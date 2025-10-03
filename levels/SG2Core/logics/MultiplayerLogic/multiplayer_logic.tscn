@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://vgph7ylokyrq"]
+
+[ext_resource type="Script" uid="uid://bgcxkvl44kr8s" path="res://levels/SG2Core/logics/MultiplayerLogic/multiplayer_logic.gd" id="1_hiqsi"]
+
+[node name="MultiplayerLogic" type="Node"]
+script = ExtResource("1_hiqsi")

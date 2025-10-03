@@ -1,0 +1,3 @@
+level_main_scene:testing_voxels.tscn
+visible:false
+developer:vvin17

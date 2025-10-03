@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://1rcaqn2jiace"]
+
+[ext_resource type="Script" uid="uid://dwwhkgkrddwnn" path="res://levels/SG2Core/logics/InterpolationLogic/interpolation_logic.gd" id="1_wnt82"]
+
+[node name="InterpolationLogic" type="Node"]
+script = ExtResource("1_wnt82")

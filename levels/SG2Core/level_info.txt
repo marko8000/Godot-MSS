@@ -1,0 +1,2 @@
+level_main_scene:sg2core_level/sg2core_level.tscn
+developer:vvin17

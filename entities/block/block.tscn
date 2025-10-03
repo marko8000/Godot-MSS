@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=3 uid="uid://cu7nuyq0kwbrl"]
+
+[ext_resource type="Script" uid="uid://bljxsp0q650i6" path="res://entities/block/block.gd" id="1_qf533"]
+[ext_resource type="Script" uid="uid://dtoj0plg3hbxu" path="res://entities/block/block_entity_logic.gd" id="2_mdmrc"]
+[ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="3_2u8q7"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d3hoe"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sj0rn"]
+albedo_texture = ExtResource("3_2u8q7")
+uv1_scale = Vector3(2, 2, 2)
+uv1_triplanar = true
+texture_filter = 0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mxrhb"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="ExampleBlock" type="AnimatableBody3D"]
+script = ExtResource("1_qf533")
+
+[node name="EntityLogic" type="Node" parent="."]
+script = ExtResource("2_mdmrc")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_d3hoe")
+surface_material_override/0 = SubResource("StandardMaterial3D_sj0rn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_mxrhb")

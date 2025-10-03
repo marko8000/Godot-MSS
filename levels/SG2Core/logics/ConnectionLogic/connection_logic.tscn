@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c24xijdlisvfw"]
+
+[ext_resource type="Script" uid="uid://bs6ign48kbldm" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.gd" id="1_muqj2"]
+
+[node name="ConnectionLogic" type="Node"]
+script = ExtResource("1_muqj2")

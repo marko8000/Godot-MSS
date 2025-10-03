@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqy6y4gfwcvlj"]
+
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="1_4kkti"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/abstract_sync.gd" id="2_nvif1"]
+
+[node name="EntityLogic" type="Node"]
+script = ExtResource("1_4kkti")
+params = Array[ExtResource("2_nvif1")]([null])

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://4gouauo18x4l"]
+
+[ext_resource type="Script" uid="uid://df3c8sk363k1n" path="res://levels/SG2Core/logics/ChunksCalculator/chunks_calculator.gd" id="1_wfssn"]
+
+[node name="ChunksCalculator" type="Node"]
+script = ExtResource("1_wfssn")

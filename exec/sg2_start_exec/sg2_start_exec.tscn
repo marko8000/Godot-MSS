@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvsj8biu75ayl"]
+
+[ext_resource type="Script" uid="uid://dq018w67hh475" path="res://exec/sg2_start_exec/sg2_start_exec.gd" id="1_47oxd"]
+
+[node name="Exec" type="Node"]
+script = ExtResource("1_47oxd")

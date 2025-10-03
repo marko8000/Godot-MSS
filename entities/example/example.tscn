@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://drtbkx5arhujt"]
+
+[ext_resource type="Script" uid="uid://bljxsp0q650i6" path="res://entities/block/block.gd" id="1_cdaok"]
+[ext_resource type="Script" uid="uid://dqul244asb2f7" path="res://entities/example/example_entity_logic.gd" id="2_iqlbq"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d3hoe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4pccn"]
+
+[node name="Example" type="Node3D"]
+script = ExtResource("1_cdaok")
+
+[node name="EntityLogic" type="Node" parent="."]
+script = ExtResource("2_iqlbq")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_d3hoe")
+surface_material_override/0 = SubResource("StandardMaterial3D_4pccn")
