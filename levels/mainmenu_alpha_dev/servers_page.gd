@@ -20,7 +20,6 @@ func refresh():
 		var server_button_instance = server_button_file.instantiate()
 		server_button_instance.server_ip = str(FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'ip')) if FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'ip') != null else 'localhost'
 		server_button_instance.server_port = int(FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'port')) if FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'port') != null else 17172
-		server_button_instance.icon = load('user://ServersDataSaves/'+server_name+'/'+'guest_server_icon.png') if load('user://ServersDataSaves/'+server_name+'/'+'guest_server_icon.png') != null else load('res://levels/SG2Core/x_res/x_images/missing_texture.svg')
 		server_button_instance.server_name = server_name
 		server_button_instance.server_description = FileAccess.open('user://ServersDataSaves/'+server_name+'/'+'description.txt', FileAccess.READ).get_as_text() if FileAccess.open('user://ServersDataSaves/'+server_name+'/'+'description.txt', FileAccess.READ) != null else ''
 		server_button_instance.developer = str(FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'guest_server_info.txt', 'developer'))

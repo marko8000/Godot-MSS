@@ -7,8 +7,7 @@ extends VoxelTerrain
 func _ready() -> void:
 	set_materials()
 	
-	
-	
+		
 func set_materials():
 	
 	var textures : Array = get_transvoxel_textures()

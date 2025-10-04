@@ -16,10 +16,11 @@ extends Node
 
 var entities_can_start_work : bool = false
 signal _entities_start_work
-## From this parameter player gets entity for first time, guest's params will be compressed to Array. This variable must be saved to entities_data_file.
+## From this parameter player gets entity for first time, guest's params will be compressed to Array.
 var entities : Dictionary # {chunk: {entity_id: [{params}, {entity_id: ..., entity_id: ...}], entity_id: [{params}, {}]}}
 ## From this parameter player gets small changes from entities, unchanged params will be filled with null
 var entities_changes : Dictionary # {chunk: entity_id: [[null, 0, null, 0], {...}], ...}
+var trackers : Array[AbstractSync]
 var deleted_entities : Array # [entity_id, entity_id]
 var last_used_entity_id : int = 0
 
@@ -67,15 +68,15 @@ func _peer_disconnected(peer_id):
 	
 
 func get_new_entity_id():
-	return last_used_entity_id
 	last_used_entity_id += 1
+	return last_used_entity_id - 1
 	
 	
 func load_entities_resources():
 	var resources : Dictionary
 	for entity_name in DirAccess.get_directories_at('res://entities'):
-		if FilesManager.give_value_from_file_readlines('res://entities/'+entity_name, 'entity_scene_file') != null:
-			resources[entity_name] = str(FilesManager.give_value_from_file_readlines('res://entities/'+entity_name, 'entity_scene_file'))
+		if FilesManager.give_value_from_file_readlines('res://entities/'+entity_name+'/entity_info.txt', 'entity_scene_file') != null:
+			resources[entity_name] = load("res://entities/"+entity_name+"/"+str(FilesManager.give_value_from_file_readlines('res://entities/'+entity_name+'/entity_info.txt', 'entity_scene_file')))
 	return resources
 	
 	
@@ -85,29 +86,49 @@ func load_entities_data():
 		var entities_data = JSON.parse_string(file.get_as_text())
 		last_used_entity_id = entities_data.last_used_entity_id
 		entities_data.erase('last_used_entity_id')
-		load_entities(entities_data.duplicate(true))
+		summon_entities(entities_data.duplicate(true))
 	
 	
 func save_entities_data():
 	pass
 	
+
+func track(entity_id, entity_node, params):
+	entity_node.get_node('EntityLogic').queue_free()
+	var already_used_tracker_types = []
+	for tracker in trackers:
+		already_used_tracker_types.append(tracker.get_class())
+	for resource in params:
+		if not resource.get_class() in already_used_tracker_types:
+			resource.SG2Core = SG2Core
+			trackers.append(resource)
+		for tracker in range(len(already_used_tracker_types)):
+			if resource.get_class() == already_used_tracker_types[tracker]:
+				trackers[tracker].track(entity_id, entity_node, resource.value_path, resource.param_data)
+		
 	
-func load_entities(entities_data: Dictionary):
+	
+func summon_entities(entities_data: Dictionary):
 	for chunk in entities_data:
 		for entity_id in chunk:
-			load_entity(chunk, entity_id, entities_data[chunk][entity_id])
+			summon_entity(chunk, entities_data[chunk][entity_id], entity_id)
 			
 			
-func load_entity(chunk, entity_id : int, entity_data):
+func summon_entity(chunk, entity_data = {}, entity_id : int = get_new_entity_id()):
 	if not entities_storage.has_node('e'+str(entity_id)):
-		var entity_name = entity_data[0]['name'] if entity_data is Dictionary else entity_data[0][0]
+		var entity_name = entity_data[0]['name'] if entity_data[0] is Dictionary else entity_data[0][0]
 		var entity_instance = entities_resources[entity_name].instantiate()
 		entity_instance.name = 'e'+str(entity_id)
 		entities_storage.add_child(entity_instance)
-		entities_storage.get_node('e'+str(entity_id)).get_node('EntityLogic').load_entity_data(entity_data.duplicate(true))
-	else:
-		entities_storage.get_node('e'+str(entity_id)).get_node('EntityLogic').load_entity_data(entity_data.duplicate(true))
-		
+		#entities_storage.get_node('e'+str(entity_id)).get_node('EntityLogic').load_entity_data(entity_data.duplicate(true))
+
+
+func load_entities(entities_data):
+	for chunk in entities_data:
+		for entity_id in chunk:
+			load_entity(chunk, entity_id, entities_data[chunk][entity_id])
 	
-func summon(chunk, entity_data : Array):
-	load_entity(chunk, get_new_entity_id(), entity_data)
+	
+func load_entity(chunk, entity_id : int, entity_data):
+	for tracker in trackers:
+		tracker.load_entity(chunk, entity_id, entity_data)

@@ -1,8 +1,7 @@
-[gd_scene load_steps=26 format=3 uid="uid://dk216gheeqnhw"]
+[gd_scene load_steps=27 format=3 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/SG2Core/sg2core_level/sg2core_level.gd" id="1_igffl"]
 [ext_resource type="PackedScene" uid="uid://c24xijdlisvfw" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.tscn" id="2_11ecv"]
-[ext_resource type="PackedScene" uid="uid://3wcaljh41a24" path="res://levels/SG2Core/logics/VoxelTerrain/sg2vin17_voxel_terrain.tscn" id="2_qr7p3"]
 [ext_resource type="PackedScene" uid="uid://vgph7ylokyrq" path="res://levels/SG2Core/logics/MultiplayerLogic/multiplayer_logic.tscn" id="3_84t7g"]
 [ext_resource type="PackedScene" uid="uid://b105k8a0duxoc" path="res://entities/BallRigidBody3D/ball_rigid_body_3d.tscn" id="3_dfx6i"]
 [ext_resource type="Script" uid="uid://cox4umbac26ux" path="res://levels/SG2Core/logics/ConnectionLogic/ConnectionModes/enetmultiplayer_connection_mode.gd" id="4_7044o"]
@@ -21,11 +20,14 @@
 [ext_resource type="Script" uid="uid://b8f6pyi6atuap" path="res://levels/SG2Core/logics/AuthLogic/auth_pages/valid_token.gd" id="12_bul0o"]
 [ext_resource type="Texture2D" uid="uid://b8r7k6l6r6ow7" path="res://levels/SG2Core/x_res/x_images/godot_engine_logo.png" id="12_qyviw"]
 [ext_resource type="PackedScene" uid="uid://1rcaqn2jiace" path="res://levels/SG2Core/logics/InterpolationLogic/interpolation_logic.tscn" id="18_dfx6i"]
+[ext_resource type="PackedScene" uid="uid://3wcaljh41a24" path="res://levels/SG2Core/logics/VoxelTerrain/sg2vin17_voxel_terrain.tscn" id="21_dfx6i"]
+
+[sub_resource type="Environment" id="Environment_dfx6i"]
+background_mode = 1
+background_color = Color(0.6477238, 0.9622573, 0.99999994, 1)
 
 [sub_resource type="Resource" id="Resource_dfx6i"]
 script = ExtResource("4_7044o")
-server_ip = "127.0.0.1"
-server_port = 17172
 metadata/_custom_type_script = "uid://cox4umbac26ux"
 
 [sub_resource type="Animation" id="Animation_bul0o"]
@@ -78,10 +80,13 @@ rotate_speed = 3.0
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 0)
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D"]
+environment = SubResource("Environment_dfx6i")
+
 [node name="entities_storage" type="Node3D" parent="."]
 
 [node name="RigidBody3D" parent="entities_storage" instance=ExtResource("3_dfx6i")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 53.00199, 0)
 
 [node name="Logics" type="Node" parent="."]
 
@@ -294,9 +299,9 @@ text = "Login"
 
 [node name="ChunksCalculator" parent="Logics" instance=ExtResource("8_7x2pq")]
 
-[node name="VoxelTerrain" parent="Logics" instance=ExtResource("2_qr7p3")]
-
 [node name="PlayersActionsLogic" parent="Logics" instance=ExtResource("10_4g3w8")]
+
+[node name="VoxelTerrain" parent="Logics" instance=ExtResource("21_dfx6i")]
 
 [connection signal="pressed" from="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage/continue" to="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage" method="_on_ok_pressed"]
 [connection signal="pressed" from="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage/continue" to="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage" method="_on_ok_pressed"]

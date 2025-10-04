@@ -7,33 +7,24 @@ var Logic : EntityLogic
 var param_data : Vector3
 ## Example: $SomeNode.value or value
 @export var value_path : String
-var value
+
+var SG2Core
+var tracking_entities : Dictionary # {chunk: {entity_id: {value_path: param_data, ...}, ...}, ...}
+var ChunksCalculator
 
 
-func _ready():
-	if '$' in value_path:
-		if '.' in value_path:
-			value = get_value_from_node(Logic.get_parent().get_node(value_path))
-		else:
-			value = Logic.get_parent().get_node(value_path.substr(1))
-	else:
-		value = get_value_from_node(Logic.get_parent().get(value_path))
-		
-
-func get_value_from_node(node):
-	pass
-		
-		
-func load_param_data(_param_data):
-	param_data = _param_data
+func track(entity_id, entity_node, _value_path, _param_data):
+	ChunksCalculator = SG2Core.giveo('ChunksCalculator')
+	if not tracking_entities.has(ChunksCalculator.position_to_chunk(entity_node.position)):
+		tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)] = {}
+	if not tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)].has(entity_id):
+		tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)][entity_id] = {}
+	tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)][entity_id] = {_value_path: _param_data}
 	
-
-func _process():
-	if Logic.ConnectionLogic.peer_role == 'host':
-		give_data_to_entity_logic()
-		
-		
-func give_data_to_entity_logic():
+	
+func get_entities_params():
 	pass
 	
 	
+func load_entities_params():
+	pass
