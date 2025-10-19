@@ -28,4 +28,4 @@ func _ready():
 
 func start_tracking():
 	var entity_id = get_parent().name
-	EntitiesLogic.track(entity_id, get_parent(), params)
+	EntitiesLogic.start_tracking(entity_id, get_parent(), params)

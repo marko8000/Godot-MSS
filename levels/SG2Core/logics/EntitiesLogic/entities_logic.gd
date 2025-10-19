@@ -16,12 +16,14 @@ extends Node
 
 var entities_can_start_work : bool = false
 signal _entities_start_work
-## From this parameter player gets entity for first time, guest's params will be compressed to Array.
-var entities : Dictionary # {chunk: {entity_id: [type, {value_path: value,...}, path_from_entities_storage_to_parent], entity_id: [type, {value_path: value,...}, path_from_entities_storage_to_parent],...},...}
+## From this variable player gets entity for first time, guest values will be compressed to Array
+## Host use this dictionary to load and save data
+var entities : Dictionary # {chunk: {entity_id: [type, {value_path: value, ...}, path_from_entities_storage_to_parent],...,...},...}
+var entities_chunks : Dictionary # {entity_id: chunk, ...}
 ## From this parameter player gets small changes from entities, unchanged params will be filled with null
-var entities_changes : Dictionary # {chunk: {entity_id: [value, value,...], ...}}
+var entities_changes : Dictionary # {entity_id: [value, value, ...], ...}
+var entities_values_compressed_order : Dictionary # {entity_type: [value_path, value_path, ...], ...}
 var trackers : Array[AbstractSync]
-var deleted_entities : Array # [entity_id, entity_id]
 var last_used_entity_id : int = 0
 
 @export_category('Drawing Settings')
@@ -45,7 +47,8 @@ func start():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if ConnectionLogic.peer_role == 'host':
-		pass
+		track_entities()
+		send_entities_to_guests()
 		
 		
 func _connection_peer_changed(new_peer):
@@ -93,7 +96,7 @@ func save_entities_data():
 	pass
 	
 
-func track(entity_id, entity_node, params):
+func start_tracking(entity_id, entity_node, params):
 	entity_node.get_node('EntityLogic').queue_free()
 	var already_used_tracker_types = []
 	for tracker in trackers:
@@ -104,7 +107,17 @@ func track(entity_id, entity_node, params):
 			trackers.append(resource)
 		for tracker in range(len(already_used_tracker_types)):
 			if resource.get_class() == already_used_tracker_types[tracker]:
-				trackers[tracker].track(entity_id, entity_node, resource.value_path, resource.param_data)
+				trackers[tracker].start_tracking(entity_id, entity_node, resource.value_path, resource.param_data)
+	
+				
+				
+func track_entities():
+	for tracker in trackers:
+		tracker.track_entities()
+		
+		
+func send_entities_to_guests():
+	pass
 		
 		
 func get_parent_entity(node):
@@ -127,6 +140,10 @@ func summon_entity(entity_data = {}, chunk='from_e_data_pos', entity_id : int = 
 		chunk = null if not entity_data[1].has('position') else ChunksCalculator.position_to_chunk(entity_data[1]['position'])
 	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').nonchunk = chunk==null
 	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').start_tracking()
+	entities_chunks[entity_id] = chunk
+	if not entities.has(chunk):
+		entities[chunk] = {}
+	entities[chunk][entity_id] = [entity_type, {}, '.' if not entity_data.has(2) else entity_data[2]]
 	load_entity(chunk, entity_id, entity_data)
 	
 	

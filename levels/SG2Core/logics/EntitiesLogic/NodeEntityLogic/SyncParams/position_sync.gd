@@ -4,12 +4,12 @@ class_name PositionSync
 
 
 var Logic : EntityLogic
-var param_data : Vector3
+var param_data : Vector3 # host and guest must have same param_data in entity param
 ## Example: $SomeNode.value or value or $SomeNode
 @export var value_path : String
 
 var SG2Core
-var tracking_entities : Dictionary # {chunk: {entity_id: {value_path: param_data, ...}, ...}, ...}
+var tracking_entities : Dictionary # {entity_id: {value_path: param_data, ...}, ...}
 var ChunksCalculator
 var entities_storage
 
@@ -20,7 +20,7 @@ func start():
 	entities_storage = SG2Core.giveo('entities_storage')
 	
 	
-func track(entity_id, entity_node, _value_path, _param_data):
+func start_tracking(entity_id, entity_node, _value_path, _param_data):
 	if not tracking_entities.has(ChunksCalculator.position_to_chunk(entity_node.position)):
 		tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)] = {}
 	if not tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)].has(entity_id):
@@ -29,4 +29,12 @@ func track(entity_id, entity_node, _value_path, _param_data):
 	
 	
 func load_entity(chunk, entity_id, entity_data):
-	pass
+	var entity = entities_storage.get_node('.' if not entity_data.has(2) else entity_data[2]).get_node('e'+str(entity_id))
+	
+	for _value_path in entity_data[1]:
+		Dispenser.set_resource(entity, _value_path, entity_data[1][value_path])
+	
+	
+func track_entities():
+	for entity_id in tracking_entities:
+		pass
