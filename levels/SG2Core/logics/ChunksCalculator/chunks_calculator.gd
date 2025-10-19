@@ -8,16 +8,14 @@ const chunk_size : int = 16
 # TERMS
 # chunk_position : Vector = (position_of_smth - position_of_negative_position_of_chunk) 
 # global_positon or position : Vector
-# chunk : Vectori
+# chunk : Vectori||null
 # direction : Vectori
 
 
 func position_to_chunk(position):
 	var _type_of_position = typeof(position)
 	
-	if _type_of_position == TYPE_NIL:
-		return 'nonchunk'
-	elif _type_of_position == TYPE_VECTOR3:
+	if _type_of_position == TYPE_VECTOR3:
 		return Vector2i(floor(position.x / chunk_size), floor(position.z / chunk_size))
 	elif _type_of_position == TYPE_VECTOR2:
 		pass
@@ -39,7 +37,7 @@ func chunk_to_negative_chunk_position(chunk):
 		
 func chunk_position_to_position(chunk, chunk_position):
 	raise_if_wrong_chunk_type(chunk)
-	if str(chunk) == 'nonchunk':
+	if chunk == null:
 		return chunk_position
 		
 	var _type_of_position = typeof(chunk_position)

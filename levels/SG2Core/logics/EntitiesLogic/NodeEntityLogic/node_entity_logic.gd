@@ -17,11 +17,15 @@ func _ready():
 	if not EntitiesLogic.entities_can_start_work:
 		await EntitiesLogic._entities_start_work
 	
-	if len(str(get_parent().name)) >= 2 and not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
+	if not len(str(get_parent().name)) >= 2 and not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
 		if ConnectionLogic.peer_role == 'guest':
 			get_parent().queue_free()
 		elif ConnectionLogic.peer_role == 'host':
 			var entity_id = EntitiesLogic.get_new_entity_id()
 			get_parent().name = 'e'+str(entity_id)
-			EntitiesLogic.track(entity_id, get_parent(), params)
+			start_tracking()
 			
+
+func start_tracking():
+	var entity_id = get_parent().name
+	EntitiesLogic.track(entity_id, get_parent(), params)

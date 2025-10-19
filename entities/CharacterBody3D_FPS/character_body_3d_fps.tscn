@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://b6kgx4015ltmv"]
+[gd_scene load_steps=9 format=3 uid="uid://b6kgx4015ltmv"]
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_yk36g"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_gcdr8"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="3_gcdr8"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/abstract_sync.gd" id="4_lii66"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -35,4 +36,5 @@ surface_material_override/0 = SubResource("StandardMaterial3D_17ylx")
 
 [node name="EntityLogic" type="Node" parent="."]
 script = ExtResource("3_gcdr8")
+params = Array[ExtResource("4_lii66")]([null])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
