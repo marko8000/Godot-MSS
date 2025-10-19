@@ -8,8 +8,7 @@ var current_page : String
 
 
 func _ready() -> void:
-	print('hello')
-	
+	pass
 	
 	change_page('MainPage')
 	
@@ -48,10 +47,14 @@ func _on_servers_pressed() -> void:
 
 func _on_timer_2_timeout() -> void:
 	#print('hello', Dispenser.get_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color'))
+	#if $Node3D/StaticBody3D/MeshInstance3D.get_surface_override_material(0).albedo_color != Color(255, 255, 255, 255):
+		#print(error_string(Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(255, 255, 255, 255))))
+	#else:
+		#print(error_string(Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(1, 1, 1, 1))))
 	if $Node3D/StaticBody3D/MeshInstance3D.get_surface_override_material(0).albedo_color != Color(255, 255, 255, 255):
-		print(error_string(Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(255, 255, 255, 255))))
+		Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(255, 255, 255, 255))
 	else:
-		print(error_string(Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(1, 1, 1, 1))))
+		Dispenser.set_resource(self, '$Node3D/StaticBody3D/MeshInstance3D.surface_material_override/0.albedo_color', Color(1, 1, 1, 1))
 	#print(error_string(Dispenser.set_resource(self, 'position', Vector2(100, 100))))
 	#print(error_string(Dispenser.set_resource($Node3D, 'position', Vector3(20, 2, 2))))
 	#$Node3D/StaticBody3D.set('position', Vector3(20, 2, 2))
