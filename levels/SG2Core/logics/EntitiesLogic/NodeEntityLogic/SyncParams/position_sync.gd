@@ -10,12 +10,14 @@ var param_data : Vector3 # host and guest must have same param_data in entity pa
 
 var SG2Core
 var tracking_entities : Dictionary # {entity_id: {value_path: param_data, ...}, ...}
+var EntitiesLogic
 var ChunksCalculator
 var entities_storage
 
 
 func start():
 	SG2Core = ExecManager.give_current_exec().giveo('level')
+	EntitiesLogic = SG2Core.giveo('EntitiesLogic')
 	ChunksCalculator = SG2Core.giveo('ChunksCalculator')
 	entities_storage = SG2Core.giveo('entities_storage')
 	
@@ -31,10 +33,19 @@ func start_tracking(entity_id, entity_node, _value_path, _param_data):
 func load_entity(chunk, entity_id, entity_data):
 	var entity = entities_storage.get_node('.' if not entity_data.has(2) else entity_data[2]).get_node('e'+str(entity_id))
 	
-	for _value_path in entity_data[1]:
-		Dispenser.set_resource(entity, _value_path, entity_data[1][value_path])
+	if entity_data[1] is Dictionary:
+		for _value_path in entity_data[1]:
+			Dispenser.set_resource(entity, _value_path, Dispenser.dupl(entity_data[1][value_path]))
+	elif entity_data[1] is Array:
+		var dict = {}
+		for i in range(EntitiesLogic.entities_values_compressed_order[entity_data[0]].size()):
+			dict[EntitiesLogic.entities_values_compressed_order[entity_data[0]][i]] = Dispenser.dupl(entity_data[1][i])
+		entity_data[1] = dict.duplicate(true)
+		load_entity(chunk, entity_id, entity_data)
 	
 	
 func track_entities():
 	for entity_id in tracking_entities:
-		pass
+		EntitiesLogic.entities_chunks[entity_id] = ChunksCalculator.position_to_chunk(entities_storage.get_node(EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][2]).get_node('e'+str(entity_id)).global_position)
+		for value_path in tracking_entities[entity_id]:
+			EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][value_path] = Dispenser.get_resource(entities_storage.get_node(EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][2]).get_node('e'+str(entity_id)), value_path)

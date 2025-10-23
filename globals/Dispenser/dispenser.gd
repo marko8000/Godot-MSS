@@ -127,3 +127,11 @@ func permutation(words_list: Array) -> Array:
 			result.append(new_permutation)
 	return result
 	
+	
+func dupl(value):
+	var duplicate_deep_types = [TYPE_ARRAY, TYPE_DICTIONARY]
+	if typeof(value) in duplicate_deep_types:
+		return value.duplicate(true)
+	else:
+		return value
+	

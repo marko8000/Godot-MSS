@@ -17,7 +17,7 @@ func _ready():
 	if not EntitiesLogic.entities_can_start_work:
 		await EntitiesLogic._entities_start_work
 	
-	if not len(str(get_parent().name)) >= 2 and not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
+	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
 		if ConnectionLogic.peer_role == 'guest':
 			get_parent().queue_free()
 		elif ConnectionLogic.peer_role == 'host':
@@ -27,5 +27,5 @@ func _ready():
 			
 
 func start_tracking():
-	var entity_id = get_parent().name
+	var entity_id = get_parent().name.substr(1)
 	EntitiesLogic.start_tracking(entity_id, get_parent(), params)

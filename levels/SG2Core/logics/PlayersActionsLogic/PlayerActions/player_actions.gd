@@ -15,7 +15,8 @@ var old_actions : Dictionary
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	EntitiesLogic.summon_entity(Vector2i(0, 0), [{'name': 'CharacterBody3D_FPS', 'player_actions_info': player_info.duplicate()}])
+	#EntitiesLogic.summon_entity(Vector2i(0, 0), [{'name': 'CharacterBody3D_FPS', 'player_actions_info': player_info.duplicate()}])
+	pass
 
 
 func _process(delta: float) -> void:

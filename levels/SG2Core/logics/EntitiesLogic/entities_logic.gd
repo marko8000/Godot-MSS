@@ -18,7 +18,7 @@ var entities_can_start_work : bool = false
 signal _entities_start_work
 ## From this variable player gets entity for first time, guest values will be compressed to Array
 ## Host use this dictionary to load and save data
-var entities : Dictionary # {chunk: {entity_id: [type, {value_path: value, ...}, path_from_entities_storage_to_parent],...,...},...}
+var entities : Dictionary # {chunk: {entity_id: [typeCONST, {value_path: value, ...}, path_from_entities_storage_to_parentCONST],...,...},...}
 var entities_chunks : Dictionary # {entity_id: chunk, ...}
 ## From this parameter player gets small changes from entities, unchanged params will be filled with null
 var entities_changes : Dictionary # {entity_id: [value, value, ...], ...}
@@ -100,14 +100,13 @@ func start_tracking(entity_id, entity_node, params):
 	entity_node.get_node('EntityLogic').queue_free()
 	var already_used_tracker_types = []
 	for tracker in trackers:
-		already_used_tracker_types.append(tracker.get_class())
+		already_used_tracker_types.append(tracker.get_script().get_global_name())
 	for resource in params:
-		if not resource.get_class() in already_used_tracker_types:
+		if not resource.get_script().get_global_name() in already_used_tracker_types:
 			resource.start()
 			trackers.append(resource)
-		for tracker in range(len(already_used_tracker_types)):
-			if resource.get_class() == already_used_tracker_types[tracker]:
-				trackers[tracker].start_tracking(entity_id, entity_node, resource.value_path, resource.param_data)
+			already_used_tracker_types.append(resource.get_script().get_global_name())
+			trackers[tracker].start_tracking(entity_id, entity_node, resource.value_path, resource.param_data)
 	
 				
 				
@@ -132,6 +131,10 @@ func get_parent_entity(node):
 func summon_entity(entity_data = {}, chunk='from_e_data_pos', entity_id : int = get_new_entity_id()):
 	var entity_type = entity_data[0]
 	var entity_instance = entities_resources[entity_type].instantiate()
+	if not entities_values_compressed_order.has(entity_type):
+		entities_values_compressed_order[entity_type] = []
+		for param in entity_instance.get_node('EntityLogic').params:
+			entities_values_compressed_order[entity_type].append(param.value_path)
 	entity_instance.name = 'e'+str(entity_id)
 	var entity_parent_node = entities_storage.get_node('.' if not entity_data.has(2) else entity_data[2])
 	entity_parent_node.add_child(entity_instance)

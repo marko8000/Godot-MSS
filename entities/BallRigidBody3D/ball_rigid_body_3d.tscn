@@ -12,7 +12,7 @@ albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_enx2m"]
 
-[sub_resource type="Resource" id="Resource_elkij"]
+[sub_resource type="Resource" id="Resource_o68h5"]
 script = ExtResource("4_o68h5")
 metadata/_custom_type_script = "uid://cwqxwu1y2gemq"
 
@@ -27,5 +27,5 @@ shape = SubResource("SphereShape3D_enx2m")
 
 [node name="EntityLogic" type="Node" parent="."]
 script = ExtResource("2_yutah")
-params = Array[ExtResource("3_dq10n")]([SubResource("Resource_elkij")])
+params = Array[ExtResource("3_dq10n")]([SubResource("Resource_o68h5")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

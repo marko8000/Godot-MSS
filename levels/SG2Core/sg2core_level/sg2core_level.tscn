@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dk216gheeqnhw"]
+[gd_scene load_steps=17 format=3 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/SG2Core/sg2core_level/sg2core_level.gd" id="1_igffl"]
 [ext_resource type="PackedScene" uid="uid://c24xijdlisvfw" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.tscn" id="2_11ecv"]
@@ -10,15 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://svh7yub544mr" path="res://levels/SG2Core/logics/AntiDDoS/anti_ddos.tscn" id="6_7044o"]
 [ext_resource type="PackedScene" uid="uid://dshi5atmhqw0g" path="res://levels/SG2Core/logics/AuthLogic/auth_logic.tscn" id="6_hpyvy"]
 [ext_resource type="PackedScene" uid="uid://cdc2coyv3bvdd" path="res://levels/SG2Core/logics/EntitiesLogic/entities_logic.tscn" id="6_lp5fp"]
-[ext_resource type="Theme" uid="uid://dy856cw5iovk6" path="res://levels/SG2Core/x_res/x_fonts/sg2_pixel.tres" id="7_x0jy4"]
 [ext_resource type="PackedScene" uid="uid://4gouauo18x4l" path="res://levels/SG2Core/logics/ChunksCalculator/chunks_calculator.tscn" id="8_7x2pq"]
-[ext_resource type="Script" uid="uid://c82qbfmo805i1" path="res://levels/SG2Core/logics/AuthLogic/auth_control.gd" id="8_l0mfm"]
-[ext_resource type="Script" uid="uid://bw4l73be7gevc" path="res://levels/SG2Core/logics/AuthLogic/auth_pages/start_page.gd" id="9_b18cy"]
-[ext_resource type="Texture2D" uid="uid://c8xgder2qyng0" path="res://levels/SG2Core/x_res/x_images/loading.png" id="9_x0d0r"]
 [ext_resource type="PackedScene" uid="uid://w0x07c144wr1" path="res://levels/SG2Core/logics/PlayersActionsLogic/players_actions_logic.tscn" id="10_4g3w8"]
-[ext_resource type="Script" uid="uid://fdhfhsb3e7u3" path="res://levels/SG2Core/logics/AuthLogic/auth_pages/auth_type_page.gd" id="11_b18cy"]
-[ext_resource type="Script" uid="uid://b8f6pyi6atuap" path="res://levels/SG2Core/logics/AuthLogic/auth_pages/valid_token.gd" id="12_bul0o"]
-[ext_resource type="Texture2D" uid="uid://b8r7k6l6r6ow7" path="res://levels/SG2Core/x_res/x_images/godot_engine_logo.png" id="12_qyviw"]
 [ext_resource type="PackedScene" uid="uid://1rcaqn2jiace" path="res://levels/SG2Core/logics/InterpolationLogic/interpolation_logic.tscn" id="18_dfx6i"]
 [ext_resource type="PackedScene" uid="uid://3wcaljh41a24" path="res://levels/SG2Core/logics/VoxelTerrain/sg2vin17_voxel_terrain.tscn" id="21_dfx6i"]
 
@@ -29,43 +22,6 @@ background_color = Color(0.6477238, 0.9622573, 0.99999994, 1)
 [sub_resource type="Resource" id="Resource_dfx6i"]
 script = ExtResource("4_7044o")
 metadata/_custom_type_script = "uid://cox4umbac26ux"
-
-[sub_resource type="Animation" id="Animation_bul0o"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Control:rotation")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [3.14159]
-}
-
-[sub_resource type="Animation" id="Animation_b18cy"]
-resource_name = "load"
-length = 3.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Control:rotation")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1.5, 3),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, 3.14159, 6.28319]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_qyviw"]
-_data = {
-&"RESET": SubResource("Animation_bul0o"),
-&"load": SubResource("Animation_b18cy")
-}
 
 [node name="SG2Core" type="Node"]
 script = ExtResource("1_igffl")
@@ -97,198 +53,6 @@ connection_mode = SubResource("Resource_dfx6i")
 
 [node name="AuthLogic" parent="Logics" instance=ExtResource("6_hpyvy")]
 
-[node name="AuthControl" type="Control" parent="Logics/AuthLogic"]
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("7_x0jy4")
-script = ExtResource("8_l0mfm")
-
-[node name="Panel" type="Panel" parent="Logics/AuthLogic/AuthControl"]
-custom_minimum_size = Vector2(500, 500)
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -250.0
-offset_right = 250.0
-offset_bottom = 250.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Label" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 35
-text = "Authentication"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-layout_mode = 2
-text = "----------------------"
-
-[node name="StartPage" type="Control" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("9_b18cy")
-
-[node name="Control" type="Control" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/StartPage"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 2.0
-offset_top = -22.5
-offset_right = 152.0
-offset_bottom = 127.5
-grow_horizontal = 2
-grow_vertical = 2
-rotation = 3.14159
-
-[node name="TextureRect" type="TextureRect" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/StartPage/Control"]
-layout_mode = 0
-offset_left = -80.0
-offset_top = -65.0
-offset_right = -40.0
-offset_bottom = -25.0
-scale = Vector2(4, 4)
-texture = ExtResource("9_x0d0r")
-expand_mode = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/StartPage"]
-libraries = {
-&"": SubResource("AnimationLibrary_qyviw")
-}
-
-[node name="PasswordPage" type="VBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("11_b18cy")
-
-[node name="Label" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage"]
-layout_mode = 2
-size_flags_vertical = 6
-text = "Enter unique password for this server account:"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="PasswordLineEdit" type="LineEdit" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Password"
-alignment = 1
-secret = true
-secret_character = "*"
-
-[node name="Button" type="Button" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage/HBoxContainer"]
-layout_mode = 2
-text = "_"
-
-[node name="continue" type="Button" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 10
-text = "Continue"
-
-[node name="NotrobotPage" type="VBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("11_b18cy")
-
-[node name="Label" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage"]
-layout_mode = 2
-size_flags_vertical = 6
-text = "Enter text from picture:"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="TextureRect" type="TextureRect" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage"]
-layout_mode = 2
-size_flags_vertical = 3
-texture = ExtResource("12_qyviw")
-expand_mode = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="PasswordLineEdit" type="LineEdit" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Text"
-alignment = 1
-secret = true
-secret_character = "*"
-
-[node name="continue" type="Button" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 10
-text = "Continue"
-
-[node name="InvalidToken" type="VBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("12_bul0o")
-
-[node name="Label" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken"]
-layout_mode = 2
-text = "Failed to find valid account from"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="Label2" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken"]
-layout_mode = 2
-text = "abamagroup.com"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="Label3" type="Label" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken"]
-layout_mode = 2
-size_flags_vertical = 6
-text = "You want to login from this resource?"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken"]
-layout_mode = 2
-size_flags_vertical = 10
-
-[node name="Back" type="Button" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Back"
-
-[node name="Login" type="Button" parent="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/InvalidToken/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Login"
-
 [node name="MultiplayerLogic" parent="Logics" instance=ExtResource("3_84t7g")]
 
 [node name="DirectoriesPathsDistributor" parent="Logics" instance=ExtResource("4_wxnwx")]
@@ -302,6 +66,3 @@ text = "Login"
 [node name="PlayersActionsLogic" parent="Logics" instance=ExtResource("10_4g3w8")]
 
 [node name="VoxelTerrain" parent="Logics" instance=ExtResource("21_dfx6i")]
-
-[connection signal="pressed" from="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage/continue" to="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/PasswordPage" method="_on_ok_pressed"]
-[connection signal="pressed" from="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage/continue" to="Logics/AuthLogic/AuthControl/Panel/VBoxContainer/NotrobotPage" method="_on_ok_pressed"]
