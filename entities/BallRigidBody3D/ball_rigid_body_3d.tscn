@@ -14,6 +14,7 @@ albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="Resource" id="Resource_o68h5"]
 script = ExtResource("4_o68h5")
+value_path = "position"
 metadata/_custom_type_script = "uid://cwqxwu1y2gemq"
 
 [node name="RigidBody3D" type="RigidBody3D"]

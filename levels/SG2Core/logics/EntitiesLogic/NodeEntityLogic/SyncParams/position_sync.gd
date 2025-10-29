@@ -23,11 +23,9 @@ func start():
 	
 	
 func start_tracking(entity_id, entity_node, _value_path, _param_data):
-	if not tracking_entities.has(ChunksCalculator.position_to_chunk(entity_node.position)):
-		tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)] = {}
-	if not tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)].has(entity_id):
-		tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)][entity_id] = {}
-	tracking_entities[ChunksCalculator.position_to_chunk(entity_node.position)][entity_id] = {_value_path: [entity_node, _param_data, entities_storage.get_path_to(entity_node)]}
+	if not tracking_entities.has(entity_id):
+		tracking_entities[entity_id] = {}
+	tracking_entities[entity_id] = {_value_path: [entity_node, _param_data, entities_storage.get_path_to(entity_node)]}
 	
 	
 func load_entity(chunk, entity_id, entity_data):
@@ -46,6 +44,7 @@ func load_entity(chunk, entity_id, entity_data):
 	
 func track_entities():
 	for entity_id in tracking_entities:
+		if not EntitiesLogic.entities_chunks.has(entity_id): continue
 		EntitiesLogic.entities_chunks[entity_id] = ChunksCalculator.position_to_chunk(entities_storage.get_node(EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][2]).get_node('e'+str(entity_id)).global_position)
 		for value_path in tracking_entities[entity_id]:
-			EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][value_path] = Dispenser.get_resource(entities_storage.get_node(EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][2]).get_node('e'+str(entity_id)), value_path)
+			EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][1][value_path] = Dispenser.get_resource(entities_storage.get_node(EntitiesLogic.entities[EntitiesLogic.entities_chunks[entity_id]][entity_id][2]).get_node('e'+str(entity_id)), value_path)

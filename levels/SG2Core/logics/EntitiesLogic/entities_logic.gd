@@ -48,6 +48,7 @@ func start():
 func _process(delta: float) -> void:
 	if ConnectionLogic.peer_role == 'host':
 		track_entities()
+		print(entities)
 		send_entities_to_guests()
 		
 		
@@ -96,17 +97,22 @@ func save_entities_data():
 	pass
 	
 
-func start_tracking(entity_id, entity_node, params):
+func start_tracking(entity_id, entity_node, params, chunk='from_e_pos'):
 	entity_node.get_node('EntityLogic').queue_free()
 	var already_used_tracker_types = []
 	for tracker in trackers:
 		already_used_tracker_types.append(tracker.get_script().get_global_name())
-	for resource in params:
-		if not resource.get_script().get_global_name() in already_used_tracker_types:
-			resource.start()
-			trackers.append(resource)
-			already_used_tracker_types.append(resource.get_script().get_global_name())
-			trackers[tracker].start_tracking(entity_id, entity_node, resource.value_path, resource.param_data)
+	var entity_type = entity_node.get_scene_file_path().get_slice('/', 3)
+	if chunk == 'from_e_pos':
+		chunk = ChunksCalculator.position_to_chunk(entity_node.global_position)
+	entities_chunks[entity_id] = chunk
+	entities[chunk] = {}
+	entities[chunk][entity_id] = [entity_type, {}, entities_storage.get_path_to(entity_node.get_parent())]
+	for res_num in range(len(params)):
+		if not params[res_num].get_script().get_global_name() in already_used_tracker_types:
+			params[res_num].start()
+			trackers.append(params[res_num])
+		trackers[res_num].start_tracking(entity_id, entity_node, params[res_num].value_path, params[res_num].param_data)
 	
 				
 				
@@ -128,7 +134,7 @@ func get_parent_entity(node):
 	return current_node
 			
 			
-func summon_entity(entity_data = {}, chunk='from_e_data_pos', entity_id : int = get_new_entity_id()):
+func summon_entity(entity_data = {}, chunk='from_e_pos', entity_id : int = get_new_entity_id()):
 	var entity_type = entity_data[0]
 	var entity_instance = entities_resources[entity_type].instantiate()
 	if not entities_values_compressed_order.has(entity_type):
@@ -139,14 +145,14 @@ func summon_entity(entity_data = {}, chunk='from_e_data_pos', entity_id : int = 
 	var entity_parent_node = entities_storage.get_node('.' if not entity_data.has(2) else entity_data[2])
 	entity_parent_node.add_child(entity_instance)
 	
-	if chunk == 'from_e_data_pos':
-		chunk = null if not entity_data[1].has('position') else ChunksCalculator.position_to_chunk(entity_data[1]['position'])
+	if chunk == 'from_e_pos':
+		chunk = null
+		if entity_data[1].has('position'):
+			chunk = ChunksCalculator.position_to_chunk(entity_data[1]['position'])
+		else:
+			chunk = 'from_e_pos'
 	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').nonchunk = chunk==null
-	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').start_tracking()
-	entities_chunks[entity_id] = chunk
-	if not entities.has(chunk):
-		entities[chunk] = {}
-	entities[chunk][entity_id] = [entity_type, {}, '.' if not entity_data.has(2) else entity_data[2]]
+	start_tracking(entity_id, entity_parent_node.get_node('e'+str(entity_id)), entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').params, chunk)
 	load_entity(chunk, entity_id, entity_data)
 	
 	
