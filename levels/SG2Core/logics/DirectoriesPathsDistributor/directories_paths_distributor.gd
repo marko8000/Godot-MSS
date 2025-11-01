@@ -9,7 +9,7 @@ var paths : Dictionary
 
 
 func paths_assignment():
-	var SG2Exec = ExecManager.give_current_exec()
+	var SG2Exec = ExecManager.give_current_exec(self)
 	var SG2Core = SG2Exec.giveo('level')
 	var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
 	

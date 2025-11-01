@@ -32,7 +32,7 @@ func _on_texture_button_pressed() -> void:
 	
 	
 func connect_to_server():
-	ExecManager.give_current_exec().giveo('CommandLine').command('sg2core guest {ipport} {server_name}'.format({'ipport':server_ip+':'+str(server_port), 'server_name': server_name}))
+	ExecManager.give_current_exec(self).giveo('CommandLine').command('sg2core guest {ipport} {server_name}'.format({'ipport':server_ip+':'+str(server_port), 'server_name': server_name}))
 
 
 func _on_settings_pressed() -> void:

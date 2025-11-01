@@ -1,6 +1,6 @@
 extends Node
 
-@onready var SG2Exec = ExecManager.give_current_exec()
+@onready var SG2Exec = ExecManager.give_current_exec(self)
 @onready var current_level = SG2Exec.giveo('level')
 @onready var commandline = SG2Exec.giveo('CommandLine')
 @onready var debug_control = SG2Exec.giveo('debug_control')

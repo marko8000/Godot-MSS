@@ -16,7 +16,7 @@ var entities_storage
 
 
 func start():
-	SG2Core = ExecManager.give_current_exec().giveo('level')
+	SG2Core = ExecManager.give_current_exec(self).giveo('level')
 	EntitiesLogic = SG2Core.giveo('EntitiesLogic')
 	ChunksCalculator = SG2Core.giveo('ChunksCalculator')
 	entities_storage = SG2Core.giveo('entities_storage')

@@ -2,7 +2,7 @@
 extends Node
 
 
-@onready var SG2Core = ExecManager.give_current_exec().giveo('level')
+@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
 @onready var AuthLogic = SG2Core.giveo('AuthLogic')
 @onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')

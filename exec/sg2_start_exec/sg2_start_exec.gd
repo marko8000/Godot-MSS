@@ -12,7 +12,7 @@ func _ready() -> void:
 		var delay = 0
 		while delay < 10 ** 7.5:
 			delay += 1
-	ExecManager.change_exec_to('sg2vin17_exec')
+	ExecManager.change_exec_to('sg2vin17_exec', self)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

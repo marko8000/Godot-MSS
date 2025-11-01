@@ -1,7 +1,7 @@
 extends MarginContainer
 
 
-@onready var SG2Exec = ExecManager.give_current_exec()
+@onready var SG2Exec = ExecManager.give_current_exec(self)
 @onready var current_level = SG2Exec.giveo('level')
 
 

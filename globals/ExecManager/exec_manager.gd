@@ -19,7 +19,7 @@ func _process(delta: float) -> void:
 	execs_changing()
 
 
-func change_exec_to(exec_name):
+func change_exec_to(exec_name, caller : Object):
 	var exec_dir = FilesManager.create_path(['res://exec', exec_name])
 	var exec_scene_path = FilesManager.create_path([exec_dir, FilesManager.give_value_from_file_readlines(FilesManager.create_path([exec_dir, 'exec_info.txt']), 'exec_main_scene')])
 	get_tree().change_scene_to_file(exec_scene_path)
@@ -28,7 +28,7 @@ func change_exec_to(exec_name):
 	return Debug.dprint('Exec successfully changed to ' + exec_name, name)
 
 
-func give_current_exec():
+func give_current_exec(caller : Object):
 	var root_children = get_tree().root.get_children()
 	for child in root_children:
 		if 'is_exec' in child:
@@ -43,13 +43,13 @@ func give_available_execs():
 	return _available_execs
 
 
-func give_current_exec_name():
+func give_current_exec_name(caller : Object):
 	return get_tree().current_scene.name
 
 
 func execs_changing():
 	avaible_execs = give_available_execs()
-	current_exec_name = give_current_exec_name()
+	current_exec_name = give_current_exec_name(self)
 	if old_exec_name != null:
 		if old_exec_name != current_exec_name:
 			var copy_of_old_name = old_exec_name

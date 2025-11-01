@@ -3,7 +3,7 @@ extends Node
 class_name EntityLogic
 
 
-@onready var SG2Core = ExecManager.give_current_exec().giveo('level')
+@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')
 @onready var ChunksCalculator = SG2Core.giveo('ChunksCalculator')
 @onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
