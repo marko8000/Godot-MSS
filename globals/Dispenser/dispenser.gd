@@ -1,6 +1,10 @@
 extends Node
 
 
+#TODO
+var cache : Dictionary[Object, Dictionary]
+
+
 ## Example of resource_path: $SomeNode/SomeNode/MeshInstance3D.surface_material_override/0.albedo_color
 ## Returns [resource_value : Variant, Error]
 func get_resource(from : Node, resource_path : String, method : String = 'call_method') -> Array:

@@ -1,2 +1,27 @@
 extends Resource
 class_name AbstractSync
+
+
+var SG2Core
+var EntitiesLogic
+
+var param_data # host and guest must have same param_data in entity param
+## Example: $SomeNode.value or value or $SomeNode
+@export var value_path : String
+
+
+func start():
+	SG2Core = ExecManager.give_current_exec(self).giveo('level')
+	EntitiesLogic = SG2Core.giveo('EntitiesLogic')
+	
+	
+func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _param_data):
+	pass
+	
+	
+func load_entity(chunk, entity_id : int, entity_data):
+	pass
+	
+	
+func track_entity(entity_id : int):
+	pass
