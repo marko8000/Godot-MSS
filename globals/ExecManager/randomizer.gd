@@ -11,13 +11,13 @@ func _process(delta: float) -> void:
 	pass
 	
 	
-func give_random_int_in_range(from : int, to : int):
+func ri(from : int, to : int):
 	return randi_range(from, to)
 	
 	
-func give_random_float_in_range(from : float, to : float):
+func rfloat(from : float, to : float):
 	return randi_range(from, to)
 
 
-func give_random_bool():
+func rbool():
 	return bool(randi_range(0, 1))

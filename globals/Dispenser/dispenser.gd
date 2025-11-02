@@ -35,7 +35,7 @@ func get_resource(from : Node, resource_path : String, method : String = 'call_m
 							return [null, ERR_DOES_NOT_EXIST]
 		else:
 			return [null, FAILED]
-		return [resource, OK]
+		return [dupl(resource), OK]
 
 ## Example of resource_path: $SomeNode/SomeNode/MeshInstance3D.surface_material_override/0.albedo_color
 ## Returns Error

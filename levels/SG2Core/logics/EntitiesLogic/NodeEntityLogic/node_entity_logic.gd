@@ -13,7 +13,7 @@ class_name EntityLogic
 @export var nonchunk : bool = false
 
 
-func _ready():	
+func _ready():
 	if not EntitiesLogic.entities_can_start_work:
 		await EntitiesLogic._entities_start_work
 	
