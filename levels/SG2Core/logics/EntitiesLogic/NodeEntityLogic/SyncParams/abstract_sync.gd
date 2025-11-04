@@ -19,9 +19,13 @@ func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _
 	pass
 	
 	
-func load_entity(chunk, entity_id : int, entity_data):
+func update_entity(chunk, entity_id : int, entity_data):
 	pass
 	
 	
 func track_entity(entity_id : int):
+	pass
+	
+	
+func save_entities():
 	pass
