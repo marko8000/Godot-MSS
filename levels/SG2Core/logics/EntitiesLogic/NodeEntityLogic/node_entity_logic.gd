@@ -10,6 +10,7 @@ class_name EntityLogic
 @onready var InterpolationLogic = SG2Core.giveo('InterpolationLogic')
 
 @export var params : Array[AbstractSync]
+@export var guest_presets : Dictionary[String, Variant]
 @export var nonchunk : bool = false
 
 
@@ -26,6 +27,11 @@ func _ready():
 			start_tracking()
 			
 
+func apply_guest_presets():
+	for value_path in guest_presets:
+		Dispenser.set_resource(get_parent(), value_path, guest_presets[value_path])
+	print('apply')
+	
 func start_tracking():
 	var entity_id = int(get_parent().name.substr(1))
 	EntitiesLogic.start_tracking(entity_id, get_parent(), params, null if nonchunk else EntitiesLogic.FROM_E_POS)

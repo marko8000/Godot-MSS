@@ -11,7 +11,7 @@ extends Node
 @onready var users_auth_database = DirectoriesPathsDistributor.give_path('users_auth_database_file')
 @onready var player_info_file = DirectoriesPathsDistributor.give_path('player_info_file')
 
-@onready var db = SQLite.new()
+@onready var db = get_parent()
 
 var token_length : int = 16
 var token_symbols : String = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm'

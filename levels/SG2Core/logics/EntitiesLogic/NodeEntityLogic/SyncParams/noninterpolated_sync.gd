@@ -18,21 +18,23 @@ func start():
 	
 func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _param_data):
 	if not tracking_entities.has(entity_id):
-		tracking_entities[entity_id] = [entity_node, {}, EntitiesLogic.entities_spawn_data[entity_id].type, EntitiesLogic.entities_value_path_value_array_num[EntitiesLogic.entities_spawn_data[entity_id].type][value_path], EntitiesLogic.entities_value_array_num_value_path[EntitiesLogic.entities_spawn_data[entity_id].type].duplicate(true)]
+		tracking_entities[entity_id] = [entity_node, {}, EntitiesLogic.entities_spawn_data[entity_id][0], EntitiesLogic.entities_value_path_value_array_num[EntitiesLogic.entities_spawn_data[entity_id][0]][value_path], EntitiesLogic.entities_value_array_num_value_path[EntitiesLogic.entities_spawn_data[entity_id][0]].duplicate(true)]
 	tracking_entities[entity_id][1][_value_path] = _param_data
 	
 	
 func track_entity(entity_id : int):
+	if not tracking_entities.has(entity_id): return
 	for _value_path in tracking_entities[entity_id][1]:
-		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path)[0]
-		EntitiesLogic.entities_spawn_data[entity_id].values_array[tracking_entities[entity_id][3]] = value
-		EntitiesLogic.entities_update_data[entity_id].values_array[tracking_entities[entity_id][3]] = value
+		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path, 'call_method')[0]
+		EntitiesLogic.entities_spawn_data[entity_id][1][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
+		EntitiesLogic.entities_update_data[entity_id][0][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
 		
 		
-func update_entity(chunk, entity_id : int, entity_data):
-	for i in range(len(entity_data.values_array)):
-		if entity_data.values_array != null:
-			Dispenser.set_resource(tracking_entities[entity_id][0], tracking_entities[entity_id][4][i], entity_data.values_array[i])
+func update_entity(chunk, entity_id : int, update_data : Array):
+	if not tracking_entities.has(entity_id): return
+	for i in range(len(update_data[0])):
+		if update_data[0] != null:
+			Dispenser.set_resource(tracking_entities[entity_id][0], tracking_entities[entity_id][4][i], update_data[0][i])
 		
 		
 func save_entities():

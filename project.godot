@@ -33,10 +33,6 @@ gdscript/warnings/unused_parameter=0
 gdscript/warnings/integer_division=0
 gdscript/warnings/narrowing_conversion=0
 
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg")
-
 [file_customization]
 
 folder_colors={

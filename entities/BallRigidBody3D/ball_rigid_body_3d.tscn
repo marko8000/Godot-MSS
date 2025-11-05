@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://b105k8a0duxoc"]
+[gd_scene load_steps=10 format=3 uid="uid://b105k8a0duxoc"]
 
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="1_oh78e"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="2_yutah"]
@@ -12,9 +12,14 @@ albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_enx2m"]
 
-[sub_resource type="Resource" id="Resource_elkij"]
+[sub_resource type="Resource" id="Resource_o68h5"]
 script = ExtResource("4_o68h5")
 value_path = "position"
+metadata/_custom_type_script = "uid://dl7rg7fbudor7"
+
+[sub_resource type="Resource" id="Resource_elkij"]
+script = ExtResource("4_o68h5")
+value_path = "rotation"
 metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
 [node name="RigidBody3D" type="RigidBody3D"]
@@ -28,5 +33,5 @@ shape = SubResource("SphereShape3D_enx2m")
 
 [node name="EntityLogic" type="Node" parent="."]
 script = ExtResource("2_yutah")
-params = Array[ExtResource("3_dq10n")]([SubResource("Resource_elkij")])
+params = Array[ExtResource("3_dq10n")]([SubResource("Resource_o68h5"), SubResource("Resource_elkij")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

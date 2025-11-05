@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dk216gheeqnhw"]
+[gd_scene load_steps=19 format=3 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/SG2Core/sg2core_level/sg2core_level.gd" id="1_igffl"]
 [ext_resource type="PackedScene" uid="uid://c24xijdlisvfw" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.tscn" id="2_11ecv"]
@@ -25,6 +25,8 @@ ssil_enabled = true
 sdfgi_enabled = true
 glow_enabled = true
 
+[sub_resource type="BoxMesh" id="BoxMesh_l0mfm"]
+
 [sub_resource type="Resource" id="Resource_dfx6i"]
 script = ExtResource("4_7044o")
 metadata/_custom_type_script = "uid://cox4umbac26ux"
@@ -45,6 +47,10 @@ shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D"]
 environment = SubResource("Environment_dfx6i")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, -2, -10)
+mesh = SubResource("BoxMesh_l0mfm")
 
 [node name="entities_storage" type="Node3D" parent="."]
 
