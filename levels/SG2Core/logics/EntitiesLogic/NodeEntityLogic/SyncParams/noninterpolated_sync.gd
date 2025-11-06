@@ -25,7 +25,7 @@ func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _
 func track_entity(entity_id : int):
 	if not tracking_entities.has(entity_id): return
 	for _value_path in tracking_entities[entity_id][1]:
-		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path, 'call_method')[0]
+		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path, tracking_entities[entity_id][2])[0]
 		EntitiesLogic.entities_spawn_data[entity_id][1][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
 		EntitiesLogic.entities_update_data[entity_id][0][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
 		

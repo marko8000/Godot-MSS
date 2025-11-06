@@ -50,7 +50,7 @@ func start():
 	entities_can_start_work = true
 	if ConnectionLogic.peer_role == 'host':
 		load_entities_data()
-		for i in range(100):
+		for i in range(1000):
 			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(R.ri(-10, 10), 20, R.ri(-10, 10))}))
 	
 
