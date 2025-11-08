@@ -27,10 +27,15 @@ func _ready():
 			start_tracking()
 			
 
+func presets():
+	if ConnectionLogic.peer_role == 'guest':
+		apply_guest_presets()
+	
+	
 func apply_guest_presets():
 	for value_path in guest_presets:
 		Dispenser.set_resource(get_parent(), value_path, guest_presets[value_path])
-	print('apply')
+	
 	
 func start_tracking():
 	var entity_id = int(get_parent().name.substr(1))

@@ -50,7 +50,7 @@ func start():
 	entities_can_start_work = true
 	if ConnectionLogic.peer_role == 'host':
 		load_entities_data()
-		for i in range(1000):
+		for i in range(100):
 			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(R.ri(-10, 10), 20, R.ri(-10, 10))}))
 	
 
@@ -230,8 +230,7 @@ func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_ne
 		else:
 			chunk = FROM_E_POS
 	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').nonchunk = chunk==null
-	if ConnectionLogic.peer_role == 'guest':
-		entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').apply_guest_presets()
+	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').presets()
 	start_tracking(entity_id, entity_parent_node.get_node('e'+str(entity_id)), entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').params, chunk)
 	update_entity(chunk, entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
 
