@@ -34,4 +34,7 @@ shape = SubResource("SphereShape3D_enx2m")
 [node name="EntityLogic" type="Node" parent="."]
 script = ExtResource("2_yutah")
 params = Array[ExtResource("3_dq10n")]([SubResource("Resource_o68h5"), SubResource("Resource_elkij")])
+guest_presets = Dictionary[String, Variant]({
+"freeze": true
+})
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

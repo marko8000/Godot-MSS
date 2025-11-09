@@ -37,7 +37,7 @@ const FROM_E_POS = 'f' # that means that chunk will be found from entity_positio
 
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 16 # host's parameter is max for guest. 0 is 1 chunk
-@export var chunks_per_second : int = 3 # host's parameter is max for guest
+@export var chunks_per_second : int = 16 # host's parameter is max for guest
 var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, loaded_chunks, loaded_entities], ...}
 
 
@@ -51,8 +51,9 @@ func start():
 	entities_can_start_work = true
 	if ConnectionLogic.peer_role == 'host':
 		load_entities_data()
-		for i in range(100):
-			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(R.ri(-10, 10), 20, R.ri(-10, 10))}))
+		var chunks = ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
+		for chunk in chunks[0]:
+			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 30, chunk.y)}))
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
