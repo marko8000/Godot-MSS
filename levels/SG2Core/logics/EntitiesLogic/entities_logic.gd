@@ -18,16 +18,16 @@ extends Node
 
 var entities_can_start_work : bool = false
 signal _entities_start_work
+var trackers : Array[AbstractSync]
 var updates_per_frame : int = 30
 var entities_spawn_data : Dictionary[int, Array] # Array = [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
 var entities_update_data : Dictionary[int, Array] # Array = [values_array : Array, path_from_entities_storage_to_parent : String = '.']
 var entities_file_data : Dictionary[int, Array] # Array = [entity_type : int, values_dict : Dictionary, path_from_entities_storage_to_parent : String = '.']
-var entities_chunks : Dictionary[int, Variant]
-var chunks_entities : Dictionary[Variant, PackedInt32Array]
+var entities_chunks : Dictionary[int, Variant] # = {entity_id: chunk}
+var chunks_entities : Dictionary[Variant, PackedInt32Array] # = {chunk: [entity_id, ...], ...}
 var entities_value_path_value_array_num : Dictionary[int, Dictionary] # {entity_type: {value_path: values_array_num}}
 var entities_value_array_num_value_path : Dictionary[int, Array] # {entity_type: [value_path, ...]}
 var entities_empty_values_array : Dictionary[int, Array]
-var trackers : Array[AbstractSync]
 var last_used_entity_id : int = 0
 var current_update_frame : int = 1
 var current_update_range_size : int
@@ -37,7 +37,7 @@ const FROM_E_POS = 'f' # that means that chunk will be found from entity_positio
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 16 # host's parameter is max for guest. 0 is 1 chunk
 @export var chunks_per_second : int = 3 # host's parameter is max for guest
-var players_drawing_settings : Dictionary # {peer_id: [drawing_distance, chunks_per_second], ...}
+var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, loaded_chunks, loaded_entities], ...}
 
 
 # Called when the node enters the scene tree for the first time.
@@ -73,12 +73,12 @@ func _connection_peer_changed(new_peer):
 		
 		
 func _peer_connected(peer_id):
-	players_drawing_settings[peer_id] = [drawing_distance, chunks_per_second]
+	players[peer_id] = [drawing_distance, chunks_per_second]
 	rpc_id(peer_id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
 	
 	
 func _peer_disconnected(peer_id):
-	players_drawing_settings.erase(peer_id)
+	players.erase(peer_id)
 	
 
 func EntityFileData(_type, _values_dict : Dictionary, _path_from_entities_storage_to_parent : String = '.') -> Array:
@@ -171,9 +171,6 @@ func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = g
 	
 func start_tracking(entity_id : int, entity_node : Node, params : Array[AbstractSync], chunk=FROM_E_POS):
 	entity_node.get_node('EntityLogic').queue_free()
-	var already_used_tracker_types = []
-	for tracker in trackers:
-		already_used_tracker_types.append(tracker.get_script().get_global_name())
 	var entity_type = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
 	if typeof(chunk) == typeof(FROM_E_POS):
 		chunk = ChunksCalculator.position_to_chunk(entity_node.global_position)
@@ -183,11 +180,14 @@ func start_tracking(entity_id : int, entity_node : Node, params : Array[Abstract
 	entities_chunks[entity_id] = chunk
 	entities_spawn_data[entity_id] = EntitySpawnData(entity_type, entities_empty_values_array[entity_type], entities_storage.get_path_to(entity_node.get_parent()))
 	entities_update_data[entity_id] = EntityUpdateData(entities_empty_values_array[entity_type], entities_storage.get_path_to(entity_node.get_parent()))
+	var already_used_tracker_types = []
 	for res_num in range(len(params)):
-		if not params[res_num].get_script().get_global_name() in already_used_tracker_types:
+		for tracker in trackers:
+			already_used_tracker_types.append(tracker.get_script().get_global_name())
+		if not already_used_tracker_types.has(params[res_num].get_script().get_global_name()):
 			params[res_num].start()
 			trackers.append(params[res_num])
-		trackers[res_num].start_tracking(entity_id, entity_node, params[res_num].value_path, params[res_num].param_data)
+		trackers[already_used_tracker_types.find(params[res_num].get_script().get_global_name())].start_tracking(entity_id, entity_node, params[res_num].value_path, params[res_num].param_data)
 	
 
 func track_entities():
@@ -199,7 +199,6 @@ func track_entities():
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1), current_update_range_size*current_update_frame)
 		current_update_frame += 1
 	else:
-		some_sum += 1
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1))
 		current_update_frame = 1
 	for entity_id in entities_range:
@@ -242,7 +241,7 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 
 
 func send_entities_to_guests():
-	for peer_id in MultiplayerLogic.players_info:
+	for peer_id in players:
 		rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
 		
 		

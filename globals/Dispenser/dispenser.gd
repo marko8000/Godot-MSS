@@ -127,7 +127,6 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 				resource_path = resource_path.substr(resource_path.find('.')+1)
 		return FAILED
 	else:
-		print('Im using CACHE')
 		var resource = from
 		for element_num in range(len(setter_cache[cache_key])):
 			if setter_cache[cache_key][element_num] is NodePath:

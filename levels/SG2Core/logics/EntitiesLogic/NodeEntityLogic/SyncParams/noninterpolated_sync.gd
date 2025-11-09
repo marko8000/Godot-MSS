@@ -18,16 +18,16 @@ func start():
 	
 func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _param_data):
 	if not tracking_entities.has(entity_id):
-		tracking_entities[entity_id] = [entity_node, {}, EntitiesLogic.entities_spawn_data[entity_id][0], EntitiesLogic.entities_value_path_value_array_num[EntitiesLogic.entities_spawn_data[entity_id][0]][value_path], EntitiesLogic.entities_value_array_num_value_path[EntitiesLogic.entities_spawn_data[entity_id][0]].duplicate(true)]
+		tracking_entities[entity_id] = [entity_node, {}, EntitiesLogic.entities_spawn_data[entity_id][0], EntitiesLogic.entities_value_path_value_array_num[EntitiesLogic.entities_spawn_data[entity_id][0]], EntitiesLogic.entities_value_array_num_value_path[EntitiesLogic.entities_spawn_data[entity_id][0]]]
 	tracking_entities[entity_id][1][_value_path] = _param_data
 	
 	
 func track_entity(entity_id : int):
 	if not tracking_entities.has(entity_id): return
 	for _value_path in tracking_entities[entity_id][1]:
-		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path, tracking_entities[entity_id][2])[0]
-		EntitiesLogic.entities_spawn_data[entity_id][1][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
-		EntitiesLogic.entities_update_data[entity_id][0][tracking_entities[entity_id][3]] = Dispenser.dupl(value)
+		var value = Dispenser.get_resource(tracking_entities[entity_id][0], _value_path, [tracking_entities[entity_id][2], _value_path])[0]
+		EntitiesLogic.entities_spawn_data[entity_id][1][tracking_entities[entity_id][3][_value_path]] = Dispenser.dupl(value)
+		EntitiesLogic.entities_update_data[entity_id][0][tracking_entities[entity_id][3][_value_path]] = Dispenser.dupl(value)
 		
 		
 func update_entity(chunk, entity_id : int, update_data : Array):
