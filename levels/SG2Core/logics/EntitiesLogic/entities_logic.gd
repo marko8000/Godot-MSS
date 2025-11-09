@@ -25,6 +25,7 @@ var entities_update_data : Dictionary[int, Array] # Array = [values_array : Arra
 var entities_file_data : Dictionary[int, Array] # Array = [entity_type : int, values_dict : Dictionary, path_from_entities_storage_to_parent : String = '.']
 var entities_chunks : Dictionary[int, Variant] # = {entity_id: chunk}
 var chunks_entities : Dictionary[Variant, PackedInt32Array] # = {chunk: [entity_id, ...], ...}
+var update_check : Dictionary[int, bool] # {entity_id: bool} if nothing is changed: false
 var entities_value_path_value_array_num : Dictionary[int, Dictionary] # {entity_type: {value_path: values_array_num}}
 var entities_value_array_num_value_path : Dictionary[int, Array] # {entity_type: [value_path, ...]}
 var entities_empty_values_array : Dictionary[int, Array]
@@ -54,7 +55,6 @@ func start():
 			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(R.ri(-10, 10), 20, R.ri(-10, 10))}))
 	
 
-var some_sum = 0
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if ConnectionLogic.peer_role == 'host':
@@ -209,10 +209,12 @@ func track_entities():
 			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
 			chunks_entities[new_chunk].append(entity_id)
 			entities_chunks[entity_id] = new_chunk
+		var old_data = entities_update_data[entity_id].duplicate(true)
 		entities_spawn_data[entity_id][1] = entities_empty_values_array[entities_spawn_data[entity_id][0]].duplicate(true)
 		entities_update_data[entity_id][0] = entities_empty_values_array[entities_spawn_data[entity_id][0]].duplicate(true)
 		for tracker in trackers:
 			tracker.track_entity(entity_id)
+		update_check[entity_id] = old_data != entities_update_data[entity_id]
 			
 	
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
