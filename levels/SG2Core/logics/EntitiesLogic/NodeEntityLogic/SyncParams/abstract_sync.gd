@@ -5,11 +5,11 @@ class_name AbstractSync
 var SG2Core
 var EntitiesLogic
 
-var param_data # host and guest must have same param_data in entity param
 ## Example: $SomeNode.value or value or $SomeNode
 @export var value_path : String
-
-
+var param_data # host and guest must have same param_data in entity param
+	
+	
 func start():
 	SG2Core = ExecManager.give_current_exec(self).giveo('level')
 	EntitiesLogic = SG2Core.giveo('EntitiesLogic')

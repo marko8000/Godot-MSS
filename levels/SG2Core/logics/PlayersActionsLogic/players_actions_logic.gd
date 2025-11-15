@@ -20,12 +20,10 @@ var frame_num = 0
 func _process(delta: float) -> void:
 	frame_num += 1
 	var actions_list = [['move_right', 'button'], ['move_forward', 'button'], ['move_left', 'button'], ['move_back', 'button'], ["jump", 'button'], ['mouse_relative', 'mouse']]		
-	if ConnectionLogic.peer_role == 'guest':
+	if ConnectionLogic.peer_role in ['guest', 'host']:
 		var actions = get_actions_dict(actions_list)
 		rpc_id(1, "host_get_player_actions_from_player", actions)
-	elif ConnectionLogic.peer_role == 'host':
-		var actions = get_actions_dict(actions_list)
-		host_get_player_actions_from_player(actions)
+
 	
 	if true:
 		if mouse_relative_frame_num != frame_num:
@@ -57,11 +55,9 @@ func get_actions_dict(processing_actions : Array):
 	return _actions
 		
 		
-@rpc("any_peer")
+@rpc("any_peer", 'call_local')
 func host_get_player_actions_from_player(new_actions : Dictionary):
 	var _player_id = multiplayer.get_remote_sender_id()
-	if _player_id == 0:
-		_player_id = 1
 	get_node('peer'+str(_player_id)).actions = new_actions.duplicate(true)
 	
 

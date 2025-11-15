@@ -11,6 +11,7 @@ class_name EntityLogic
 
 @export var params : Array[AbstractSync]
 @export var guest_presets : Dictionary[String, Variant]
+## nonchunk entitites are visible everywhere
 @export var nonchunk : bool = false
 
 
@@ -24,10 +25,16 @@ func _ready():
 		elif ConnectionLogic.peer_role == 'host':
 			var entity_id = EntitiesLogic.get_new_entity_id()
 			get_parent().name = 'e'+str(entity_id)
-			start_tracking()
+			presets()
+			start_tracking(entity_id)
 			
 
 func presets():
+	for child in get_parent().get_children():
+		if child.has_method('presets') and child != self:
+			child.presets()
+	if ConnectionLogic == null:
+		return
 	if ConnectionLogic.peer_role == 'guest':
 		apply_guest_presets()
 	
@@ -37,6 +44,5 @@ func apply_guest_presets():
 		Dispenser.set_resource(get_parent(), value_path, guest_presets[value_path])
 	
 	
-func start_tracking():
-	var entity_id = int(get_parent().name.substr(1))
+func start_tracking(entity_id):
 	EntitiesLogic.start_tracking(entity_id, get_parent(), params, null if nonchunk else EntitiesLogic.FROM_E_POS)

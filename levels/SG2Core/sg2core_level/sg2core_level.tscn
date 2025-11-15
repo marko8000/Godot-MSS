@@ -1,12 +1,10 @@
-[gd_scene load_steps=19 format=3 uid="uid://dk216gheeqnhw"]
+[gd_scene load_steps=17 format=3 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/SG2Core/sg2core_level/sg2core_level.gd" id="1_igffl"]
 [ext_resource type="PackedScene" uid="uid://c24xijdlisvfw" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.tscn" id="2_11ecv"]
 [ext_resource type="PackedScene" uid="uid://vgph7ylokyrq" path="res://levels/SG2Core/logics/MultiplayerLogic/multiplayer_logic.tscn" id="3_84t7g"]
-[ext_resource type="PackedScene" uid="uid://b105k8a0duxoc" path="res://entities/BallRigidBody3D/ball_rigid_body_3d.tscn" id="3_dfx6i"]
 [ext_resource type="Script" uid="uid://cox4umbac26ux" path="res://levels/SG2Core/logics/ConnectionLogic/ConnectionModes/enetmultiplayer_connection_mode.gd" id="4_7044o"]
 [ext_resource type="PackedScene" uid="uid://bhko47dvkt1qi" path="res://nodes/InterpolatedCamera3D/interpolated_camera_3d.tscn" id="4_k8imj"]
-[ext_resource type="PackedScene" uid="uid://b6kgx4015ltmv" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.tscn" id="4_l0mfm"]
 [ext_resource type="PackedScene" uid="uid://bjcb4comxta17" path="res://levels/SG2Core/logics/DirectoriesPathsDistributor/directories_paths_distributor.tscn" id="4_wxnwx"]
 [ext_resource type="PackedScene" uid="uid://svh7yub544mr" path="res://levels/SG2Core/logics/AntiDDoS/anti_ddos.tscn" id="6_7044o"]
 [ext_resource type="PackedScene" uid="uid://dshi5atmhqw0g" path="res://levels/SG2Core/logics/AuthLogic/auth_logic.tscn" id="6_hpyvy"]
@@ -53,11 +51,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, -2, -10)
 mesh = SubResource("BoxMesh_l0mfm")
 
 [node name="entities_storage" type="Node3D" parent="."]
-
-[node name="RigidBody3D" parent="entities_storage" instance=ExtResource("3_dfx6i")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 53.00199, 0)
-
-[node name="CharacterBody3D_FPS" parent="entities_storage" instance=ExtResource("4_l0mfm")]
 
 [node name="Logics" type="Node" parent="."]
 

@@ -38,7 +38,7 @@ const FROM_E_POS = 'f' # that means that chunk will be found from entity_positio
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 16 # host's parameter is max for guest. 0 is 1 chunk
 @export var chunks_per_second : int = 16 # host's parameter is max for guest
-var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, loaded_chunks, loaded_entities], ...}
+var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, current_chunk, direction, loaded_chunks, loaded_entities], ...}
 
 
 # Called when the node enters the scene tree for the first time.
@@ -51,9 +51,9 @@ func start():
 	entities_can_start_work = true
 	if ConnectionLogic.peer_role == 'host':
 		load_entities_data()
-		var chunks = ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
-		for chunk in chunks[0]:
-			file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 30, chunk.y)}))
+		#var chunks = ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
+		#for chunk in chunks[0]:
+			#file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 30, chunk.y)}))
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -74,8 +74,19 @@ func _connection_peer_changed(new_peer):
 		
 		
 func _peer_connected(peer_id):
-	players[peer_id] = [drawing_distance, chunks_per_second]
-	rpc_id(peer_id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
+	spawn_player('peer', peer_id)
+	
+	
+## player_type = "peer" or "reg"
+## use "peer" if player entity will be deleted after player disconnect
+## use "reg" if player will play on same entity after reconnect
+func spawn_player(player_type : String, id):
+	if player_type == 'peer':
+		players[id] = [drawing_distance, chunks_per_second, null, null, [], []]
+		file_entity_summon(EntityFileData('CharacterBody3D_FPS', {'position': Vector3(0, 10, 0), '$Observer.player_type': player_type, '$Observer.id': id}))
+		rpc_id(id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
+	elif player_type == 'reg':
+		pass
 	
 	
 func _peer_disconnected(peer_id):
@@ -122,6 +133,7 @@ func load_entities_resources():
 			if not entity_instance.has_node('EntityLogic'):
 				entities_without_EntityLogic.append(entity_type)
 				continue
+			entity_instance.get_node('EntityLogic').presets()
 			if not entities_value_path_value_array_num.has(entities_types_shortcuts[entity_type]):
 				entities_value_path_value_array_num[entities_types_shortcuts[entity_type]] = {}
 				entities_value_array_num_value_path[entities_types_shortcuts[entity_type]] = []
@@ -247,14 +259,14 @@ func send_entities_to_guests():
 	for peer_id in players:
 		rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
 		
-		
-@rpc("authority")
+
+@rpc("authority", 'call_local')
 func guest_spawn_entities(entities):
 	for entity_id in entities:
 		spawn_entity(entities[entity_id])
 		
-	
-@rpc("authority")
+
+@rpc("authority", 'call_local')
 func guest_update_entities(entities):
 	for entity_id in entities:
 		update_entity(FROM_E_POS, entity_id, entities[entity_id])

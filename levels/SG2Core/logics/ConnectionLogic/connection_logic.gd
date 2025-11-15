@@ -3,7 +3,7 @@ extends Node
 
 
 var peer = ENetMultiplayerPeer.new()
-var peer_role : String # host or gues
+var peer_role : String # host or guest
 
 @export_category('Connection Settings')
 @export var connection_mode : AbstractConnectionMode = null
@@ -25,6 +25,7 @@ func host_create_server():
 			multiplayer.multiplayer_peer = peer
 			Debug.dprint('Server Created {ip}:{port}'.format({'ip': connection_mode.server_ip, 'port': connection_mode.server_port}), peer_role)
 			connection_peer_changed.emit(multiplayer.multiplayer_peer)
+			multiplayer.emit_signal('peer_connected', 1)
 	elif connection_mode is SteamConnectionMode:
 		pass
 	

@@ -7,7 +7,7 @@ var ChunksCalculator
 var entities_storage
 
 var tracking_entities : Dictionary[int, Array] # {entity_id: [entity_node, {value_path: param_data, ...}, entity_type], ...}
-
+	
 
 func start():
 	SG2Core = ExecManager.give_current_exec(self).giveo('level')

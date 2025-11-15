@@ -1,10 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://b6kgx4015ltmv"]
+[gd_scene load_steps=13 format=3 uid="uid://b6kgx4015ltmv"]
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_yk36g"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_gcdr8"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="3_gcdr8"]
 [ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/abstract_sync.gd" id="4_lii66"]
 [ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/noninterpolated_sync.gd" id="5_17ylx"]
+[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/Observer/observer.gd" id="6_g6p1q"]
+[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/PlayerInput/player_input.gd" id="7_80mxe"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -44,3 +46,11 @@ surface_material_override/0 = SubResource("StandardMaterial3D_17ylx")
 script = ExtResource("3_gcdr8")
 params = Array[ExtResource("4_lii66")]([SubResource("Resource_g6p1q")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
+
+[node name="Observer" type="Node" parent="."]
+script = ExtResource("6_g6p1q")
+metadata/_custom_type_script = "uid://cu4bumaj12olc"
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("7_80mxe")
+metadata/_custom_type_script = "uid://cxsg3x5vw3nlq"
