@@ -48,18 +48,18 @@ func host(args : Array):
 		return
 	if args[0] == 'enet': # args = [connection_mode, ipport]
 		if len(args) == 1:
-			if current_level.has_method('giveo'):
-				var ConnectionLogic = current_level.giveo('ConnectionLogic')
-				ConnectionLogic.peer_role = 'host'
-				ConnectionLogic.connection_mode = ENetMultiplayerConnectionMode.new()
+			if '_ConnectionLogic' in current_level:
+				var _ConnectionLogic = current_level._ConnectionLogic
+				_ConnectionLogic.peer_role = 'host'
+				_ConnectionLogic.connection_mode = ENetMultiplayerConnectionMode.new()
 				if len(args) >= 2:
-					ConnectionLogic.connection_mode.server_ip = args[1].split(':')[0]
-					ConnectionLogic.connection_mode.server_port = args[1].split(':')[1]
-					ConnectionLogic.host_create_server()
+					_ConnectionLogic.connection_mode.server_ip = args[1].split(':')[0]
+					_ConnectionLogic.connection_mode.server_port = args[1].split(':')[1]
+					_ConnectionLogic.host_create_server()
 				elif len(args) == 1:
-					ConnectionLogic.host_create_server()
+					_ConnectionLogic.host_create_server()
 			else:
-				commandline.output('[color=red]Failed to find method "giveo" in current level[/color]')
+				commandline.output('[color=red]Failed to find _ConnectionLogic in current level[/color]')
 		else:
 			commandline.output('[color=red]To execute this command you have to specify connection_mode, ip:port[/color]')
 
@@ -70,18 +70,18 @@ func guest(args : Array):
 		return
 	if args[0] == 'enet': # args = [connection_mode, ipport]
 		if len(args) == 1:
-			if current_level.has_method('giveo'):
-				var ConnectionLogic = current_level.giveo('ConnectionLogic')
-				ConnectionLogic.peer_role = 'guest'
-				ConnectionLogic.connection_mode = ENetMultiplayerConnectionMode.new()
+			if '_ConnectionLogic' in current_level:
+				var _ConnectionLogic = current_level._ConnectionLogic
+				_ConnectionLogic.peer_role = 'guest'
+				_ConnectionLogic.connection_mode = ENetMultiplayerConnectionMode.new()
 				if len(args) >= 2:
-					ConnectionLogic.connection_mode.server_ip = args[1].split(':')[0]
-					ConnectionLogic.connection_mode.server_port = args[1].split(':')[1]
-					ConnectionLogic.guest_join_server()
+					_ConnectionLogic.connection_mode.server_ip = args[1].split(':')[0]
+					_ConnectionLogic.connection_mode.server_port = args[1].split(':')[1]
+					_ConnectionLogic.guest_join_server()
 				elif len(args) == 1:
-					ConnectionLogic.guest_join_server()
+					_ConnectionLogic.guest_join_server()
 			else:
-				commandline.output('[color=red]Failed to find method "giveo" in current level[/color]')
+				commandline.output('[color=red]Failed to find _ConnectionLogic in current level[/color]')
 		else:
 			commandline.output('[color=red]To execute this command you have to specify connection_mode, ip:port[/color]')
 		

@@ -1,15 +1,18 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## AuthLogic is used verify player identification
+class_name AuthLogic
+
 
 #TODO
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var DirectoriesPathsDistributor = SG2Core.giveo('DirectoriesPathsDistributor')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
 @onready var AuthControl = $AuthControl
 
-@onready var auth_token_file = DirectoriesPathsDistributor.give_path('auth_token_file')
-@onready var users_auth_database = DirectoriesPathsDistributor.give_path('users_auth_database_file')
-@onready var player_info_file = DirectoriesPathsDistributor.give_path('player_info_file')
+@onready var auth_token_file = _DirectoriesPathsDistributor.give_path('auth_token_file')
+@onready var users_auth_database = _DirectoriesPathsDistributor.give_path('users_auth_database_file')
+@onready var player_info_file = _DirectoriesPathsDistributor.give_path('player_info_file')
 
 @onready var db = get_parent()
 
@@ -23,8 +26,8 @@ var token_symbols : String = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvb
 # NOT DONE
 
 
-#func _ready() -> void:
-	#ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
+func _ready() -> void:
+	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 	
 	
 #func start():
@@ -41,9 +44,9 @@ var token_symbols : String = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvb
 	#db.create_table(table_name, table_dict)
 	#
 	#
-#func _connection_peer_changed(new_peer):
-	#multiplayer.multiplayer_peer = new_peer
-	#Debug.dprint('Connection Peer Setted', self.name)
+func _connection_peer_changed(new_peer):
+	multiplayer.multiplayer_peer = new_peer
+	Debug.dprint('Connection Peer Setted', self.name)
 	#start()
 #
 #

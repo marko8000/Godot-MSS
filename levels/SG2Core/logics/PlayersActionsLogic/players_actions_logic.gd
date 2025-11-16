@@ -1,18 +1,21 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## PlayersActionsLogic is used by host to get guests actions
+## Examples of player actions: [Input], [InputEvent]
+class_name PlayersActionsLogic
 
 
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var DirectoriesPathsDistributor = SG2Core.giveo('DirectoriesPathsDistributor')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
 
-@onready var PlayersActionsLogic_dir = FilesManager.create_path([DirectoriesPathsDistributor.give_path('logics_dir'), 'PlayersActionsLogic'])
+@onready var PlayersActionsLogic_dir = FilesManager.create_path([_DirectoriesPathsDistributor.give_path('logics_dir'), 'PlayersActionsLogic'])
 @onready var PlayerActions_scene_path = FilesManager.create_path([PlayersActionsLogic_dir, 'PlayerActions/player_actions.tscn'])
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
+	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 
 
 var frame_num = 0
@@ -20,7 +23,7 @@ var frame_num = 0
 func _process(delta: float) -> void:
 	frame_num += 1
 	var actions_list = [['move_right', 'button'], ['move_forward', 'button'], ['move_left', 'button'], ['move_back', 'button'], ["jump", 'button'], ['mouse_relative', 'mouse']]		
-	if ConnectionLogic.peer_role in ['guest', 'host']:
+	if _ConnectionLogic.peer_role in ['guest', 'host']:
 		var actions = get_actions_dict(actions_list)
 		rpc_id(1, "host_get_player_actions_from_player", actions)
 
@@ -35,7 +38,6 @@ func get_actions_dict(processing_actions : Array):
 	for action in processing_actions:
 		var action_name = action[0]
 		var action_type = action[1]
-		#print(action_name, action_type)
 		var action_arguments
 		if len(action) >= 3:
 			action_arguments = action[2]
@@ -69,7 +71,7 @@ func get_PlayerActions_from_dict(player_actions_info : Dictionary):
 func _connection_peer_changed(new_peer):
 	multiplayer.multiplayer_peer = new_peer
 	Debug.dprint('Connection Peer Setted', self.name)
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		multiplayer.peer_connected.connect(_peer_connected)
 		multiplayer.peer_disconnected.connect(_peer_disconnected)
 		_peer_connected(1)

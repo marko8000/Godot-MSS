@@ -1,5 +1,7 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## ChunksCalculator is used calculate equal virtual areas
+class_name ChunksCalculator
 
 
 const chunk_size : int = 16

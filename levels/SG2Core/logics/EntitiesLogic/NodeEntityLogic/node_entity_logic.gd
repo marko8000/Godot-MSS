@@ -1,13 +1,13 @@
 @icon('res://levels/SG2Core/x_res/x_images/entity_icon.png')
+@tool
 extends Node
+## EntityLogic is start point for entity properties tracking, the node is deleted after the function EntitiesLogic.start_tracking is called
 class_name EntityLogic
 
 
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')
-@onready var ChunksCalculator = SG2Core.giveo('ChunksCalculator')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var InterpolationLogic = SG2Core.giveo('InterpolationLogic')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
 @export var params : Array[AbstractSync]
 @export var guest_presets : Dictionary[String, Variant]
@@ -16,26 +16,32 @@ class_name EntityLogic
 
 
 func _ready():
-	if not EntitiesLogic.entities_can_start_work:
-		await EntitiesLogic._entities_start_work
+	_EntitiesLogic.entities_can_start_work
+	if not _EntitiesLogic.entities_can_start_work:
+		await _EntitiesLogic._entities_start_work
 	
 	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
-		if ConnectionLogic.peer_role == 'guest':
+		if _ConnectionLogic.peer_role == 'guest':
 			get_parent().queue_free()
-		elif ConnectionLogic.peer_role == 'host':
-			var entity_id = EntitiesLogic.get_new_entity_id()
+		elif _ConnectionLogic.peer_role == 'host':
+			var entity_id = _EntitiesLogic.get_new_entity_id()
 			get_parent().name = 'e'+str(entity_id)
 			presets()
 			start_tracking(entity_id)
+			
+			
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		pass
 			
 
 func presets():
 	for child in get_parent().get_children():
 		if child.has_method('presets') and child != self:
 			child.presets()
-	if ConnectionLogic == null:
+	if _ConnectionLogic == null:
 		return
-	if ConnectionLogic.peer_role == 'guest':
+	if _ConnectionLogic.peer_role == 'guest':
 		apply_guest_presets()
 	
 	
@@ -45,4 +51,4 @@ func apply_guest_presets():
 	
 	
 func start_tracking(entity_id):
-	EntitiesLogic.start_tracking(entity_id, get_parent(), params, null if nonchunk else EntitiesLogic.FROM_E_POS)
+	_EntitiesLogic.start_tracking(entity_id, get_parent(), params, null if nonchunk else _EntitiesLogic.FROM_E_POS)

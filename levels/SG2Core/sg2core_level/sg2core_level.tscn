@@ -29,8 +29,17 @@ glow_enabled = true
 script = ExtResource("4_7044o")
 metadata/_custom_type_script = "uid://cox4umbac26ux"
 
-[node name="SG2Core" type="Node"]
+[node name="SG2Core" type="Node" node_paths=PackedStringArray("_ConnectionLogic", "_AuthLogic", "_MultiplayerLogic", "_DirectoriesPathsDistributor", "_EntitiesLogic", "_entities_storage", "_ChunksCalculator", "_PlayersActionsLogic", "_InterpolationLogic")]
 script = ExtResource("1_igffl")
+_ConnectionLogic = NodePath("Logics/ConnectionLogic")
+_AuthLogic = NodePath("Logics/AuthLogic")
+_MultiplayerLogic = NodePath("Logics/MultiplayerLogic")
+_DirectoriesPathsDistributor = NodePath("Logics/DirectoriesPathsDistributor")
+_EntitiesLogic = NodePath("Logics/EntitiesLogic")
+_entities_storage = NodePath("entities_storage")
+_ChunksCalculator = NodePath("Logics/ChunksCalculator")
+_PlayersActionsLogic = NodePath("Logics/PlayersActionsLogic")
+_InterpolationLogic = NodePath("Logics/InterpolationLogic")
 
 [node name="Node3D" type="Node3D" parent="."]
 

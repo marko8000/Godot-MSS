@@ -1,11 +1,13 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## MultiplayerLogic is used to manage players statuses
+class_name MultiplayerLogic
 
 
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var AuthLogic = SG2Core.giveo('AuthLogic')
-@onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _AuthLogic := _SG2Core._AuthLogic
+@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
 
 var players_info : Dictionary # {peer_id: {reg_id : reg_id, user_id: user_id, player_name: player_name, status: player_status, status_is_blocked: false, language: language}}
@@ -17,33 +19,33 @@ var players_info : Dictionary # {peer_id: {reg_id : reg_id, user_id: user_id, pl
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
-
+	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		manage_players_statuses()
 	
 
 func _connection_peer_changed(new_peer):
 	multiplayer.multiplayer_peer = new_peer
 	Debug.dprint('Connection Peer Setted', self.name)
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		multiplayer.peer_connected.connect(_peer_connected)
 		multiplayer.peer_disconnected.connect(_peer_disconnected)
-	elif ConnectionLogic.peer_role == 'guest':
+	elif _ConnectionLogic.peer_role == 'guest':
 		multiplayer.connected_to_server.connect(_connected_to_server)
 
 
 func _peer_connected(peer_id):
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		players_info[peer_id] = {'player_name': '', 'status': 'logging_in', 'status_is_blocked': false, 'language': 'us'}
 		players_info[peer_id].player_name = 'player' + str(peer_id)
 
 
 func _peer_disconnected(peer_id):
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		players_info.erase(peer_id)
 		
 		

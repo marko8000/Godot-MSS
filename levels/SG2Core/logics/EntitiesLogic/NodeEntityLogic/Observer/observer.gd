@@ -6,13 +6,13 @@ class_name Observer
 var player_type : String = 'dsfdsf'# peer or reg
 var id : int
 
-var SG2Core
-var EntitiesLogic
+var _SG2Core : SG2Core
+var _EntitiesLogic : EntitiesLogic
 
 
 func presets():
-	SG2Core = ExecManager.give_current_exec(self).giveo('level')
-	EntitiesLogic = SG2Core.giveo('EntitiesLogic')
+	_SG2Core = ExecManager.give_current_exec(self).giveo('level')
+	_EntitiesLogic = _SG2Core._EntitiesLogic
 	
 	if not get_parent().has_node('EntityLogic'):
 		return

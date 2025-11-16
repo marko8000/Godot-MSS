@@ -1,5 +1,7 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## DirectoriesPathsDistributor is used to share directories and files paths with other logics
+class_name DirectoriesPathsDistributor
 
 
 ## parameter to separate data between few servers in one machine
@@ -9,12 +11,12 @@ var paths : Dictionary
 
 
 func paths_assignment():
-	var SG2Exec = ExecManager.give_current_exec(self)
-	var SG2Core = SG2Exec.giveo('level')
-	var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
+	var _SG2Exec = ExecManager.give_current_exec(self)
+	var _SG2Core : SG2Core = _SG2Exec.giveo('level')
+	var _ConnectionLogic := _SG2Core._ConnectionLogic
 	
 	paths.general_entities_dir = 'res://entities'
-	paths.level_dir = SG2Exec.current_level_dir_path if scene_file_path.get_slice('/', 3) != 'SG2Core' else 'res://levels/SG2Core'
+	paths.level_dir = _SG2Exec.current_level_dir_path if scene_file_path.get_slice('/', 3) != 'SG2Core' else 'res://levels/SG2Core'
 	paths.logics_dir = FilesManager.create_path([paths.level_dir, 'logics'])
 
 	paths.ServersDataSaves = 'user://ServersDataSaves'

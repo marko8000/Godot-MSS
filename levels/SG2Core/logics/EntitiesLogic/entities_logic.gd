@@ -1,17 +1,19 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
+## EntitiesLogic saves/loads entities state, transfers entities data between host and guests
+class_name EntitiesLogic
 
 
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var MultiplayerLogic = SG2Core.giveo('MultiplayerLogic')
-@onready var InterpolationLogic = SG2Core.giveo('InterpolationLogic')
-@onready var DirectoriesPathsDistributor = SG2Core.giveo('DirectoriesPathsDistributor')
-@onready var entities_storage = SG2Core.giveo('entities_storage')
-@onready var ChunksCalculator = SG2Core.giveo('ChunksCalculator')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _MultiplayerLogic := _SG2Core._MultiplayerLogic
+@onready var _InterpolationLogic := _SG2Core._InterpolationLogic
+@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
+@onready var entities_storage := _SG2Core._entities_storage
+@onready var _ChunksCalculator := _SG2Core._ChunksCalculator
 
-@onready var general_entities_dir = DirectoriesPathsDistributor.give_path('general_entities_dir')
-@onready var entities_data_file = DirectoriesPathsDistributor.give_path('entities_data_file')
+@onready var general_entities_dir = _DirectoriesPathsDistributor.give_path('general_entities_dir')
+@onready var entities_data_file = _DirectoriesPathsDistributor.give_path('entities_data_file')
 @onready var shortcuts_entities_types : Dictionary[int, String] = load_shortcuts_entities_types()
 @onready var entities_types_shortcuts : Dictionary[String, int] = load_entities_types_shortcuts()
 @onready var entities_resources : Dictionary[int, Resource] = load_entities_resources()
@@ -43,13 +45,13 @@ var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, curre
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
+	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 
 
 func start():
 	emit_signal('_entities_start_work')
 	entities_can_start_work = true
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		load_entities_data()
 		#var chunks = ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
 		#for chunk in chunks[0]:
@@ -58,7 +60,7 @@ func start():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		await get_tree().process_frame
 		track_entities()
 		send_entities_to_guests()
@@ -68,7 +70,7 @@ func _connection_peer_changed(new_peer):
 	start()
 	multiplayer.multiplayer_peer = new_peer
 	Debug.dprint('Connection Peer Setted', self.name)
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		multiplayer.peer_connected.connect(_peer_connected)
 		multiplayer.peer_disconnected.connect(_peer_disconnected)
 		
@@ -186,7 +188,7 @@ func start_tracking(entity_id : int, entity_node : Node, params : Array[Abstract
 	entity_node.get_node('EntityLogic').queue_free()
 	var entity_type = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
 	if typeof(chunk) == typeof(FROM_E_POS):
-		chunk = ChunksCalculator.position_to_chunk(entity_node.global_position)
+		chunk = _ChunksCalculator.position_to_chunk(entity_node.global_position)
 	if not chunks_entities.has(chunk):
 		chunks_entities[chunk] = PackedInt32Array()
 	chunks_entities[chunk].append(entity_id)
@@ -206,7 +208,7 @@ func start_tracking(entity_id : int, entity_node : Node, params : Array[Abstract
 func track_entities():
 	var entities_range : PackedInt32Array
 	if current_update_frame == 1:
-		current_frames_per_update = InterpolationLogic.server_FPS / updates_per_frame
+		current_frames_per_update = _InterpolationLogic.server_FPS / updates_per_frame
 		current_update_range_size = len(entities_update_data) / current_frames_per_update
 	if not current_update_frame == current_frames_per_update:
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1), current_update_range_size*current_update_frame)
@@ -215,7 +217,7 @@ func track_entities():
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1))
 		current_update_frame = 1
 	for entity_id in entities_range:
-		var new_chunk = ChunksCalculator.position_to_chunk(entities_storage.get_node(entities_spawn_data[entity_id][2]).get_node('e'+str(entity_id)).global_position)
+		var new_chunk = _ChunksCalculator.position_to_chunk(entities_storage.get_node(entities_spawn_data[entity_id][2]).get_node('e'+str(entity_id)).global_position)
 		if new_chunk != entities_chunks[entity_id]:
 			if not chunks_entities.has(new_chunk):
 				chunks_entities[new_chunk] = PackedInt32Array()
@@ -240,7 +242,7 @@ func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_ne
 	entity_parent_node.add_child(entity_instance)
 	if typeof(chunk) == typeof(FROM_E_POS):
 		if entities_value_path_value_array_num[entity_type].has('position'):
-			chunk = ChunksCalculator.position_to_chunk(spawn_data[1][entities_value_path_value_array_num[entity_type]['position']])
+			chunk = _ChunksCalculator.position_to_chunk(spawn_data[1][entities_value_path_value_array_num[entity_type]['position']])
 		else:
 			chunk = FROM_E_POS
 	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityLogic').nonchunk = chunk==null

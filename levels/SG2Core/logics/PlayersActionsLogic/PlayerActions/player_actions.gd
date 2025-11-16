@@ -1,9 +1,10 @@
 extends Node
+class_name PlayerActions
 
 
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
 
 var actions : Dictionary

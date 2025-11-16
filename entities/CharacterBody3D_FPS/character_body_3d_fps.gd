@@ -3,9 +3,9 @@ extends CharacterBody3D
 
 var player_actions_info
 var PlayerActions
-@onready var SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var ConnectionLogic = SG2Core.giveo('ConnectionLogic')
-@onready var EntitiesLogic = SG2Core.giveo('EntitiesLogic')
+@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
 
 var direction : Vector3
@@ -20,7 +20,7 @@ func _ready() -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		if PlayerActions != null:
 			if not PlayerActions.input.is_connected(input):
 				PlayerActions.input.connect(input)
@@ -31,9 +31,9 @@ func _physics_process(delta: float) -> void:
 			return
 	else:
 		return
-	if int(name) in EntitiesLogic.current_entities:
+	if int(name) in _EntitiesLogic.current_entities:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
+		_SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
 				
 	
 	# Add the gravity.
@@ -51,7 +51,7 @@ func _physics_process(delta: float) -> void:
 		
 
 func input():
-	if ConnectionLogic.peer_role == 'host':
+	if _ConnectionLogic.peer_role == 'host':
 		# Handle jump.
 		if PlayerActions.is_action_just_pressed("jump") and is_on_floor():
 			velocity.y = JUMP_VELOCITY
