@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 
 var player_actions_info
-var PlayerActions
+var _PlayerActions : PlayerActions
 @onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic
@@ -21,10 +21,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
-		if PlayerActions != null:
-			if not PlayerActions.input.is_connected(input):
-				PlayerActions.input.connect(input)
-			if PlayerActions.sleep:
+		if _PlayerActions != null:
+			if not _PlayerActions.input.is_connected(input):
+				_PlayerActions.input.connect(input)
+			if _PlayerActions.sleep:
 				if player_actions_info.player_type == 'peer':
 					queue_free()
 		else:
@@ -53,12 +53,12 @@ func _physics_process(delta: float) -> void:
 func input():
 	if _ConnectionLogic.peer_role == 'host':
 		# Handle jump.
-		if PlayerActions.is_action_just_pressed("jump") and is_on_floor():
+		if _PlayerActions.is_action_just_pressed("jump") and is_on_floor():
 			velocity.y = JUMP_VELOCITY
 	
 		# Handle mouse rotation
-		if PlayerActions.actions.has('mouse_relative'):
-			var mouse_relative = PlayerActions.actions.mouse_relative[0]
+		if _PlayerActions.actions.has('mouse_relative'):
+			var mouse_relative = _PlayerActions.actions.mouse_relative[0]
 			mouse_rotation.y -= mouse_relative.x * ROTATION_SPEED
 			mouse_rotation.x -= mouse_relative.y * ROTATION_SPEED
 			if mouse_rotation.x < -1.2: mouse_rotation.x = -1.2
@@ -68,7 +68,7 @@ func input():
 		
 		# Get the input direction and handle the movement/deceleration.
 		# As good practice, you should replace UI actions with custom gameplay actions.
-		var input_dir = PlayerActions.get_vector("move_left", "move_right", "move_forward", "move_back")
+		var input_dir = _PlayerActions.get_vector("move_left", "move_right", "move_forward", "move_back")
 		direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	

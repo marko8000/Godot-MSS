@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://b105k8a0duxoc"]
+[gd_scene load_steps=10 format=3 uid="uid://b105k8a0duxoc"]
 
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="1_oh78e"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="2_yutah"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/abstract_sync.gd" id="3_dq10n"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/noninterpolated_sync.gd" id="4_o68h5"]
-[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/Observer/observer.gd" id="5_elkij"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/abstract_sync.gd" id="3_o68h5"]
+[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/noninterpolated_sync.gd" id="4_elkij"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8rfn7"]
 
@@ -13,14 +12,14 @@ albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_enx2m"]
 
-[sub_resource type="Resource" id="Resource_o68h5"]
-script = ExtResource("4_o68h5")
-value_path = "position"
+[sub_resource type="Resource" id="Resource_vuocc"]
+script = ExtResource("4_elkij")
+property_path = "position"
 metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
-[sub_resource type="Resource" id="Resource_elkij"]
-script = ExtResource("4_o68h5")
-value_path = "rotation"
+[sub_resource type="Resource" id="Resource_hrxbq"]
+script = ExtResource("4_elkij")
+property_path = "rotation"
 metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
 [node name="RigidBody3D" type="RigidBody3D"]
@@ -32,14 +31,10 @@ surface_material_override/0 = SubResource("StandardMaterial3D_psjoe")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_enx2m")
 
-[node name="EntityLogic" type="Node" parent="."]
+[node name="EntityPropertiesSeed" type="Node" parent="."]
 script = ExtResource("2_yutah")
-params = Array[ExtResource("3_dq10n")]([SubResource("Resource_o68h5"), SubResource("Resource_elkij")])
+tracked_properties = Array[ExtResource("3_o68h5")]([SubResource("Resource_vuocc"), SubResource("Resource_hrxbq")])
 guest_presets = Dictionary[String, Variant]({
 "freeze": true
 })
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
-
-[node name="Observer" type="Node" parent="."]
-script = ExtResource("5_elkij")
-metadata/_custom_type_script = "uid://cu4bumaj12olc"

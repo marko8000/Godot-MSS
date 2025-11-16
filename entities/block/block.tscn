@@ -26,6 +26,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_sj0rn")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_mxrhb")
 
-[node name="EntityLogic" type="Node" parent="."]
+[node name="EntityPropertiesSeed" type="Node" parent="."]
 script = ExtResource("3_ged6v")
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

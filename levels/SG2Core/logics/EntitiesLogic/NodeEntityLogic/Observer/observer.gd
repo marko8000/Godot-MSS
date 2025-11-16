@@ -16,20 +16,20 @@ func presets():
 	
 	if not get_parent().has_node('EntityLogic'):
 		return
-	var ELogic : EntityLogic = $'../EntityLogic'
+	var EPropertiesSeed : EntityPropertiesSeed = $'../EntityLogic'
 	var Entity = get_parent()
 	var player_type_sync = NoninterpolatedSync.new()
 	player_type_sync.value_path = '$'+str(Entity.get_path_to(self))+'.player_type'
 	var id_sync = NoninterpolatedSync.new()
 	id_sync.value_path = '$'+str(Entity.get_path_to(self))+'.id'
-	ELogic.params.append_array([player_type_sync, id_sync])
+	EPropertiesSeed.tracked_properties.append_array([player_type_sync, id_sync])
 
 
 func _get_configuration_warnings():
 	var warnings = []
 	var has_entity_logic = false
 	for child in get_parent().get_children():
-		if child is EntityLogic:
+		if child is EntityPropertiesSeed:
 			has_entity_logic = true
 	if not has_entity_logic:
 		warnings.append('Observer must be child of Node with EntityLogic')

@@ -6,8 +6,8 @@ var _SG2Core : SG2Core
 var _EntitiesLogic : EntitiesLogic
 
 ## Example: $SomeNode.value or value or $SomeNode
-@export var value_path : String
-var param_data # host and guest must have same param_data in entity param
+@export var property_path : String
+var property_config # host and guest must have same property_config in sync type
 	
 	
 func start():

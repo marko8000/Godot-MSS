@@ -14,6 +14,6 @@ script = ExtResource("1_cdaok")
 mesh = SubResource("BoxMesh_d3hoe")
 surface_material_override/0 = SubResource("StandardMaterial3D_4pccn")
 
-[node name="EntityLogic" type="Node" parent="."]
+[node name="EntityPropertiesSeed" type="Node" parent="."]
 script = ExtResource("2_6j8nx")
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

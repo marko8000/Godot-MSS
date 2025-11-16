@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_yk36g"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_gcdr8"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="3_gcdr8"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/abstract_sync.gd" id="4_lii66"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncParams/noninterpolated_sync.gd" id="5_17ylx"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/abstract_sync.gd" id="4_g6p1q"]
+[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/noninterpolated_sync.gd" id="5_80mxe"]
 [ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/Observer/observer.gd" id="6_g6p1q"]
 [ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/PlayerInput/player_input.gd" id="7_80mxe"]
 
@@ -18,9 +18,9 @@ size = Vector2(0.54, 0.5)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_17ylx"]
 albedo_texture = ExtResource("2_gcdr8")
 
-[sub_resource type="Resource" id="Resource_g6p1q"]
-script = ExtResource("5_17ylx")
-value_path = "position"
+[sub_resource type="Resource" id="Resource_6gn8f"]
+script = ExtResource("5_80mxe")
+property_path = "position"
 metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
 [node name="CharacterBody3D_FPS" type="CharacterBody3D"]
@@ -42,9 +42,9 @@ surface_material_override/0 = SubResource("StandardMaterial3D_17ylx")
 
 [node name="VoxelViewer" type="VoxelViewer" parent="."]
 
-[node name="EntityLogic" type="Node" parent="."]
+[node name="EntityPropertiesSeed" type="Node" parent="."]
 script = ExtResource("3_gcdr8")
-params = Array[ExtResource("4_lii66")]([SubResource("Resource_g6p1q")])
+tracked_properties = Array[ExtResource("4_g6p1q")]([SubResource("Resource_6gn8f")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
 [node name="Observer" type="Node" parent="."]

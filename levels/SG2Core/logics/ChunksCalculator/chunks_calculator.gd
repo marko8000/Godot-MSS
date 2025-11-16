@@ -14,7 +14,7 @@ const chunk_size : int = 16
 # direction : Vectori
 
 
-func position_to_chunk(position):
+func position_to_chunk(position) -> Variant:
 	var _type_of_position = typeof(position)
 	
 	if _type_of_position == TYPE_VECTOR3:
@@ -23,6 +23,7 @@ func position_to_chunk(position):
 		pass
 	elif _type_of_position == TYPE_VECTOR4:
 		pass
+	return null
 		
 		
 func position_to_chunk_position(position):
