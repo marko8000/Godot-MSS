@@ -176,13 +176,13 @@ func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entitie
 			file_entity_summon(_entities_file_data[entity_id], entity_id, chunk)
 			
 
-var j = 0
 func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var array : Array
-	j += 1
 	for i in range(len(entities_property_array_num_property_path[file_data[0]])):
 		if file_data[1].has(entities_property_array_num_property_path[file_data[0]][i]):
 			array.append(file_data[1][entities_property_array_num_property_path[file_data[0]][i]])
+		else:
+			array.append(null)
 	spawn_entity(EntitySpawnData(file_data[0], array, file_data[2]), chunk, entity_id)
 	
 	

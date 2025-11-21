@@ -7,10 +7,6 @@ class_name PlayersActionsLogic
 
 @onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
-@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
-
-@onready var PlayersActionsLogic_dir = FilesManager.create_path([_DirectoriesPathsDistributor.give_path('logics_dir'), 'PlayersActionsLogic'])
-@onready var PlayerActions_scene_path = FilesManager.create_path([PlayersActionsLogic_dir, 'PlayerActions/player_actions.tscn'])
 
 
 # Called when the node enters the scene tree for the first time.
@@ -63,9 +59,10 @@ func host_get_player_actions_from_player(new_actions : Dictionary):
 	get_node('peer'+str(_player_id)).actions = new_actions.duplicate(true)
 	
 
-func get_PlayerActions_from_dict(player_actions_info : Dictionary):
-	if player_actions_info.player_type == 'peer':
-		return get_node('peer'+str(player_actions_info.peer_id))
+func get_PlayerActions(player_type, id) -> PlayerActions:
+	if player_type == 'peer':
+		return get_node('peer'+str(id))
+	return
 	
 	
 func _connection_peer_changed(new_peer):
@@ -74,15 +71,13 @@ func _connection_peer_changed(new_peer):
 	if _ConnectionLogic.peer_role == 'host':
 		multiplayer.peer_connected.connect(_peer_connected)
 		multiplayer.peer_disconnected.connect(_peer_disconnected)
-		_peer_connected(1)
 		
 		
 func _peer_connected(id):
-	var file = load(PlayerActions_scene_path)
-	var PlayerActionsManager_instance = file.instantiate()
-	PlayerActionsManager_instance.name = 'peer'+str(id)
-	PlayerActionsManager_instance.player_info = {'player_type': 'peer', 'peer_id': id}
-	add_child(PlayerActionsManager_instance)
+	var PlayerActions_instance = PlayerActions.new()
+	PlayerActions_instance.name = 'peer'+str(id)
+	add_child(PlayerActions_instance)
+	print(get_node('peer'+str(id)).name)
 	
 	
 func _peer_disconnected(id):

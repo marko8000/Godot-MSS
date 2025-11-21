@@ -1,12 +1,11 @@
 extends CharacterBody3D
 
 
-var player_actions_info
-var _PlayerActions : PlayerActions
 @onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
+var _PlayerActions : PlayerActions
 
 var direction : Vector3
 const SPEED = 5.0
@@ -19,22 +18,28 @@ var mouse_rotation = Vector2.ZERO
 func _ready() -> void:
 	pass
 
+
+func _process(delta: float) -> void:
+	if _ConnectionLogic.peer_role == 'host':
+		_PlayerActions = %PlayerInput.get_PlayerActions()
+	
+
 func _physics_process(delta: float) -> void:
+	if %Observer.is_player():
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		_SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
+		
 	if _ConnectionLogic.peer_role == 'host':
 		if _PlayerActions != null:
 			if not _PlayerActions.input.is_connected(input):
 				_PlayerActions.input.connect(input)
 			if _PlayerActions.sleep:
-				if player_actions_info.player_type == 'peer':
+				if %Observer.player_type == 'peer':
 					queue_free()
 		else:
 			return
 	else:
 		return
-	if int(name) in _EntitiesLogic.current_entities:
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		_SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
-				
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -70,7 +75,3 @@ func input():
 		# As good practice, you should replace UI actions with custom gameplay actions.
 		var input_dir = _PlayerActions.get_vector("move_left", "move_right", "move_forward", "move_back")
 		direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
-	
-func get_EntityLogic():
-	return $EntityLogic

@@ -14,8 +14,8 @@ var peer_role : String
 
 signal connection_peer_changed(new_peer)
 var my_peer_id
-
-
+	
+	
 func host_create_server():
 	peer_role = 'host'
 	if connection_mode is ENetMultiplayerConnectionMode:

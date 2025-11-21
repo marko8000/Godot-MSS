@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://b6kgx4015ltmv"]
+[gd_scene load_steps=15 format=3 uid="uid://b6kgx4015ltmv"]
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_yk36g"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_gcdr8"]
@@ -23,6 +23,16 @@ script = ExtResource("5_80mxe")
 property_path = "position"
 metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
+[sub_resource type="Resource" id="Resource_80mxe"]
+script = ExtResource("5_80mxe")
+property_path = "rotation"
+metadata/_custom_type_script = "uid://dl7rg7fbudor7"
+
+[sub_resource type="Resource" id="Resource_ol233"]
+script = ExtResource("5_80mxe")
+property_path = "$cam.rotation"
+metadata/_custom_type_script = "uid://dl7rg7fbudor7"
+
 [node name="CharacterBody3D_FPS" type="CharacterBody3D"]
 script = ExtResource("1_yk36g")
 
@@ -40,17 +50,17 @@ transform = Transform3D(-1, 0, -8.74228e-08, 8.74228e-08, -4.37114e-08, -1, -3.8
 mesh = SubResource("PlaneMesh_lii66")
 surface_material_override/0 = SubResource("StandardMaterial3D_17ylx")
 
-[node name="VoxelViewer" type="VoxelViewer" parent="."]
-
 [node name="EntityPropertiesSeed" type="Node" parent="."]
 script = ExtResource("3_gcdr8")
-tracked_properties = Array[ExtResource("4_g6p1q")]([SubResource("Resource_6gn8f")])
+tracked_properties = Array[ExtResource("4_g6p1q")]([SubResource("Resource_6gn8f"), SubResource("Resource_80mxe"), SubResource("Resource_ol233")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
 [node name="Observer" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("6_g6p1q")
 metadata/_custom_type_script = "uid://cu4bumaj12olc"
 
 [node name="PlayerInput" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("7_80mxe")
 metadata/_custom_type_script = "uid://cxsg3x5vw3nlq"

@@ -2,22 +2,10 @@ extends Node
 class_name PlayerActions
 
 
-@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
-@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
-@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
-
-
 var actions : Dictionary
-var player_info : Dictionary
 var sleep : bool = false
 signal input
 var old_actions : Dictionary
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	#EntitiesLogic.summon_entity(Vector2i(0, 0), [{'name': 'CharacterBody3D_FPS', 'player_actions_info': player_info.duplicate()}])
-	pass
 
 
 func _process(delta: float) -> void:
