@@ -37,5 +37,5 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 			Dispenser.set_resource(tracked_entities[entity_id][0], tracked_entities[entity_id][4][i], update_data[0][i])
 		
 		
-func save_entities():
-	pass
+func stop_tracking(entity_id):
+	tracked_entities.erase(entity_id)

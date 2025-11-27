@@ -27,5 +27,5 @@ func track_entity(entity_id : int):
 	pass
 	
 	
-func save_entities():
+func stop_tracking(entity_id):
 	pass

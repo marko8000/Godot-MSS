@@ -35,6 +35,7 @@ var last_used_entity_id : int = 0
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
+var deleted_entities : PackedInt32Array
 const FROM_E_POS = 'f' # that means that chunk will be found from entity_position
 
 @export_category('Drawing Settings')
@@ -219,6 +220,13 @@ func track_entities():
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1))
 		current_update_frame = 1
 	for entity_id in entities_range:
+		if not entities_storage.has_node(entities_spawn_data[entity_id][2].get_node('e'+str(entity_id))):
+			deleted_entities.append(entity_id)
+			entities_spawn_data.erase(entity_id)
+			entities_update_data.erase(entity_id)
+			for tracker in trackers:
+				tracker.stop_tracking(entity_id)
+			continue
 		var new_chunk = _ChunksCalculator.position_to_chunk(entities_storage.get_node(entities_spawn_data[entity_id][2]).get_node('e'+str(entity_id)).global_position)
 		if new_chunk != entities_chunks[entity_id]:
 			if not chunks_entities.has(new_chunk):
