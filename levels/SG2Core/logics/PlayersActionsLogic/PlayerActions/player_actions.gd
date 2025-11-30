@@ -2,7 +2,7 @@ extends Node
 class_name PlayerActions
 
 
-var actions : Dictionary
+var actions : Dictionary[String, Array]
 var sleep : bool = false
 signal input
 var old_actions : Dictionary

@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=3 uid="uid://b105k8a0duxoc"]
 
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="1_oh78e"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/node_entity_logic.gd" id="2_yutah"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/abstract_sync.gd" id="3_o68h5"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/NodeEntityLogic/SyncTypes/noninterpolated_sync.gd" id="4_elkij"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/entity_properties_seed.gd" id="2_yutah"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/SyncTypes/abstract_sync.gd" id="3_o68h5"]
+[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/SyncTypes/noninterpolated_sync.gd" id="4_elkij"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8rfn7"]
 

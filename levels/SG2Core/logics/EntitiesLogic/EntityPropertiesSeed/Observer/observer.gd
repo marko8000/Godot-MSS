@@ -8,10 +8,6 @@ var id : int
 
 var _SG2Core : SG2Core
 var _EntitiesLogic : EntitiesLogic
-
-
-func _ready() -> void:
-	add_child(VoxelViewer.new())
 	
 	
 func presets():
@@ -20,6 +16,7 @@ func presets():
 	
 	if not get_parent().has_node('EntityPropertiesSeed'):
 		return
+	get_parent().add_child(VoxelViewer.new())
 	var EPropertiesSeed : EntityPropertiesSeed = $'../EntityPropertiesSeed'
 	var Entity = get_parent()
 	var player_type_sync = NoninterpolatedSync.new()

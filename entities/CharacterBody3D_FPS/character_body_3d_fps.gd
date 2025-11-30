@@ -3,16 +3,17 @@ extends CharacterBody3D
 
 @onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
-@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
 var _PlayerActions : PlayerActions
 
-var direction : Vector3
-const SPEED = 5.0
+const WALKING_SPEED = 1.5
+const SLOW_SHIFT_SPEED = 3
+const FAST_SHIFT_SPEED = 7
 const JUMP_VELOCITY = 4.5
 const ROTATION_SPEED = 0.0001 * 10
 
-var mouse_rotation = Vector2.ZERO
+var direction : Vector3
+var current_speed : float
 
 
 func _ready() -> void:
@@ -44,22 +45,38 @@ func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+		
+	# Interaction with RigidBody
+	for col_idx in get_slide_collision_count():
+		var col := get_slide_collision(col_idx)
+		if col.get_collider() is RigidBody3D:
+			col.get_collider().apply_central_impulse(-col.get_normal() * 0.3)
+			col.get_collider().apply_impulse(-col.get_normal() * 0.01, col.get_position())
 	
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.x = direction.x * current_speed
+		velocity.z = direction.z * current_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0, current_speed)
+		velocity.z = move_toward(velocity.z, 0, current_speed)
 
 	move_and_slide()
 		
 
+var mouse_rotation = Vector2.ZERO
 func input():
 	if _ConnectionLogic.peer_role == 'host':
 		# Handle jump.
 		if _PlayerActions.is_action_just_pressed("jump") and is_on_floor():
 			velocity.y = JUMP_VELOCITY
+			
+		# Handle movement speed
+		if _PlayerActions.is_action_pressed('slow_shift'):
+			current_speed = SLOW_SHIFT_SPEED
+		elif _PlayerActions.is_action_pressed('fast_shift'):
+			current_speed = FAST_SHIFT_SPEED
+		else:
+			current_speed = WALKING_SPEED
 	
 		# Handle mouse rotation
 		if _PlayerActions.actions.has('mouse_relative'):

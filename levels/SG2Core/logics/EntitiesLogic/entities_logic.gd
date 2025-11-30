@@ -220,7 +220,7 @@ func track_entities():
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1))
 		current_update_frame = 1
 	for entity_id in entities_range:
-		if not entities_storage.has_node(entities_spawn_data[entity_id][2].get_node('e'+str(entity_id))):
+		if not entities_storage.has_node(entities_spawn_data[entity_id][2] + '/e'+str(entity_id)):
 			deleted_entities.append(entity_id)
 			entities_spawn_data.erase(entity_id)
 			entities_update_data.erase(entity_id)

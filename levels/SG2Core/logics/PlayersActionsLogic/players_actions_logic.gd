@@ -8,6 +8,8 @@ class_name PlayersActionsLogic
 @onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
+enum {ACTION, MOUSE}
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -18,9 +20,9 @@ var frame_num = 0
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	frame_num += 1
-	var actions_list = [['move_right', 'button'], ['move_forward', 'button'], ['move_left', 'button'], ['move_back', 'button'], ["jump", 'button'], ['mouse_relative', 'mouse']]		
 	if _ConnectionLogic.peer_role in ['guest', 'host']:
-		var actions = get_actions_dict(actions_list)
+		var actions = get_actions_dict()
+		print(actions)
 		rpc_id(1, "host_get_player_actions_from_player", actions)
 
 	
@@ -29,29 +31,35 @@ func _process(delta: float) -> void:
 			mouse_relative = Vector2.ZERO
 			
 
-func get_actions_dict(processing_actions : Array):
-	var _actions : Dictionary
+func get_actions_dict() -> Dictionary[String, Array]:
+	var processing_actions : Array[Array] = get_processing_actions()
+	var _actions : Dictionary[String, Array]
 	for action in processing_actions:
 		var action_name = action[0]
 		var action_type = action[1]
-		var action_arguments
-		if len(action) >= 3:
-			action_arguments = action[2]
 		_actions[action_name] = []
-		if action_type == 'button':
+		if action_type == ACTION:
 			if Input.is_action_pressed(action_name):
 				_actions[action_name].append('pressed')
 			if Input.is_action_just_pressed(action_name):
 				_actions[action_name].append('just_pressed')
 			if Input.is_action_just_released(action_name):
 				_actions[action_name].append('just_released')
-		elif action_type == 'mouse':
+			if len(_actions[action_name]) == 0:
+				_actions.erase(action_name)
+		elif action_type == MOUSE:
 			if action_name == 'mouse_relative':
 				_actions[action_name].append(mouse_relative)
-		else:
-			_actions[action_name].append(action_arguments)
 	return _actions
 		
+		
+func get_processing_actions() -> Array[Array]:
+	var processing_actions : Array[Array]
+	for input_action in InputMap.get_actions():
+		processing_actions.append([input_action, ACTION])
+	processing_actions.append(['mouse_relative', MOUSE])
+	return processing_actions
+	
 		
 @rpc("any_peer", 'call_local')
 func host_get_player_actions_from_player(new_actions : Dictionary):
@@ -77,7 +85,6 @@ func _peer_connected(id):
 	var PlayerActions_instance = PlayerActions.new()
 	PlayerActions_instance.name = 'peer'+str(id)
 	add_child(PlayerActions_instance)
-	print(get_node('peer'+str(id)).name)
 	
 	
 func _peer_disconnected(id):
