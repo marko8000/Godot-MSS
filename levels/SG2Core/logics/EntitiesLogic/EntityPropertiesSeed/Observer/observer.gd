@@ -3,16 +3,23 @@ extends Node
 class_name Observer
 
 
+var entity_id : int
 var player_type : String # peer or reg
 var id : int
 
 var _SG2Core : SG2Core
 var _EntitiesLogic : EntitiesLogic
+var _MultiplayerLogic : MultiplayerLogic
+var _ChunksCalculator : ChunksCalculator
+var _ConnectionLogic : ConnectionLogic
 	
 	
 func presets():
 	_SG2Core = ExecManager.give_current_exec(self).giveo('level')
 	_EntitiesLogic = _SG2Core._EntitiesLogic
+	_MultiplayerLogic = _SG2Core._MultiplayerLogic
+	_ChunksCalculator = _SG2Core._ChunksCalculator
+	_ConnectionLogic = _SG2Core._ConnectionLogic
 	
 	if not get_parent().has_node('EntityPropertiesSeed'):
 		return
@@ -46,3 +53,23 @@ func is_player() -> bool:
 	elif player_type == 'reg':
 		pass
 	return false
+	
+	
+func _process(delta: float) -> void:
+	update_player_data()
+	
+	
+func update_player_data():
+	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
+		return
+	if _ConnectionLogic.peer_role != 'host':
+		return
+	entity_id = int(get_parent().name.substr(1))
+	var _player_data : EntitiesLogic.PlayerData
+	if  player_type == 'peer':
+		_player_data = _EntitiesLogic.players[id]
+	elif player_type == 'reg':
+		_player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
+	var _current_chunk = _ChunksCalculator.position_to_chunk(get_parent().position)
+	var _direction = _ChunksCalculator.rotation_to_direction(get_parent().rotation)
+	_player_data.observers_data[entity_id] = EntitiesLogic.PlayerData.ObserverData.new(_current_chunk, _direction)

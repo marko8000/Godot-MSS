@@ -41,7 +41,7 @@ const FROM_E_POS = 'f' # that means that chunk will be found from entity_positio
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 16 # host's parameter is max for guest. 0 is 1 chunk
 @export var chunks_per_second : int = 16 # host's parameter is max for guest
-var players : Dictionary # {peer_id: [drawing_distance, chunks_per_second, current_chunk, direction, loaded_chunks, loaded_entities], ...}
+var players : Dictionary[int, PlayerData]
 
 
 # Called when the node enters the scene tree for the first time.
@@ -85,7 +85,7 @@ func _peer_connected(peer_id):
 ## use "reg" if player will play on same entity after reconnect
 func spawn_player(player_type : String, id):
 	if player_type == 'peer':
-		players[id] = [drawing_distance, chunks_per_second, null, null, [], []]
+		players[id] = PlayerData.new(drawing_distance, chunks_per_second)
 		file_entity_summon(EntityFileData('CharacterBody3D_FPS', {'position': Vector3(0, 10, 0), '$Observer.player_type': player_type, '$Observer.id': id}))
 		rpc_id(id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
 	elif player_type == 'reg':
@@ -106,6 +106,23 @@ func EntitySpawnData(_type : int, _values_array : Array, _path_from_entities_sto
 	
 func EntityUpdateData(_values_array, _path_from_entities_storage_to_parent : String = '.') -> Array:
 	return [_values_array, _path_from_entities_storage_to_parent]
+	
+	
+class PlayerData:
+	var drawing_distance : int
+	var chunks_per_second : int 
+	var observers_data : Dictionary[int, ObserverData]
+	func _init(_drawing_distance :  int, _chunks_per_second : int) -> void:
+		drawing_distance = _drawing_distance
+		chunks_per_second = _chunks_per_second
+	class ObserverData:
+		var current_chunk
+		var direction
+		var loaded_chunks : Array
+		var loaded_entities : PackedInt32Array
+		func _init(_current_chunk, _direction) -> void:
+			current_chunk = _current_chunk
+			direction = _direction
 	
 	
 func get_new_entity_id():
@@ -268,8 +285,11 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 
 
 func send_entities_to_guests():
-	for peer_id in players:
-		rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
+	if current_update_frame == 1:
+		for peer_id in players:
+			for observer_data in players[peer_id].observers_data.values():
+				print(observer_data.direction)
+			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
 		
 
 @rpc("authority", 'call_local')

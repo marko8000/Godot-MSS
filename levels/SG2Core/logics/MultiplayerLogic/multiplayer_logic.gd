@@ -10,11 +10,18 @@ class_name MultiplayerLogic
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 
 
-var players_info : Dictionary # {peer_id: {reg_id : reg_id, user_id: user_id, player_name: player_name, status: player_status, status_is_blocked: false, language: language}}
-# ALL PLAYER STATUSES:
-# logging_in
-# preparing
-# online
+var players_info : Dictionary[int, PlayerData]
+enum player_status {logging_in, preparing, online}
+
+
+class PlayerData:
+	var reg_id
+	var personal_info := PersonalInfo.new()
+	var status : player_status = player_status.logging_in
+	var status_is_blocked : bool = false
+	class PersonalInfo:
+		var player_name : String
+		var language : String
 
 
 # Called when the node enters the scene tree for the first time.
@@ -40,8 +47,8 @@ func _connection_peer_changed(new_peer):
 
 func _peer_connected(peer_id):
 	if _ConnectionLogic.peer_role == 'host':
-		players_info[peer_id] = {'player_name': '', 'status': 'logging_in', 'status_is_blocked': false, 'language': 'us'}
-		players_info[peer_id].player_name = 'player' + str(peer_id)
+		players_info[peer_id] = PlayerData.new()
+		players_info[peer_id].personal_info.player_name = 'player' + str(peer_id)
 
 
 func _peer_disconnected(peer_id):
@@ -55,18 +62,18 @@ func _connected_to_server():
 		
 func manage_players_statuses():
 	for peer_id in players_info:
-		var _current_player_status = players_info[peer_id].status
+		var _current_player_status := players_info[peer_id].status
 		if not players_info[peer_id].status_is_blocked:
 			
-			if _current_player_status == 'logging_in':
+			if _current_player_status == player_status.logging_in:
 				block_player_status(peer_id)
-				change_player_status(peer_id, 'preparing')
+				change_player_status(peer_id, player_status.preparing)
 				
-			elif _current_player_status == 'preparing':
+			elif _current_player_status == player_status.preparing:
 				block_player_status(peer_id)
-				change_player_status(peer_id, 'online')
+				change_player_status(peer_id, player_status.online)
 				
-			elif _current_player_status == 'online':
+			elif _current_player_status == player_status.online:
 				block_player_status(peer_id)
 		else:
 			pass
@@ -91,4 +98,4 @@ func reg_id_to_peer_id(reg_id):
 @rpc("any_peer")
 func set_language(language):
 	var _peer_id = multiplayer.get_remote_sender_id()
-	players_info[_peer_id].language = language
+	players_info[_peer_id].personal_info.language = language
