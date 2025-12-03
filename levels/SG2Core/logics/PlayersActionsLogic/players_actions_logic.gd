@@ -22,7 +22,6 @@ func _process(delta: float) -> void:
 	frame_num += 1
 	if _ConnectionLogic.peer_role in ['guest', 'host']:
 		var actions = get_actions_dict()
-		print(actions)
 		rpc_id(1, "host_get_player_actions_from_player", actions)
 
 	

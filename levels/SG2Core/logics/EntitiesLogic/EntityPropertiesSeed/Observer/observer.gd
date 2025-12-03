@@ -56,7 +56,8 @@ func is_player() -> bool:
 	
 	
 func _process(delta: float) -> void:
-	update_player_data()
+	if _EntitiesLogic.entities_can_start_work:
+		update_player_data()
 	
 	
 func update_player_data():
@@ -65,11 +66,25 @@ func update_player_data():
 	if _ConnectionLogic.peer_role != 'host':
 		return
 	entity_id = int(get_parent().name.substr(1))
-	var _player_data : EntitiesLogic.PlayerData
-	if  player_type == 'peer':
+	var _player_data : EntitiesLogic.EntitiesPlayerData
+	if player_type == 'peer':
 		_player_data = _EntitiesLogic.players[id]
 	elif player_type == 'reg':
 		_player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
-	var _current_chunk = _ChunksCalculator.position_to_chunk(get_parent().position)
-	var _direction = _ChunksCalculator.rotation_to_direction(get_parent().rotation)
-	_player_data.observers_data[entity_id] = EntitiesLogic.PlayerData.ObserverData.new(_current_chunk, _direction)
+	if not _player_data.observers_data.has(entity_id):
+		_player_data.observers_data[entity_id] = EntitiesLogic.EntitiesPlayerData.ObserverData.new()
+	var _observer_data : EntitiesLogic.EntitiesPlayerData.ObserverData = _player_data.observers_data[entity_id]
+	var _current_chunk = _ChunksCalculator.position_to_chunk(get_parent().global_position)
+	var _direction = _ChunksCalculator.rotation_to_direction(get_parent().global_rotation)
+	var _old_chunk = _observer_data.current_chunk
+	var _old_direction = _observer_data.direction
+	_observer_data.current_chunk = _current_chunk
+	_observer_data.direction = _direction
+	_observer_data.last_update_time = Time.get_unix_time_from_system()
+	if _current_chunk != _old_chunk:
+		_observer_data.chunk_changed = true
+	if _direction != _old_direction:
+		_observer_data.direction_changed = true
+	
+	
+	

@@ -19,6 +19,8 @@ class PlayerData:
 	var personal_info := PersonalInfo.new()
 	var status : player_status = player_status.logging_in
 	var status_is_blocked : bool = false
+	func _to_string() -> String:
+		return '{reg_id: {0}, status: {1}, status_is_blocked: {2}}'.format([reg_id, status, status_is_blocked])
 	class PersonalInfo:
 		var player_name : String
 		var language : String
