@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 
@@ -9,14 +10,11 @@ var current_exec_dir_path : String
 
 var language : String = 'EN_us'
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	execs_changing()
+	if not Engine.is_editor_hint():
+		execs_changing()
 
 
 func change_exec_to(exec_name, caller : Object):

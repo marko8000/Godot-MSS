@@ -32,7 +32,7 @@ var target_changed_on_process = false
 func _process(delta: float) -> void:
 	if target == null or str(target) == '':
 		return
-	
+
 	# TODO: Fix delta calculation so it behaves correctly if the speed is set to 1.0.
 	var translate_factor := translate_speed * delta * 10
 	var rotate_factor := rotate_speed * delta * 10

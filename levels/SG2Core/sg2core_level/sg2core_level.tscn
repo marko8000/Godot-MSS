@@ -45,7 +45,7 @@ _InterpolationLogic = NodePath("Logics/InterpolationLogic")
 
 [node name="Camera" parent="Node3D" instance=ExtResource("4_k8imj")]
 transform = Transform3D(1, 0, 0, 0, 0.67978704, 0.73340964, 0, -0.73340964, 0.67978704, 0, 28.662369, 38.23881)
-translate_speed = 10.0
+translate_speed = 5.0
 rotate_speed = 3.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D"]

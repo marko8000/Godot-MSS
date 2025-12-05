@@ -29,7 +29,6 @@ func _physics_process(delta: float) -> void:
 	if %Observer.is_player():
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
-		
 	if _ConnectionLogic.peer_role == 'host':
 		if _PlayerActions != null:
 			if not _PlayerActions.input.is_connected(input):

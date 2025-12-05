@@ -122,14 +122,19 @@ class EntitiesPlayerData:
 		return '{drawing_distance: {0}, chunks_per_second: {1}, observers_data: {2}}'.format([drawing_distance, chunks_per_second, observers_data])
 	class ObserverData:
 		var current_chunk
+		var old_chunk
+		var chunk_before_changes
 		var direction
+		var old_direction
 		var chunk_changed : bool = false
-		var direction_changed : bool = false
 		var loaded_chunks : Array
 		var loaded_entities : PackedInt32Array
 		var last_update_time # if current time - last_update_time > 10, Observer data will be removed
+		var chunks_cache : Array
 		func _to_string() -> String:
-			return '[{0}, {1}, {2}, {3}, {4}, {5}, {6}]'.format([current_chunk, direction, chunk_changed, direction_changed, str(loaded_chunks), loaded_entities, last_update_time])
+			return '[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', chunk_changed, direction, old_direction, str(loaded_chunks), loaded_entities, last_update_time])
+		func clear_chunks_cache():
+			chunks_cache.clear()
 	
 	
 func get_new_entity_id():
@@ -295,7 +300,27 @@ func send_entities_to_guests():
 	if current_update_frame == 1:
 		for peer_id in players:
 			for observer_data : EntitiesPlayerData.ObserverData in players[peer_id].observers_data.values():
+				if not observer_data.chunk_changed:
+					observer_data.chunk_before_changes = observer_data.old_chunk
+				if observer_data.current_chunk != observer_data.old_chunk:
+					observer_data.chunk_changed = true
+				var _direction_changed : bool
+				if observer_data.direction != observer_data.old_direction:
+					observer_data.old_direction = observer_data.direction
+					_direction_changed = true
+				
+				var _clear_chunks_cache : bool
+				if _direction_changed:
+					_direction_changed = false
+					_clear_chunks_cache = true
+				elif _ChunksCalculator.dist(observer_data.chunk_before_changes, observer_data.current_chunk) > 2:
+					_clear_chunks_cache = true
+					observer_data.chunk_changed = false
+				
+				if _clear_chunks_cache:
+					observer_data.clear_chunks_cache()
 				print(observer_data)
+				
 			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
 		
 

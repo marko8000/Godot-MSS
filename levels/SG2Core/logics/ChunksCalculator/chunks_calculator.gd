@@ -10,18 +10,14 @@ const chunk_size : int = 16
 # TERMS
 # chunk_position : Vector = (position_of_smth - position_of_negative_position_of_chunk) 
 # global_positon or position : Vector
-# chunk : Vectori||null
+# chunk : Vectori or null
 # direction : Vectori
 
 
 func position_to_chunk(position) -> Variant:
-	var _type_of_position = typeof(position)
-	
-	if _type_of_position == TYPE_VECTOR3:
+	if position is Vector3:
 		return Vector2i(floor(position.x / chunk_size), floor(position.z / chunk_size))
-	elif _type_of_position == TYPE_VECTOR2:
-		pass
-	elif _type_of_position == TYPE_VECTOR4:
+	elif position is Vector2:
 		pass
 	return null
 		
@@ -31,45 +27,40 @@ func position_to_chunk_position(position):
 		
 	
 func chunk_to_negative_chunk_position(chunk):
-	raise_if_wrong_chunk_type(chunk)
-	var _type_of_chunk = typeof(chunk)
 	
-	if _type_of_chunk == TYPE_VECTOR2I:
+	if chunk is Vector2i:
 		return Vector3(chunk.x * chunk_size, 0, chunk.y * chunk_size)
 		
 		
 func chunk_position_to_position(chunk, chunk_position):
-	raise_if_wrong_chunk_type(chunk)
 	if chunk == null:
 		return chunk_position
-		
-	var _type_of_position = typeof(chunk_position)
 	
-	if _type_of_position == TYPE_VECTOR3:
+	if chunk_position is Vector3:
 		return chunk_to_negative_chunk_position(chunk) + chunk_position
-	elif _type_of_position == TYPE_VECTOR2:
-		pass
-	elif _type_of_position == TYPE_VECTOR4:
+	elif chunk_position is Vector2:
 		pass
 		
 		
 func rotation_to_direction(rotation):
-	var _type_of_rotation = typeof(rotation)
-	
-	if _type_of_rotation == TYPE_VECTOR3:
+	if rotation is Vector3:
 		return -Vector2i(round(sin(rotation.y)), round(cos(rotation.y)))
-	elif _type_of_rotation == TYPE_VECTOR2:
-		pass
-	elif _type_of_rotation == TYPE_VECTOR4:
+	elif rotation is Vector2:
 		pass
 				
 
-# PLEASE CLEAR CACHE IF PLAYER_DIRECTION HAS CHANGED
+func dist(chunk1, chunk2):
+	if chunk1 is Vector2i or chunk1 is Vector3i or chunk1 is Vector4i:
+		return chunk1.distance_to(chunk2)
+	else:
+		return 0
+	
+	
+## CLEAR CACHE IF PLAYER_DIRECTION OR PLAYER_CHUNK HAS CHANGED
 func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [0, 1], max_count_of_chunks = 1, cache = []):
 	var chunks : Array
 	var new_cache
-	var type_of_player_chunk = typeof(player_chunk)
-	if type_of_player_chunk == TYPE_VECTOR2I:
+	if player_chunk is Vector2i:
 		new_cache = []
 		var is_crooked_movement = false if abs(player_direction.x) + abs(player_direction.y) == 1 else true
 		var right_side = Vector2i(-player_direction.y, player_direction.x)
@@ -129,7 +120,6 @@ func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [
 
 
 func raise_if_wrong_chunk_type(chunk):
-	# raise_if_wrong_chunk(chunk)
 	var _type_of_chunk = typeof(chunk)
 	var _chunk_types = [TYPE_VECTOR2I, TYPE_VECTOR3I, TYPE_VECTOR4I, TYPE_INT]
 	assert(_type_of_chunk in _chunk_types, "Wrong chunk type")

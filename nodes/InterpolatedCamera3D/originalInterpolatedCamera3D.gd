@@ -27,7 +27,6 @@ extends Camera3D
 
 
 func _process(delta: float) -> void:
-	print(target)
 	if not target is Node3D:
 		return
 
