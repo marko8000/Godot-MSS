@@ -10,7 +10,7 @@ var tracked_entities : Dictionary[int, Array] # {entity_id: [entity_node, {prope
 	
 
 func start():
-	_SG2Core = ExecManager.give_current_exec(self).giveo('level')
+	_SG2Core = ExecManager.get_current_exec(self).get_current_level()
 	_EntitiesLogic = _SG2Core._EntitiesLogic
 	_ChunksCalculator = _SG2Core._ChunksCalculator
 	_entities_storage = _SG2Core._entities_storage

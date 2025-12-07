@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dy2wkms3t04dt"]
-
-[ext_resource type="Script" uid="uid://dpk0gjtcg42bl" path="res://exec/sg2vin17_exec/command_line/modules/SG2Vin17ExecCommandsModule/sg_2_vin_17_exec_commands_module.gd" id="1_j617t"]
-
-[node name="SG2Vin17ExecCommandsModule" type="Node"]
-script = ExtResource("1_j617t")

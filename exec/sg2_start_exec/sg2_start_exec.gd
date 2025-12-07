@@ -1,4 +1,4 @@
-extends Node
+extends AbstractExec
 
 
 var delay_at_start : bool = false

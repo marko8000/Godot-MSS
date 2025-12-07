@@ -15,7 +15,7 @@ var _ConnectionLogic : ConnectionLogic
 	
 	
 func presets():
-	_SG2Core = ExecManager.give_current_exec(self).giveo('level')
+	_SG2Core = ExecManager.get_current_exec(self).get_current_level()
 	_EntitiesLogic = _SG2Core._EntitiesLogic
 	_MultiplayerLogic = _SG2Core._MultiplayerLogic
 	_ChunksCalculator = _SG2Core._ChunksCalculator
@@ -86,15 +86,14 @@ func update_player_data():
 	var _old_direction = _observer_data.direction
 	if _old_direction == null:
 		_old_direction = _direction
-		print('d', _direction, _old_direction)
 	
+	_observer_data.observer_entity_id = entity_id
 	_observer_data.current_chunk = _current_chunk
 	_observer_data.direction = _direction
 	if _current_chunk != _old_chunk:
 		_observer_data.old_chunk = _old_chunk
 	if _direction != _old_direction:
 		_observer_data.old_direction = _old_direction
-	_observer_data.last_update_time = Time.get_unix_time_from_system()
 	
 	
 	

@@ -1,1 +1,0 @@
-exec_main_scene:sg2_start_exec.tscn

@@ -23,4 +23,4 @@ func refresh():
 			
 			
 func load_level(level_name):
-	ExecManager.give_current_exec(self).load_level(level_name)
+	ExecManager.get_current_exec(self).load_level(level_name)

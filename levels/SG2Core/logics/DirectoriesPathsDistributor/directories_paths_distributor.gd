@@ -11,8 +11,8 @@ var paths : Dictionary
 
 
 func paths_assignment():
-	var _SG2Exec = ExecManager.give_current_exec(self)
-	var _SG2Core : SG2Core = _SG2Exec.giveo('level')
+	var _SG2Exec = ExecManager.get_current_exec(self)
+	var _SG2Core : SG2Core = _SG2Exec.get_current_level()
 	var _ConnectionLogic := _SG2Core._ConnectionLogic
 	
 	paths.general_entities_dir = 'res://entities'

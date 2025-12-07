@@ -4,7 +4,7 @@ extends Node
 class_name EntitiesLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _MultiplayerLogic := _SG2Core._MultiplayerLogic
 @onready var _InterpolationLogic := _SG2Core._InterpolationLogic
@@ -42,7 +42,7 @@ enum {
 }
 
 @export_category('Drawing Settings')
-@export var drawing_distance : int = 16 # host's parameter is max for guest. 0 is 1 chunk
+@export var drawing_distance : int = 2 # host's parameter is max for guest. 0 is 1 chunk
 @export var chunks_per_second : int = 16 # host's parameter is max for guest
 var players : Dictionary[int, EntitiesPlayerData]
 
@@ -89,7 +89,7 @@ func _peer_connected(peer_id):
 func spawn_player(player_type : String, id):
 	if player_type == 'peer':
 		players[id] = EntitiesPlayerData.new(drawing_distance, chunks_per_second)
-		file_entity_summon(EntityFileData('CharacterBody3D_FPS', {'position': Vector3(0, 10, 0), '$Observer.player_type': player_type, '$Observer.id': id}))
+		file_entity_summon(EntityFileData('CharacterBody3D_FPS', {'position': Vector3(0, 50, 0), '$Observer.player_type': player_type, '$Observer.id': id}))
 		rpc_id(id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
 	elif player_type == 'reg':
 		pass
@@ -121,6 +121,7 @@ class EntitiesPlayerData:
 	func _to_string() -> String:
 		return '{drawing_distance: {0}, chunks_per_second: {1}, observers_data: {2}}'.format([drawing_distance, chunks_per_second, observers_data])
 	class ObserverData:
+		var observer_entity_id : int
 		var current_chunk
 		var old_chunk
 		var chunk_before_changes
@@ -129,10 +130,9 @@ class EntitiesPlayerData:
 		var chunk_changed : bool = false
 		var loaded_chunks : Array
 		var loaded_entities : PackedInt32Array
-		var last_update_time # if current time - last_update_time > 10, Observer data will be removed
 		var chunks_cache : Array
 		func _to_string() -> String:
-			return '[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', chunk_changed, direction, old_direction, str(loaded_chunks), loaded_entities, last_update_time])
+			return '[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}]'.format([observer_entity_id, current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', chunk_changed, direction, old_direction, str(loaded_chunks), loaded_entities])
 		func clear_chunks_cache():
 			chunks_cache.clear()
 	
@@ -299,6 +299,7 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 func send_entities_to_guests():
 	if current_update_frame == 1:
 		for peer_id in players:
+			var player_data := players[peer_id]
 			for observer_data : EntitiesPlayerData.ObserverData in players[peer_id].observers_data.values():
 				if not observer_data.chunk_changed:
 					observer_data.chunk_before_changes = observer_data.old_chunk
@@ -319,6 +320,15 @@ func send_entities_to_guests():
 				
 				if _clear_chunks_cache:
 					observer_data.clear_chunks_cache()
+					
+				var chunks = _ChunksCalculator.chunks_in_front_of_player(
+					observer_data.current_chunk, 
+					observer_data.direction,
+					[0, player_data.drawing_distance],
+					player_data.chunks_per_second,
+					[]
+				)
+				print(chunks[0])
 				print(observer_data)
 				
 			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))

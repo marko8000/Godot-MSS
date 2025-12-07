@@ -4,7 +4,7 @@ extends Node
 class_name MultiplayerLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.give_current_exec(self).giveo('level')
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _AuthLogic := _SG2Core._AuthLogic
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic

@@ -1,0 +1,191 @@
+[gd_scene load_steps=5 format=3 uid="uid://spgwe2ooiv28"]
+
+[ext_resource type="Script" uid="uid://c6uegurw67chh" path="res://exec/sg2vin17_exec/sg2vin17_exec.gd" id="1_tqx21"]
+[ext_resource type="Theme" uid="uid://dy856cw5iovk6" path="res://levels/SG2Core/x_res/x_fonts/sg2_pixel.tres" id="2_b7tt6"]
+[ext_resource type="Script" uid="uid://dqj36fslwkrf1" path="res://exec/sg2vin17_exec/debug_exec/debug_exec.gd" id="3_1fpld"]
+[ext_resource type="Script" uid="uid://vcw23ke10nsk" path="res://exec/sg2vin17_exec/command_line/command_line.gd" id="4_5ycpr"]
+
+[node name="SG2Vin17Exec" type="Node"]
+script = ExtResource("1_tqx21")
+metadata/_custom_type_script = "uid://bsnaioysv64bv"
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_b7tt6")
+
+[node name="Debug" type="MarginContainer" parent="Control"]
+z_index = 4096
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_1fpld")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Debug"]
+layout_mode = 2
+
+[node name="exec_and_level_debug" type="VBoxContainer" parent="Control/Debug/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="name" type="Label" parent="Control/Debug/HBoxContainer/exec_and_level_debug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Exec and Level Debug"
+
+[node name="current_exec_name" type="VBoxContainer" parent="Control/Debug/HBoxContainer/exec_and_level_debug"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_exec_name"]
+layout_mode = 2
+text = "current exec name:"
+
+[node name="Value" type="RichTextLabel" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_exec_name"]
+layout_mode = 2
+size_flags_horizontal = 3
+fit_content = true
+
+[node name="current_level_name" type="VBoxContainer" parent="Control/Debug/HBoxContainer/exec_and_level_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_level_name"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "current level name:"
+
+[node name="Value" type="RichTextLabel" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_level_name"]
+layout_mode = 2
+size_flags_horizontal = 3
+fit_content = true
+
+[node name="current_peer_role" type="HBoxContainer" parent="Control/Debug/HBoxContainer/exec_and_level_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_peer_role"]
+layout_mode = 2
+text = "current peer role:"
+
+[node name="Value" type="RichTextLabel" parent="Control/Debug/HBoxContainer/exec_and_level_debug/current_peer_role"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="device_and_engine_debug" type="VBoxContainer" parent="Control/Debug/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="name" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Device and Engine Debug"
+
+[node name="godot_version" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/godot_version"]
+layout_mode = 2
+text = "Godot Engine "
+
+[node name="Value" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/godot_version"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="current_os" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/current_os"]
+layout_mode = 2
+text = "current OS:"
+
+[node name="Value" type="RichTextLabel" parent="Control/Debug/HBoxContainer/device_and_engine_debug/current_os"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="processor_info" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/processor_info"]
+layout_mode = 2
+text = "CPU: "
+
+[node name="Value" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/processor_info"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="videoadapter_info" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/videoadapter_info"]
+layout_mode = 2
+text = "Video adapter: "
+
+[node name="Value" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/videoadapter_info"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="fps_counter" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/fps_counter"]
+layout_mode = 2
+text = "FPS: "
+
+[node name="Value" type="RichTextLabel" parent="Control/Debug/HBoxContainer/device_and_engine_debug/fps_counter"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="static_memory_usage" type="HBoxContainer" parent="Control/Debug/HBoxContainer/device_and_engine_debug"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/static_memory_usage"]
+layout_mode = 2
+text = "Static memory usage: "
+
+[node name="Value" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/static_memory_usage"]
+layout_mode = 2
+
+[node name="Measure" type="Label" parent="Control/Debug/HBoxContainer/device_and_engine_debug/static_memory_usage"]
+layout_mode = 2
+text = "MiB"
+
+[node name="CommandLine" type="MarginContainer" parent="Control"]
+visible = false
+z_index = 4096
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_5ycpr")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CommandLine"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/CommandLine/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+focus_mode = 2
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
+[node name="LineEdit" type="LineEdit" parent="Control/CommandLine/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+placeholder_text = "command"
