@@ -16,6 +16,9 @@ class_name EntityPropertiesSeed
 
 
 func _ready():
+	if _EntitiesLogic == null:
+		return
+		
 	if not _EntitiesLogic.entities_can_start_work:
 		await _EntitiesLogic._entities_start_work
 	

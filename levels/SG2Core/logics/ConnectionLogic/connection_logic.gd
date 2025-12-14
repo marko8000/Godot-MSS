@@ -16,6 +16,10 @@ signal connection_peer_changed(new_peer)
 var my_peer_id
 	
 	
+func _process(delta: float) -> void:
+	Debug.dstate('peer_role', peer_role)
+	
+	
 func host_create_server():
 	peer_role = 'host'
 	if connection_mode is ENetMultiplayerConnectionMode:

@@ -9,7 +9,7 @@ extends MarginContainer
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	output('Command Line Log')
-	Debug.doutput.connect(_debug_output)
+	Debug.on_doutput.connect(_debug_output)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

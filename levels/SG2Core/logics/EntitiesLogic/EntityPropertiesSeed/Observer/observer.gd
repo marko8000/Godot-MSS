@@ -7,6 +7,20 @@ var entity_id : int
 var player_type : String # peer or reg
 var id : int
 
+var current_chunk
+var old_chunk
+var chunk_before_changes
+var chunk_changed : bool = false
+var direction
+var old_direction
+var loaded_chunks : Array
+var loaded_entities : PackedInt32Array
+var chunks_cache : Array
+func _to_string() -> String:
+	return '[{0}, {1}, {2}, {3}, {4}, {5}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', direction, str(loaded_chunks), loaded_entities])
+func clear_chunks_cache():
+	chunks_cache.clear()
+
 var _SG2Core : SG2Core
 var _EntitiesLogic : EntitiesLogic
 var _MultiplayerLogic : MultiplayerLogic
@@ -75,25 +89,26 @@ func update_player_data():
 			get_parent().queue_free()
 	elif player_type == 'reg':
 		_player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
-	if not _player_data.observers_data.has(entity_id):
-		_player_data.observers_data[entity_id] = EntitiesLogic.EntitiesPlayerData.ObserverData.new()
-	var _observer_data : EntitiesLogic.EntitiesPlayerData.ObserverData = _player_data.observers_data[entity_id]
+	if not _player_data.observers.has(self):
+		_player_data.observers.append(self)
+		
 	var _current_chunk = _ChunksCalculator.position_to_chunk(get_parent().global_position)
 	var _direction = _ChunksCalculator.rotation_to_direction(get_parent().global_rotation)
-	var _old_chunk = _observer_data.current_chunk
+	var _old_chunk = current_chunk
 	if _old_chunk == null:
 		_old_chunk = _current_chunk
-	var _old_direction = _observer_data.direction
+	if chunk_before_changes == null:
+		chunk_before_changes = _current_chunk
+	var _old_direction = direction
 	if _old_direction == null:
 		_old_direction = _direction
 	
-	_observer_data.observer_entity_id = entity_id
-	_observer_data.current_chunk = _current_chunk
-	_observer_data.direction = _direction
+	current_chunk = _current_chunk
+	direction = _direction
 	if _current_chunk != _old_chunk:
-		_observer_data.old_chunk = _old_chunk
+		old_chunk = _old_chunk
 	if _direction != _old_direction:
-		_observer_data.old_direction = _old_direction
+		old_direction = _old_direction
 	
 	
 	

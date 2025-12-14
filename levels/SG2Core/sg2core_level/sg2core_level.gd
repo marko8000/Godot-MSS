@@ -3,11 +3,7 @@ extends Node
 class_name SG2Core
 
 
-# Strongly recomended to use one game instance for one server.
-
-
-var is_level
-
+@export var server_name : String = 'SG2CoreServer'
 @warning_ignore("unused_private_class_variable")
 @export var _ConnectionLogic : ConnectionLogic
 @warning_ignore("unused_private_class_variable")

@@ -10,8 +10,12 @@ var exec_debug_labels : Dictionary[String, Array]
 var static_exec_debug_labels : Array[String]
 var engine_debug_labels : Dictionary[String, Array]
 var static_engine_debug_labels : Array[String]
+	
 
-
+func _ready() -> void:
+	Debug.on_dstate.connect(_debug_state)
+	
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	manage_debug_labels()
@@ -41,11 +45,13 @@ func manage_debug_labels():
 	
 	for _debug_labels_storage in _debug_labels_storages:
 		for _debug_label_name in _debug_labels_storages[_debug_labels_storage][0]:
-			if not _debug_labels_storage.has_node(_debug_label_name):
+			var _debug_label_node_name : String = _debug_label_name.replace(".", "").replace(":", "").replace("@", "").replace("/", "").replace("\"", "").replace("%", "")
+			if not _debug_labels_storage.has_node(_debug_label_node_name):
 				var debug_label_instance = debug_label_file.instantiate()
-				debug_label_instance.name = _debug_label_name
+				debug_label_instance.name = _debug_label_node_name
+				debug_label_instance.label_name = _debug_label_name
 				_debug_labels_storage.add_child(debug_label_instance)
-			_debug_labels_storage.get_node(_debug_label_name).set_value(_debug_labels_storages[_debug_labels_storage][0][_debug_label_name][0])
+			_debug_labels_storage.get_node(_debug_label_node_name).set_value(_debug_labels_storages[_debug_labels_storage][0][_debug_label_name][0])
 		for child in _debug_labels_storage.get_children():
 			if not child.name in _debug_labels_storages[_debug_labels_storage][0]:
 				continue
@@ -64,3 +70,7 @@ func engine_debug(debug_label_name, value, is_static: bool = false):
 	engine_debug_labels[debug_label_name] = [value, Time.get_unix_time_from_system()]
 	if is_static:
 		static_engine_debug_labels.append(debug_label_name)
+
+
+func _debug_state(state : String, value):
+	exec_debug(state, value)
