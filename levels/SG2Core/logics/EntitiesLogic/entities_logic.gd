@@ -12,10 +12,14 @@ class_name EntitiesLogic
 @onready var _entities_storage := _SG2Core._entities_storage
 @onready var _ChunksCalculator := _SG2Core._ChunksCalculator
 
-@onready var general_entities_dir = _DirectoriesPathsDistributor.give_path('general_entities_dir')
-@onready var entities_data_file = _DirectoriesPathsDistributor.give_path('entities_data_file')
-@onready var shortcuts_entities_types : Dictionary[int, String] = load_shortcuts_entities_types()
-@onready var entities_types_shortcuts : Dictionary[String, int] = load_entities_types_shortcuts()
+@onready var entities_dir = _DirectoriesPathsDistributor.path('entities_dir')
+@onready var entities_data_dir = _DirectoriesPathsDistributor.path('entities_data_dir')
+@onready var entities_global_file = _DirectoriesPathsDistributor.path('entities_global_file')
+
+@onready var entities_global = load_entities_global()
+@onready var shortcuts_entities_types : Dictionary[int, String]
+@onready var entities_types_shortcuts : Dictionary[String, int]
+@onready var last_used_entity_id : int
 @onready var entities_resources : Dictionary[int, Resource] = load_entities_resources()
 
 var entities_can_start_work : bool = false
@@ -32,7 +36,6 @@ var chunks_users_num : Dictionary[Variant, int] # if number of users is equal to
 var entities_property_path_property_array_num : Dictionary[int, Dictionary] # {entity_type: {value_path: values_array_num}}
 var entities_property_array_num_property_path : Dictionary[int, Array] # {entity_type: [value_path, ...]}
 var entities_empty_properties_array : Dictionary[int, Array]
-var last_used_entity_id : int = 0
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
@@ -55,8 +58,6 @@ func _ready() -> void:
 func start():
 	emit_signal('_entities_start_work')
 	entities_can_start_work = true
-	if _ConnectionLogic.peer_role == 'host':
-		load_entities_data()
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -125,7 +126,7 @@ class EntitiesPlayerData:
 		drawing_distance = _drawing_distance
 		chunks_per_second = _chunks_per_second
 	func _to_string() -> String:
-		return '{drawing_distance: {0}, chunks_per_second: {1}, observers_data: {2}}'.format([drawing_distance, chunks_per_second, observers])
+		return '{drawing_distance: {dd}, chunks_per_second: {cps}, observers: {od}}'.format({'dd': drawing_distance, 'cps': chunks_per_second, 'od': observers})
 	
 	
 func get_new_entity_id():
@@ -133,16 +134,32 @@ func get_new_entity_id():
 	return last_used_entity_id - 1
 	
 
-func load_shortcuts_entities_types():
+func load_entities_global():
+	var file = FileAccess.open(entities_global_file, FileAccess.READ)
+	if file != null:
+		var entities_data = JSON.parse_string(file.get_as_text())
+		
+		last_used_entity_id = entities_data.last_used_entity_id
+		entities_types_shortcuts = entities_data.entities_types_shortcuts
+		for entity_type in entities_data.entities_types_shortcuts.keys():
+			var shortcut = entities_data.entities_types_shortcuts[entity_type]
+			shortcuts_entities_types[shortcut] = entity_type
+	
+
+func get_shortcuts_entities_types():
 	var dict : Dictionary[int, String]
 	return dict
 	
 	
-func load_entities_types_shortcuts():
+func get_entities_types_shortcuts():
 	var dict : Dictionary[String, int]
 	return dict
 	
 	
+func get_last_used_entity_id():
+	pass
+		
+		
 func load_entities_resources():
 	var resources : Dictionary[int, Resource]
 	var entities_without_EntityPropertiesSeed : PackedStringArray
@@ -180,16 +197,7 @@ func get_parent_entity(node):
 		if len(current_node.name) >= 2 and str(current_node.name[0]) == 'e' and get_parent().name.substr(1).is_valid_int():
 			break
 	return current_node
-		
-
-func load_entities_data():
-	var file = FileAccess.open(entities_data_file, FileAccess.READ)
-	if file != null:
-		var entities_data = JSON.parse_string(file.get_as_text())
-		last_used_entity_id = entities_data.last_used_entity_id
-		entities_data.erase('last_used_entity_id')
-		#load_entities(entities_data.duplicate(true))
-		
+				
 		
 func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entities : Dictionary[Variant, PackedInt32Array]):
 	for chunk in _chunks_entities:
@@ -215,7 +223,7 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 	if not chunks_entities.has(chunk):
 		chunks_entities[chunk] = PackedInt32Array()
 	if not chunks_users_num.has(chunk):
-		chunks_users_num[chunk] = 1
+		load_chunk(chunk)
 	chunks_entities[chunk].append(entity_id)
 	entities_chunks[entity_id] = chunk
 	entities_spawn_data[entity_id] = EntitySpawnData(entity_type, entities_empty_properties_array[entity_type], _entities_storage.get_path_to(entity_node.get_parent()))
@@ -246,6 +254,9 @@ func track_entities():
 			deleted_entities.append(entity_id)
 			entities_spawn_data.erase(entity_id)
 			entities_update_data.erase(entity_id)
+			if entities_chunks.has(entity_id):
+				chunks_entities[entities_chunks[entity_id]].erase(entity_id)
+				entities_chunks.erase(entity_id)
 			for tracker in trackers:
 				tracker.stop_tracking(entity_id)
 			continue
@@ -254,7 +265,7 @@ func track_entities():
 			if not chunks_entities.has(new_chunk):
 				chunks_entities[new_chunk] = PackedInt32Array()
 			if not chunks_users_num.has(new_chunk):
-				chunks_users_num[new_chunk] = 0
+				load_chunk(new_chunk)
 			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
 			chunks_entities[new_chunk].append(entity_id)
 			entities_chunks[entity_id] = new_chunk
@@ -295,6 +306,7 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 func host_manage_chunks_users():
 	for chunk in chunks_users_num:
 		if chunks_users_num[chunk] <= 0:
+			print('remove')
 			unload_and_save_chunk(chunk)
 		
 		
@@ -303,7 +315,9 @@ func save_chunk(chunk):
 	
 	
 func load_chunk(chunk):
-	pass
+	
+	if not chunks_users_num.has(chunk):
+		chunks_users_num[chunk] = 0
 	
 	
 func unload_and_save_chunk(chunk):
@@ -319,38 +333,10 @@ func send_entities_to_guests():
 	if current_update_frame == 1:
 		for peer_id in players:
 			var player_data := players[peer_id]
+			print(player_data)
 			player_data.observers = player_data.observers.filter(func(_o): return _o != null)
 			for observer : Observer in player_data.observers:
-				if not observer.chunk_changed:
-					observer.chunk_before_changes = observer.current_chunk
-				if observer.current_chunk != observer.old_chunk:
-					observer.chunk_changed = true
-				var _direction_changed : bool
-				if observer.direction != observer.old_direction:
-					observer.old_direction = observer.direction
-					_direction_changed = true
-				
-				var _clear_chunks_cache : bool
-				if _direction_changed:
-					_direction_changed = false
-					_clear_chunks_cache = true
-				elif _ChunksCalculator.dist(observer.chunk_before_changes, observer.current_chunk) > 2:
-					_clear_chunks_cache = true
-					observer.chunk_changed = false
-				
-				if _clear_chunks_cache:
-					observer.clear_chunks_cache()
-					
-				var chunks = _ChunksCalculator.chunks_in_front_of_player(
-					observer.current_chunk, 
-					observer.direction,
-					[0, player_data.drawing_distance],
-					player_data.chunks_per_second,
-					[]
-				)
-				print(chunks_entities)
-				#print(chunks[0])
-				#print(observer)
+				pass
 				
 			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
 		

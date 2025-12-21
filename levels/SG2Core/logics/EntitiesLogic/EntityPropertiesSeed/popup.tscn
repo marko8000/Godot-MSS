@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsxko85vrrawt"]
+
+[ext_resource type="Script" uid="uid://ckqjc6krp5nya" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/entity_properties_seed_popup.gd" id="1_q67eu"]
+
+[node name="EntityPropertiesSeedPopup" type="Window"]
+oversampling_override = 1.0
+title = "Warning"
+initial_position = 2
+size = Vector2i(400, 81)
+popup_window = true
+minimize_disabled = true
+maximize_disabled = true
+script = ExtResource("1_q67eu")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.10980392, 0.1254902, 0.15686275, 1)
+
+[node name="Pages" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NodeRename" type="VBoxContainer" parent="Pages"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 58.0
+grow_horizontal = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Pages/NodeRename"]
+layout_mode = 2
+text = "You change entity type name only by renaming entity folder in editor"
+fit_content = true
+
+[node name="NavigateButton" type="Button" parent="Pages/NodeRename"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Navigate to entity folder"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="Pages/NodeRename/NavigateButton" to="." method="_on_navigate_button_pressed"]

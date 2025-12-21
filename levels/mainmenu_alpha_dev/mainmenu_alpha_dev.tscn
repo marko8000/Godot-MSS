@@ -1,9 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://b5uekkwcq0r5x"]
+[gd_scene load_steps=14 format=3 uid="uid://b5uekkwcq0r5x"]
 
 [ext_resource type="Theme" uid="uid://dy856cw5iovk6" path="res://levels/SG2Core/x_res/x_fonts/sg2_pixel.tres" id="1_5wuua"]
 [ext_resource type="Script" uid="uid://dhe8nl27v1v3m" path="res://levels/mainmenu_alpha_dev/mainmenu_alpha_dev.gd" id="2_2coch"]
 [ext_resource type="Script" uid="uid://bscaxt4mejjgc" path="res://levels/mainmenu_alpha_dev/game_content_page.gd" id="3_2l15w"]
-[ext_resource type="Script" uid="uid://b1ask1w854ncf" path="res://levels/mainmenu_alpha_dev/servers_page.gd" id="6_5jy2i"]
 [ext_resource type="Texture2D" uid="uid://bn2452e1dr8rp" path="res://levels/SG2Core/x_res/x_images/vin17s_games_logo.png" id="6_rhdnv"]
 [ext_resource type="Texture2D" uid="uid://np5dxnuue8p0" path="res://levels/SG2Core/x_res/x_images/sg_logo.svg" id="6_wumac"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="7_5jy2i"]
@@ -152,81 +151,6 @@ offset_right = 27.0
 offset_bottom = 39.0
 text = "<"
 
-[node name="ServersPage" type="Panel" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("6_5jy2i")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="ServersPage"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Label" type="Label" parent="ServersPage/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Servers"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="ServersPage/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="ServersPage/VBoxContainer/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Back" type="Button" parent="ServersPage"]
-layout_mode = 2
-offset_right = 27.0
-offset_bottom = 39.0
-text = "<"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="ServersPage"]
-visible = false
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -40.0
-offset_right = 20.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="NewNameLineEdit" type="LineEdit" parent="ServersPage/HBoxContainer"]
-custom_minimum_size = Vector2(350, 0)
-layout_mode = 2
-placeholder_text = "New server name"
-
-[node name="NewAddressLineEdit" type="LineEdit" parent="ServersPage/HBoxContainer"]
-custom_minimum_size = Vector2(350, 0)
-layout_mode = 2
-placeholder_text = "Address"
-
-[node name="Add" type="Button" parent="ServersPage"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -31.0
-offset_top = -39.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "+"
-
 [node name="Node3D" type="Node3D" parent="."]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Node3D"]
@@ -269,9 +193,5 @@ autostart = true
 [connection signal="pressed" from="MainPage/VBoxContainer/Servers" to="." method="_on_servers_pressed"]
 [connection signal="pressed" from="MainPage/VBoxContainer/Levels" to="." method="_on_levels_pressed"]
 [connection signal="pressed" from="LevelsPage/Back" to="LevelsPage" method="_on_back_pressed"]
-[connection signal="pressed" from="ServersPage/Back" to="ServersPage" method="_on_back_pressed"]
-[connection signal="text_submitted" from="ServersPage/HBoxContainer/NewNameLineEdit" to="ServersPage" method="_on_new_name_line_edit_text_submitted"]
-[connection signal="text_submitted" from="ServersPage/HBoxContainer/NewAddressLineEdit" to="ServersPage" method="_on_new_address_line_edit_text_submitted"]
-[connection signal="pressed" from="ServersPage/Add" to="ServersPage" method="_on_add_pressed"]
 [connection signal="timeout" from="Node3D/Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="Node3D/Timer2" to="." method="_on_timer_2_timeout"]

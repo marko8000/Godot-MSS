@@ -4,7 +4,8 @@ extends Node
 class_name DirectoriesPathsDistributor
 
 
-var paths : Dictionary
+var paths : Dictionary # every file has "_file"
+					   # every directory has "_dir"
 
 
 func paths_assignment():
@@ -12,19 +13,25 @@ func paths_assignment():
 	var _SG2Core : SG2Core = _SG2Exec.get_current_level()
 	var _ConnectionLogic := _SG2Core._ConnectionLogic
 	
-	paths.general_entities_dir = 'res://entities'
-	paths.level_dir = _SG2Exec.current_level_dir_path if scene_file_path.get_slice('/', 3) != 'SG2Core' else 'res://levels/SG2Core'
-	paths.logics_dir = FilesManager.create_path([paths.level_dir, 'logics'])
+	paths.entities_dir = 'res://entities'
+	#paths.level_dir = _SG2Exec.current_level_dir_path if scene_file_path.get_slice('/', 3) != 'SG2Core' else 'res://levels/SG2Core'
+	#paths.logics_dir = FilesManager.create_path([paths.level_dir, 'logics'])
 
-	paths.ServersData = 'user://ServersData'
-	paths.CurrentServerData = FilesManager.create_path([paths.ServersData, _SG2Core.server_name])
+	paths.ServersData_dir = 'user://ServersData'
+	paths.CurrentServerData_dir = FilesManager.create_path([paths.ServersData_dir, _SG2Core.server_name])
 	
-	paths.entities_data_file = FilesManager.create_path([paths.CurrentServerData, 'entities_data.json'])
-	paths.users_auth_database_file = FilesManager.create_path([paths.HostServerData, 'users_auth.db'])
-	paths.auth_token_file = FilesManager.create_path([paths.HostServerData, 'auth_token'])
+	paths.entities_data_dir = FilesManager.create_path([paths.CurrentServerData_dir, 'entities_data'])
+	paths.entities_chunks_dir = FilesManager.create_path([paths.entities_data_dir, 'chunks'])
+	paths.entities_global_file = FilesManager.create_path([paths.entities_data_dir, 'entities_global.json'])
+	#paths.users_auth_database_file = FilesManager.create_path([paths.HostServerData, 'users_auth.db'])
+	#paths.auth_token_file = FilesManager.create_path([paths.HostServerData, 'auth_token'])
 	
-	paths.PlayerInfo = 'user://PlayerInfo'
-	paths.player_info_file = FilesManager.create_path([paths.PlayerInfo, 'player_info.txt'])
+	#paths.PlayerInfo_dir = 'user://PlayerInfo'
+	#paths.player_info_file = FilesManager.create_path([paths.PlayerInfo_dir, 'player_info.txt'])
+	
+	for _path in paths:
+		if "_dir" in _path:
+			DirAccess.make_dir_absolute(paths[_path])
 	
 
 func path(path_name):

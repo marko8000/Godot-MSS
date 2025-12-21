@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://grjlfpod5ty7"]
 
-[ext_resource type="Script" uid="uid://cg7y17kk3la4a" path="res://mainmenu_alpha_dev_control.gd" id="1_dfaw5"]
+[ext_resource type="Script" uid="uid://cg7y17kk3la4a" path="res://levels/mainmenu_alpha_dev/mainmenu_alpha_dev_control.gd" id="1_dfaw5"]
 
 [node name="Mainmenu Alpha Dev Control" type="ColorRect"]
 anchors_preset = 15

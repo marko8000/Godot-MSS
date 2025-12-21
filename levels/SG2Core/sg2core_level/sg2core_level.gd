@@ -1,4 +1,5 @@
 @icon('res://levels/SG2Core/x_res/x_images/level_icon.png')
+@tool
 extends Node
 class_name SG2Core
 
@@ -27,3 +28,9 @@ class_name SG2Core
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
+	
+
+func _process(delta: float) -> void:
+	for symbol in '.:@/\"%':
+		if server_name.find(symbol) != -1:
+			server_name = server_name.erase(server_name.find(symbol))

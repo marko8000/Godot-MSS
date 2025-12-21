@@ -13,10 +13,12 @@ func _ready() -> void:
 	
 	
 func refresh():
-	DirAccess.make_dir_absolute('user://ServersDataSaves')
+	if true:
+		return
+	print(0)
 	for child in $VBoxContainer/ScrollContainer/VBoxContainer.get_children():
 		child.queue_free()
-	for server_name in DirAccess.get_directories_at('user://ServersDataSaves'):
+	for server_name in DirAccess.get_directories_at('user://ServersData'):
 		var server_button_instance = server_button_file.instantiate()
 		server_button_instance.server_ip = str(FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'ip')) if FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'ip') != null else 'localhost'
 		server_button_instance.server_port = int(FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'port')) if FilesManager.give_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/'+'connection_settings.txt', 'port') != null else 17172

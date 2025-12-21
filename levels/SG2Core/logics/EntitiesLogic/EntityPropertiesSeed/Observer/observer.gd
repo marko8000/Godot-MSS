@@ -17,7 +17,7 @@ var loaded_chunks : Array
 var loaded_entities : PackedInt32Array
 var chunks_cache : Array
 func _to_string() -> String:
-	return '[{0}, {1}, {2}, {3}, {4}, {5}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', direction, str(loaded_chunks), loaded_entities])
+	return '[{0}, {1}, {2}, {3}, {4}, {5}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', direction, str(len(loaded_chunks)), len(loaded_entities)])
 func clear_chunks_cache():
 	chunks_cache.clear()
 
@@ -109,6 +109,45 @@ func update_player_data():
 		old_chunk = _old_chunk
 	if _direction != _old_direction:
 		old_direction = _old_direction
+		
+	
+	if not chunk_changed:
+		chunk_before_changes = current_chunk
+	if current_chunk != old_chunk:
+		chunk_changed = true
+	var _direction_changed : bool
+	if direction != old_direction:
+		old_direction = direction
+		_direction_changed = true
+	
+	var _clear_chunks_cache : bool
+	if _direction_changed:
+		_direction_changed = false
+		_clear_chunks_cache = true
+	elif _ChunksCalculator.dist(chunk_before_changes, current_chunk) > 2:
+		_clear_chunks_cache = true
+		chunk_changed = false
+	
+	if _clear_chunks_cache:
+		clear_chunks_cache()
+		
+	var chunks = _ChunksCalculator.chunks_in_front_of_player(
+		current_chunk, 
+		direction,
+		[0, _player_data.drawing_distance],
+		_player_data.chunks_per_second,
+		[]
+	)
+	for chunk in chunks[0]:
+		if not loaded_chunks.has(chunk):
+			loaded_chunks.append(chunk)
+		if not _EntitiesLogic.chunks_users_num.has(chunk):
+			_EntitiesLogic.chunks_users_num[chunk] = 0
+		_EntitiesLogic.chunks_users_num[chunk] += 1
+		
+		
+func get_data_to_send():
+	pass
 	
 	
 	

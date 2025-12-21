@@ -10,9 +10,9 @@ class_name AuthLogic
 @onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
 @onready var AuthControl = $AuthControl
 
-@onready var auth_token_file = _DirectoriesPathsDistributor.path('auth_token_file')
-@onready var users_auth_database = _DirectoriesPathsDistributor.path('users_auth_database_file')
-@onready var player_info_file = _DirectoriesPathsDistributor.path('player_info_file')
+#@onready var auth_token_file = _DirectoriesPathsDistributor.path('auth_token_file')
+#@onready var users_auth_database = _DirectoriesPathsDistributor.path('users_auth_database_file')
+#@onready var player_info_file = _DirectoriesPathsDistributor.path('player_info_file')
 
 @onready var db = get_parent()
 
