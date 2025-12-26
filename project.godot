@@ -19,7 +19,7 @@ config/icon="uid://cwymkxeduqt3u"
 
 [autoload]
 
-FilesManager="*res://globals/FilesManager/files_manager.gd"
+File2ool="*res://globals/FilesManager/files_manager.gd"
 ExecManager="*res://globals/ExecManager/exec_manager.gd"
 Debug="*res://globals/Debug/debug.gd"
 ZipArchiver="*res://globals/FilesManager/ZipArchiver/zip_archiver.gd"

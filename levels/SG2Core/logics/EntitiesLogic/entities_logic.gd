@@ -17,9 +17,9 @@ class_name EntitiesLogic
 @onready var entities_global_file = _DirectoriesPathsDistributor.path('entities_global_file')
 
 @onready var entities_global = load_entities_global()
-@onready var shortcuts_entities_types : Dictionary[int, String]
-@onready var entities_types_shortcuts : Dictionary[String, int]
-@onready var last_used_entity_id : int
+@onready var entities_types_shortcuts : Dictionary[String, int] = get_entities_types_shortcuts()
+@onready var shortcuts_entities_types : Dictionary[int, String] = get_shortcuts_entities_types()
+@onready var last_used_entity_id : int = 0 if !entities_global.has('last_used_entity_id') else entities_global.last_used_entity_id
 @onready var entities_resources : Dictionary[int, Resource] = load_entities_resources()
 
 var entities_can_start_work : bool = false
@@ -137,38 +137,41 @@ func get_new_entity_id():
 func load_entities_global():
 	var file = FileAccess.open(entities_global_file, FileAccess.READ)
 	if file != null:
-		var entities_data = JSON.parse_string(file.get_as_text())
+		var _entities_data = JSON.parse_string(file.get_as_text())
+		file.close()
+		return _entities_data
+	else:
+		file.close()
+		push_warning('entities_global_file not found')
+		return {}
 		
-		last_used_entity_id = entities_data.last_used_entity_id
-		entities_types_shortcuts = entities_data.entities_types_shortcuts
-		for entity_type in entities_data.entities_types_shortcuts.keys():
-			var shortcut = entities_data.entities_types_shortcuts[entity_type]
-			shortcuts_entities_types[shortcut] = entity_type
-	
 
-func get_shortcuts_entities_types():
-	var dict : Dictionary[int, String]
-	return dict
-	
-	
 func get_entities_types_shortcuts():
-	var dict : Dictionary[String, int]
-	return dict
+	var _shortcuts : Dictionary[String, int]
+	if entities_global.has('entities_types_shortcuts'):
+		_shortcuts = entities_global.entities_types_shortcuts
+	return _shortcuts
 	
 	
-func get_last_used_entity_id():
-	pass
+func get_shortcuts_entities_types():
+	var _shortcuts : Dictionary[int, String]
+	if entities_global.has('entities_types_shortcuts'):
+		for entity_type in entities_global.entities_types_shortcuts.keys():
+			var shortcut = entities_global.entities_types_shortcuts[entity_type]
+			shortcuts_entities_types[shortcut] = entity_type
+	return _shortcuts
 		
 		
 func load_entities_resources():
 	var resources : Dictionary[int, Resource]
+	var entities_file_excepted : PackedStringArray
 	var entities_without_EntityPropertiesSeed : PackedStringArray
 	for entity_type in DirAccess.get_directories_at('res://entities/'):
 		if not entities_types_shortcuts.has(entity_type):
 			shortcuts_entities_types[len(shortcuts_entities_types)] = entity_type
 			entities_types_shortcuts[entity_type] = len(shortcuts_entities_types)-1
-		if FilesManager.give_value_from_file_readlines('res://entities/'+entity_type+'/entity_info.txt', 'entity_scene_file') != null:
-			resources[entities_types_shortcuts[entity_type]] = load("res://entities/"+entity_type+"/"+str(FilesManager.give_value_from_file_readlines('res://entities/'+entity_type+'/entity_info.txt', 'entity_scene_file')))
+		if FileAccess.file_exists('res://entities/'+entity_type+'/'+entity_type+'.tscn'):
+			resources[entities_types_shortcuts[entity_type]] = load("res://entities/"+entity_type+"/"+entity_type+'.tscn')
 			var entity_instance = resources[entities_types_shortcuts[entity_type]].duplicate(true).instantiate()
 			if not entity_instance.has_node('EntityPropertiesSeed'):
 				entities_without_EntityPropertiesSeed.append(entity_type)
@@ -182,12 +185,23 @@ func load_entities_resources():
 					entities_property_path_property_array_num[entities_types_shortcuts[entity_type]][entity_instance.get_node('EntityPropertiesSeed').tracked_properties[property_num].property_path] = property_num
 					entities_property_array_num_property_path[entities_types_shortcuts[entity_type]].append(entity_instance.get_node('EntityPropertiesSeed').tracked_properties[property_num].property_path)
 					entities_empty_properties_array[entities_types_shortcuts[entity_type]].append(null)
+		else:
+			entities_file_excepted.append(entity_type)
+			
+	# Pushing and asserting errors
 	assert(entities_without_EntityPropertiesSeed.size() == 0, 'Some entities don\'t have EntityPropertiesSeed as child: '+str(entities_without_EntityPropertiesSeed))
+	for entity_type in entities_file_excepted:
+		push_error('File excepted to load entity "'+entity_type+'": '+'res://entities/'+entity_type+'/'+entity_type+'.tscn')
+	
 	return resources
 	
 	
 func save_entities_data():
-	pass
+	var _eglobal_file = FileAccess.open(entities_global_file, FileAccess.WRITE)
+	_eglobal_file.store_var(entities_global)
+	_eglobal_file.close()
+	for chunk in chunks_entities:
+		save_chunk(chunk)
 		
 		
 func get_parent_entity(node):
@@ -207,6 +221,8 @@ func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entitie
 
 func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var array : Array
+	if not entities_property_array_num_property_path.has(file_data[0]):
+		return
 	for i in range(len(entities_property_array_num_property_path[file_data[0]])):
 		if file_data[1].has(entities_property_array_num_property_path[file_data[0]][i]):
 			array.append(file_data[1][entities_property_array_num_property_path[file_data[0]][i]])
@@ -280,7 +296,7 @@ func track_entities():
 	
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var entity_type = spawn_data[0]
-	if not entity_type in entities_resources:
+	if not entities_resources.has(entity_type):
 		return
 	var entity_instance = entities_resources[entity_type].instantiate()
 	entity_instance.name = 'e'+str(entity_id)
