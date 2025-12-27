@@ -11,7 +11,14 @@ class_name EntityPropertiesSeed
 
 @export var tracked_properties : Array[AbstractSync]
 @export var guest_presets : Dictionary[String, Variant]
-## nonchunk entitites are visible everywhere
+@export var chunk_type : ChunkType = ChunkType.Pixel
+##TODO: MOVE TO EntitiesLogic
+enum ChunkType {
+	## 2 dimensional chunk
+	Pixel,
+	## 3 dimensional chunk
+	Voxel}
+## nonchunk entities are visible everywhere
 @export var nonchunk : bool = false
 
 
@@ -85,6 +92,6 @@ func apply_guest_presets():
 		Dispenser.set_resource(get_parent(), property_path, guest_presets[property_path])
 	
 	
-func start_tracking(entity_id):
+func start_tracking(entity_id : int):
 	@warning_ignore("incompatible_ternary")
 	_EntitiesLogic.start_tracking(entity_id, get_parent(), tracked_properties, null if nonchunk else _EntitiesLogic.FROM_E_POS)

@@ -22,7 +22,7 @@ var entity_type : String
 var _showed_entities := false
 func _on_navigate_button_pressed() -> void:
 	if not _showed_entities:
-		FilesManager.file_system_dock_navigate_to('res://entities/'+entity_type)
+		File2ool.file_system_dock_navigate_to('res://entities/'+entity_type)
 	else:
-		FilesManager.file_system_dock_navigate_to('res://entities')
+		File2ool.file_system_dock_navigate_to('res://entities')
 	_showed_entities = !_showed_entities

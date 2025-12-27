@@ -18,7 +18,7 @@ func refresh():
 	for level_name in DirAccess.get_directories_at('res://levels'):
 		var level_control_instance = level_control_file.instantiate()
 		level_control_instance.level_name = level_name
-		level_control_instance.developer = str(FilesManager.give_value_from_file_readlines('res://levels/'+level_name+'/level_info.txt', 'developer'))
+		level_control_instance.developer = str(File2ool.give_value_from_file_readlines('res://levels/'+level_name+'/level_info.txt', 'developer'))
 		$ScrollContainer/VBoxContainer.add_child(level_control_instance)
 			
 			

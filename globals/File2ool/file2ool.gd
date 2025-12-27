@@ -12,7 +12,7 @@ func _ready() -> void:
 	pass
 
 
-func create_path(components : Array, to_make_dir : bool = false):
+func path(components : Array, to_make_dir : bool = false):
 	var _path : String
 	for component in components:
 		_path += component + '/'
@@ -26,10 +26,9 @@ func make_dir(dir):
 	var _dir_splitted_to_base_and_dir = fix_dir_path(dir).split('://')
 	var _base = _dir_splitted_to_base_and_dir[0] + '://'
 	var _dir = _dir_splitted_to_base_and_dir[1]
-	
 	var _current_dir = _base
 	for folder in _dir.split('/'):
-		_current_dir = FilesManager.create_path([_current_dir, folder])
+		_current_dir = File2ool.create_path([_current_dir, folder])
 		DirAccess.make_dir_absolute(_current_dir)
 
 
@@ -99,62 +98,11 @@ func change_value_from_file_readlines(file_path:String, key:String, new_value):
 	file.close()
 	
 	
-#func give_content_of_json(file_dir):
-	#var _file = FileAccess.open(file_dir, FileAccess.READ)
-	#var _content = _file.get_var()
-	#return _content
-	
-	
-#func change_file_extension(file_path, new_extension):
-	#if get_file_extension(file_path) != null:
-		#var _changed_file_dir : String
-		#var _file_name_splitted = file_path.split('.')
-		#_file_name_splitted[-1] = new_extension
-		#for part in _file_name_splitted:
-			#if part != _file_name_splitted[-1]:
-				#_changed_file_dir += part + '.'
-			#else:
-				#_changed_file_dir += part
-		#DirAccess.rename_absolute(file_path, _changed_file_dir)
-		#return _changed_file_dir
-	#else:
-		#add_file_extension(file_path, new_extension)
-	
-
-#func get_dir_without_last_element(source):
-	#var _dir_splitted = fix_dir_path(source).split('/')
-	#_dir_splitted.remove_at(len(_dir_splitted)-1)
-	#return create_path(_dir_splitted)
-	#
-#func add_file_extension(file_path, new_extension):
-	#var _new_file_dir = file_path + '.' + new_extension
-	#DirAccess.rename_absolute(file_path, _new_file_dir)
-	#return _new_file_dir
-	
-
-#func is_file_have_extension(file_path):
-	#var _file_name = fix_dir_path(file_path).split('/')[-1]
-	#if len(_file_name.split('.')) > 1:
-		#var _file_name_after_point = _file_name.split('.')[-1]
-		#if not ' ' in _file_name_after_point:
-			#return true
-	#return false
-	
-	
-#func get_file_extension(file_path):
-	#if is_file_have_extension(file_path):
-		#var _file_name = fix_dir_path(file_path).split('/')[-1]
-		#var _file_name_last_point_part = _file_name.split('.')[-1]
-		#return _file_name_last_point_part
-	#else:
-		#return null
-		
-		
 func refresh_file_system() -> void:
 	var file_system = EditorInterface.get_resource_filesystem()
 	file_system.scan()
 	
 	
-func file_system_dock_navigate_to(path: String) -> void:
+func file_system_dock_navigate_to(_path: String) -> void:
 	var fs_dock = EditorInterface.get_file_system_dock()
-	fs_dock.navigate_to_path(path)
+	fs_dock.navigate_to_path(_path)

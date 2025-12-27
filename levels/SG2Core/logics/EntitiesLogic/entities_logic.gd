@@ -61,7 +61,7 @@ func start():
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(delta : float) -> void:
 	Debug.dstate('Entities / chunks', str(entities_chunks.size())+'e / '+str(chunks_entities.size())+'ch')
 	if _ConnectionLogic.peer_role == 'host':
 		await get_tree().process_frame
@@ -72,7 +72,8 @@ func _process(delta: float) -> void:
 			var chunks = _ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
 			for chunk in chunks[0]:
 				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.y)}))
-		
+	elif _ConnectionLogic.peer_role == 'guest':
+		track_entities()
 		
 func _connection_peer_changed(new_peer):
 	start()
@@ -141,7 +142,6 @@ func load_entities_global():
 		file.close()
 		return _entities_data
 	else:
-		file.close()
 		push_warning('entities_global_file not found')
 		return {}
 		
@@ -322,7 +322,7 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 func host_manage_chunks_users():
 	for chunk in chunks_users_num:
 		if chunks_users_num[chunk] <= 0:
-			print('remove')
+			print('remove', chunk)
 			unload_and_save_chunk(chunk)
 		
 		
@@ -339,6 +339,8 @@ func load_chunk(chunk):
 func unload_and_save_chunk(chunk):
 	save_chunk(chunk)
 	chunks_users_num.erase(chunk)
+	if not chunks_entities.has(chunk):
+		return
 	for entity_id in chunks_entities[chunk]:
 		_entities_storage.get_node(entities_spawn_data[entity_id][2]+'/e'+str(entity_id)).queue_free()
 		entities_chunks.erase(entity_id)
@@ -351,6 +353,9 @@ func send_entities_to_guests():
 			var player_data := players[peer_id]
 			print(player_data)
 			player_data.observers = player_data.observers.filter(func(_o): return _o != null)
+			var _entities_to_delete : Array[int]
+			var _entities_to_spawn : Array[int]
+			var _entities_to_update : Array[int]
 			for observer : Observer in player_data.observers:
 				pass
 				

@@ -50,7 +50,7 @@ func rotation_to_direction(rotation):
 				
 
 func dist(chunk1, chunk2):
-	if chunk1 is Vector2i or chunk1 is Vector3i or chunk1 is Vector4i:
+	if chunk1 is Vector2i or chunk1 is Vector3i:
 		return chunk1.distance_to(chunk2)
 	else:
 		return 0
@@ -117,6 +117,11 @@ func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [
 						chunks.append(player_chunk + right_crook + (right_side * (width_level/2-1)) + (player_direction * length))
 						chunks.append(player_chunk + left_crook + (left_side * (width_level/2-1)) + (player_direction * length))
 	return [chunks, new_cache]
+	
+	
+func visualize_сhunk(chunk):
+	if chunk is Vector2i:
+		pass
 
 
 func raise_if_wrong_chunk_type(chunk):

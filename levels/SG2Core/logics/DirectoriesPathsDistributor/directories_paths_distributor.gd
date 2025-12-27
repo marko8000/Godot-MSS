@@ -18,11 +18,11 @@ func paths_assignment():
 	#paths.logics_dir = FilesManager.create_path([paths.level_dir, 'logics'])
 
 	paths.ServersData_dir = 'user://ServersData'
-	paths.CurrentServerData_dir = FilesManager.create_path([paths.ServersData_dir, _SG2Core.server_name])
+	paths.CurrentServerData_dir = File2ool.path([paths.ServersData_dir, _SG2Core.server_name])
 	
-	paths.entities_data_dir = FilesManager.create_path([paths.CurrentServerData_dir, 'entities_data'])
-	paths.entities_chunks_dir = FilesManager.create_path([paths.entities_data_dir, 'chunks'])
-	paths.entities_global_file = FilesManager.create_path([paths.entities_data_dir, 'entities_global.json'])
+	paths.entities_data_dir = File2ool.path([paths.CurrentServerData_dir, 'entities_data'])
+	paths.entities_chunks_dir = File2ool.path([paths.entities_data_dir, 'chunks'])
+	paths.entities_global_file = File2ool.path([paths.entities_data_dir, 'entities_global.json'])
 	#paths.users_auth_database_file = FilesManager.create_path([paths.HostServerData, 'users_auth.db'])
 	#paths.auth_token_file = FilesManager.create_path([paths.HostServerData, 'auth_token'])
 	

@@ -21,12 +21,12 @@ func _process(delta: float) -> void:
 			if _operation_type == 'unpack':
 				var _res = operations[id].zip_reader.read_file(operations[id].list_of_archive_parts[operations[id].elements_iteration])
 				if len(_res) > 0: # is file
-					FilesManager.make_dir(FilesManager.get_dir_without_last_element(FilesManager.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]])))
-					var _file = FileAccess.open(FilesManager.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]]), FileAccess.WRITE)
+					File2ool.make_dir(File2ool.get_dir_without_last_element(File2ool.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]])))
+					var _file = FileAccess.open(File2ool.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]]), FileAccess.WRITE)
 					_file.store_buffer(_res)
 					_file.close()
 				else: # is dir
-					FilesManager.make_dir(FilesManager.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]]))
+					File2ool.make_dir(File2ool.create_path([operations[id].extract_dir, operations[id].list_of_archive_parts[operations[id].elements_iteration]]))
 				send_result_to_callable(operations[id].call_after_operation, build_result_of_unpacking(operations[id]))
 				operations[id].elements_iteration += 1
 				
@@ -53,7 +53,7 @@ func unpack(zip_file_path, extract_dir, call_after_operation : Callable, mark = 
 	operations[id].zip_reader.open(zip_file_path)
 	
 	operations[id].extract_dir = extract_dir
-	FilesManager.make_dir(extract_dir)
+	File2ool.make_dir(extract_dir)
 	
 	operations[id].list_of_archive_parts = operations[id].zip_reader.get_files()
 	operations[id].elements_iteration = 0

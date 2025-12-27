@@ -130,7 +130,14 @@ func update_player_data():
 	
 	if _clear_chunks_cache:
 		clear_chunks_cache()
-		
+	
+	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > sqrt(_player_data.drawing_distance**2*2))
+	for chunk in _chunks_to_delete:
+		loaded_chunks.erase(chunk)
+		_EntitiesLogic.chunks_users_num[chunk] -= 1
+	
+	print(len(_EntitiesLogic.chunks_users_num))
+	
 	var chunks = _ChunksCalculator.chunks_in_front_of_player(
 		current_chunk, 
 		direction,
@@ -139,11 +146,11 @@ func update_player_data():
 		[]
 	)
 	for chunk in chunks[0]:
-		if not loaded_chunks.has(chunk):
-			loaded_chunks.append(chunk)
 		if not _EntitiesLogic.chunks_users_num.has(chunk):
 			_EntitiesLogic.chunks_users_num[chunk] = 0
-		_EntitiesLogic.chunks_users_num[chunk] += 1
+		if not loaded_chunks.has(chunk):
+			loaded_chunks.append(chunk)
+			_EntitiesLogic.chunks_users_num[chunk] += 1
 		
 		
 func get_data_to_send():

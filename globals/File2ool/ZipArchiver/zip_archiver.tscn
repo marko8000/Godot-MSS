@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bl0l2njby6eqp"]
 
-[ext_resource type="Script" uid="uid://dgh7snl7g1pmv" path="res://globals/FilesManager/ZipArchiver/zip_archiver.gd" id="1_gvogt"]
+[ext_resource type="Script" uid="uid://dgh7snl7g1pmv" path="res://globals/File2ool/ZipArchiver/zip_archiver.gd" id="1_gvogt"]
 
 [node name="ZipArchiver" type="Node"]
 script = ExtResource("1_gvogt")
