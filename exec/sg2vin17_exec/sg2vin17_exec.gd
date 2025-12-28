@@ -51,8 +51,8 @@ func manage_level_loading():
 
 
 func remove_current_level():
-	if get_current_level() != null:
-		get_current_level().queue_free()
+	if get_current_level(self) != null:
+		get_current_level(self).queue_free()
 
 
 func _input(event: InputEvent) -> void:

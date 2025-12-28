@@ -4,7 +4,13 @@ extends Node
 class_name ChunksCalculator
 
 
-const chunk_size : int = 16
+@export var chunk_size : int = 16
+@export var chunk_type : ChunkType = ChunkType.Pixel
+enum ChunkType {
+	## Vector2i chunk
+	Pixel,
+	## Vector3i chunk
+	Voxel}
 
 
 # TERMS
@@ -15,38 +21,30 @@ const chunk_size : int = 16
 
 
 func position_to_chunk(position) -> Variant:
-	if position is Vector3:
-		return Vector2i(floor(position.x / chunk_size), floor(position.z / chunk_size))
-	elif position is Vector2:
-		pass
+	if chunk_type == ChunkType.Pixel:
+		if position is Vector3:
+			return Vector2i(floor(position.x / chunk_size), floor(position.z / chunk_size))
+		elif position is Vector2:
+			pass
+	elif chunk_type == ChunkType.Voxel:
+		if position is Vector3:
+			pass
+		elif position is Vector2:
+			pass
 	return null
 		
 		
-func position_to_chunk_position(position):
-	return position - chunk_to_negative_chunk_position(position_to_chunk(position))
-		
-	
-func chunk_to_negative_chunk_position(chunk):
-	
-	if chunk is Vector2i:
-		return Vector3(chunk.x * chunk_size, 0, chunk.y * chunk_size)
-		
-		
-func chunk_position_to_position(chunk, chunk_position):
-	if chunk == null:
-		return chunk_position
-	
-	if chunk_position is Vector3:
-		return chunk_to_negative_chunk_position(chunk) + chunk_position
-	elif chunk_position is Vector2:
-		pass
-		
-		
 func rotation_to_direction(rotation):
-	if rotation is Vector3:
-		return -Vector2i(round(sin(rotation.y)), round(cos(rotation.y)))
-	elif rotation is Vector2:
-		pass
+	if chunk_type == ChunkType.Pixel:
+		if rotation is Vector3:
+			return -Vector2i(round(sin(rotation.y)), round(cos(rotation.y)))
+		elif rotation is Vector2:
+			pass
+	elif chunk_type == ChunkType.Pixel:
+		if rotation is Vector3:
+			pass
+		elif rotation is Vector2:
+			pass
 				
 
 func dist(chunk1, chunk2):
@@ -119,7 +117,7 @@ func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [
 	return [chunks, new_cache]
 	
 	
-func visualize_сhunk(chunk):
+func visualize_chunk(chunk):
 	if chunk is Vector2i:
 		pass
 

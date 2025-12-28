@@ -5,19 +5,12 @@ extends Node
 class_name EntityPropertiesSeed
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
 @export var tracked_properties : Array[AbstractSync]
 @export var guest_presets : Dictionary[String, Variant]
-@export var chunk_type : ChunkType = ChunkType.Pixel
-##TODO: MOVE TO EntitiesLogic
-enum ChunkType {
-	## 2 dimensional chunk
-	Pixel,
-	## 3 dimensional chunk
-	Voxel}
 ## nonchunk entities are visible everywhere
 @export var nonchunk : bool = false
 

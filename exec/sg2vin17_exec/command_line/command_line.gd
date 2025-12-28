@@ -14,7 +14,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_level = _SG2Exec.get_current_level()
+	_level = _SG2Exec.get_current_level(self)
 	$VBoxContainer/RichTextLabel.get_v_scroll_bar().hide()
 	if len(%LineEdit.text) > 0:
 		if %LineEdit.text[0] == '/':

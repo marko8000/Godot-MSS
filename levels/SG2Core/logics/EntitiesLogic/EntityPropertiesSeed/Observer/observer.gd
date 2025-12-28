@@ -29,7 +29,7 @@ var _ConnectionLogic : ConnectionLogic
 	
 	
 func presets():
-	_SG2Core = ExecManager.get_current_exec(self).get_current_level()
+	_SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 	_EntitiesLogic = _SG2Core._EntitiesLogic
 	_MultiplayerLogic = _SG2Core._MultiplayerLogic
 	_ChunksCalculator = _SG2Core._ChunksCalculator
@@ -136,8 +136,6 @@ func update_player_data():
 		loaded_chunks.erase(chunk)
 		_EntitiesLogic.chunks_users_num[chunk] -= 1
 	
-	print(len(_EntitiesLogic.chunks_users_num))
-	
 	var chunks = _ChunksCalculator.chunks_in_front_of_player(
 		current_chunk, 
 		direction,
@@ -153,8 +151,16 @@ func update_player_data():
 			_EntitiesLogic.chunks_users_num[chunk] += 1
 		
 		
-func get_data_to_send():
-	pass
+func get_entities_to_delete() -> Array[int]:
+	return []
+	
+	
+func get_entities_to_spawn() -> Array[int]:
+	return []
+	
+	
+func get_entities_to_update() -> Array[int]:
+	return []
 	
 	
 	

@@ -20,7 +20,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	manage_debug_labels()
 	
-	_current_level = _SG2Exec.get_current_level()
+	_current_level = _SG2Exec.get_current_level(self)
 	
 	if Input.is_action_just_pressed("debug"):
 		visible = not visible

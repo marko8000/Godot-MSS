@@ -3,7 +3,7 @@ extends Node
 class_name InterpolationLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
 

@@ -3,7 +3,7 @@ extends Node
 class_name PlayerInput
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _PlayersActionsLogic := _SG2Core._PlayersActionsLogic
 @onready var _Observer : Observer = $'../Observer'
 

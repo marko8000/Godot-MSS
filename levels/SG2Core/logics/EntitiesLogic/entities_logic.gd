@@ -4,7 +4,7 @@ extends Node
 class_name EntitiesLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level()
+@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _MultiplayerLogic := _SG2Core._MultiplayerLogic
 @onready var _InterpolationLogic := _SG2Core._InterpolationLogic
@@ -68,12 +68,14 @@ func _process(delta : float) -> void:
 		track_entities()
 		send_entities_to_guests()
 		host_manage_chunks_users()
+		clear_deleted_entities()
 		if Input.is_action_just_pressed('ui_accept'):
 			var chunks = _ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
 			for chunk in chunks[0]:
 				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.y)}))
 	elif _ConnectionLogic.peer_role == 'guest':
 		track_entities()
+		
 		
 func _connection_peer_changed(new_peer):
 	start()
@@ -270,21 +272,21 @@ func track_entities():
 			deleted_entities.append(entity_id)
 			entities_spawn_data.erase(entity_id)
 			entities_update_data.erase(entity_id)
-			if entities_chunks.has(entity_id):
-				chunks_entities[entities_chunks[entity_id]].erase(entity_id)
-				entities_chunks.erase(entity_id)
+			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
+			entities_chunks.erase(entity_id)
 			for tracker in trackers:
 				tracker.stop_tracking(entity_id)
 			continue
-		var new_chunk = _ChunksCalculator.position_to_chunk(_entities_storage.get_node(entities_spawn_data[entity_id][2]).get_node('e'+str(entity_id)).global_position)
-		if new_chunk != entities_chunks[entity_id]:
-			if not chunks_entities.has(new_chunk):
-				chunks_entities[new_chunk] = PackedInt32Array()
-			if not chunks_users_num.has(new_chunk):
-				load_chunk(new_chunk)
-			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
-			chunks_entities[new_chunk].append(entity_id)
-			entities_chunks[entity_id] = new_chunk
+		if entities_chunks[entity_id] != null:
+			var new_chunk = _ChunksCalculator.position_to_chunk(_entities_storage.get_node(entities_spawn_data[entity_id][2]).get_node('e'+str(entity_id)).global_position)
+			if new_chunk != entities_chunks[entity_id]:
+				if not chunks_entities.has(new_chunk):
+					chunks_entities[new_chunk] = PackedInt32Array()
+				if not chunks_users_num.has(new_chunk):
+					load_chunk(new_chunk)
+				chunks_entities[entities_chunks[entity_id]].erase(entity_id)
+				chunks_entities[new_chunk].append(entity_id)
+				entities_chunks[entity_id] = new_chunk
 		var old_data = entities_update_data[entity_id].duplicate(true)
 		entities_spawn_data[entity_id][1] = entities_empty_properties_array[entities_spawn_data[entity_id][0]].duplicate(true)
 		entities_update_data[entity_id][0] = entities_empty_properties_array[entities_spawn_data[entity_id][0]].duplicate(true)
@@ -293,6 +295,7 @@ func track_entities():
 		update_check[entity_id] = old_data != entities_update_data[entity_id]
 	for empty_chunk in chunks_entities.keys().filter(func(chunk): return chunks_entities[chunk] == PackedInt32Array()):
 		chunks_entities.erase(empty_chunk)
+	
 	
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var entity_type = spawn_data[0]
@@ -322,8 +325,8 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 func host_manage_chunks_users():
 	for chunk in chunks_users_num:
 		if chunks_users_num[chunk] <= 0:
-			print('remove', chunk)
-			unload_and_save_chunk(chunk)
+			save_chunk(chunk)
+			unload_chunk(chunk)
 		
 		
 func save_chunk(chunk):
@@ -336,15 +339,14 @@ func load_chunk(chunk):
 		chunks_users_num[chunk] = 0
 	
 	
-func unload_and_save_chunk(chunk):
-	save_chunk(chunk)
+func unload_chunk(chunk):
 	chunks_users_num.erase(chunk)
 	if not chunks_entities.has(chunk):
 		return
 	for entity_id in chunks_entities[chunk]:
-		_entities_storage.get_node(entities_spawn_data[entity_id][2]+'/e'+str(entity_id)).queue_free()
-		entities_chunks.erase(entity_id)
-	chunks_entities.erase(chunk)
+		var entity = _entities_storage.get_node(entities_spawn_data[entity_id][2]+'/e'+str(entity_id))
+		if entity:
+			entity.queue_free()
 	
 	
 func send_entities_to_guests():
@@ -357,9 +359,16 @@ func send_entities_to_guests():
 			var _entities_to_spawn : Array[int]
 			var _entities_to_update : Array[int]
 			for observer : Observer in player_data.observers:
-				pass
+				_entities_to_delete.append_array(observer.get_entities_to_delete())
+				_entities_to_spawn.append_array(observer.get_entities_to_spawn())
+				_entities_to_update.append_array(observer.get_entities_to_update())
 				
 			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
+			
+			
+func clear_deleted_entities():
+	if current_update_frame == 1:
+		deleted_entities.clear()
 		
 
 @rpc("authority", 'call_local')

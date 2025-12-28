@@ -10,7 +10,7 @@ var paths : Dictionary # every file has "_file"
 
 func paths_assignment():
 	var _SG2Exec = ExecManager.get_current_exec(self)
-	var _SG2Core : SG2Core = _SG2Exec.get_current_level()
+	var _SG2Core : SG2Core = _SG2Exec.get_current_level(self)
 	var _ConnectionLogic := _SG2Core._ConnectionLogic
 	
 	paths.entities_dir = 'res://entities'

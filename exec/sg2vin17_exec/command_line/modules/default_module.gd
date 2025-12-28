@@ -9,7 +9,7 @@ var _debug_control
 
 func start():
 	_SG2Exec = ExecManager.get_current_exec(self)
-	_current_level = _SG2Exec.get_current_level()
+	_current_level = _SG2Exec.get_current_level(self)
 	_commandline = _SG2Exec._command_line
 	_debug_control = _SG2Exec._debug_control
 
@@ -28,7 +28,7 @@ func sg2core(args : Array): # args = [peer_role, connection_mode, args]
 	if args.size() == 2:
 		_SG2Exec.load_level('SG2Core')
 		await _SG2Exec.level_loaded
-		_current_level = _SG2Exec.get_current_level()
+		_current_level = _SG2Exec.get_current_level(self)
 		if args[0] == 'host':
 			host(args.slice(1))
 		elif args[0] == 'guest':
