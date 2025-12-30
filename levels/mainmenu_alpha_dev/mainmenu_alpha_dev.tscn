@@ -1,15 +1,11 @@
-[gd_scene load_steps=15 format=3 uid="uid://b5uekkwcq0r5x"]
+[gd_scene load_steps=14 format=3 uid="uid://b5uekkwcq0r5x"]
 
-[ext_resource type="FontFile" uid="uid://dyn4fxbbs6x5c" path="res://levels/SG2Core/x_res/x_fonts/sg2_pixel.ttf" id="1_rhdnv"]
+[ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/SG2Core/x_res/x_themes/theme.tres" id="1_rhdnv"]
 [ext_resource type="Script" uid="uid://dhe8nl27v1v3m" path="res://levels/mainmenu_alpha_dev/mainmenu_alpha_dev.gd" id="2_2coch"]
 [ext_resource type="Script" uid="uid://bscaxt4mejjgc" path="res://levels/mainmenu_alpha_dev/game_content_page.gd" id="3_2l15w"]
 [ext_resource type="Texture2D" uid="uid://bn2452e1dr8rp" path="res://levels/SG2Core/x_res/x_images/vin17s_games_logo.png" id="6_rhdnv"]
 [ext_resource type="Texture2D" uid="uid://np5dxnuue8p0" path="res://levels/SG2Core/x_res/x_images/sg_logo.svg" id="6_wumac"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="7_5jy2i"]
-
-[sub_resource type="Theme" id="Theme_5jy2i"]
-default_font = ExtResource("1_rhdnv")
-default_font_size = 30
 
 [sub_resource type="BoxMesh" id="BoxMesh_p276i"]
 size = Vector3(10, 1, 10)
@@ -41,11 +37,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 8
-theme = SubResource("Theme_5jy2i")
+theme = ExtResource("1_rhdnv")
 script = ExtResource("2_2coch")
 
 [node name="MainPage" type="Panel" parent="."]
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(300, 350)
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0

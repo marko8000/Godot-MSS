@@ -323,10 +323,12 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 
 
 func host_manage_chunks_users():
-	for chunk in chunks_users_num:
-		if chunks_users_num[chunk] <= 0:
-			save_chunk(chunk)
-			unload_chunk(chunk)
+	if current_update_frame == 1:
+		print('hhhhhhhhhhhhhhhhhh')
+		for chunk in chunks_users_num:
+			if chunks_users_num[chunk] <= 0:
+				save_chunk(chunk)
+				unload_chunk(chunk)
 		
 		
 func save_chunk(chunk):
@@ -353,17 +355,38 @@ func send_entities_to_guests():
 	if current_update_frame == 1:
 		for peer_id in players:
 			var player_data := players[peer_id]
-			print(player_data)
+			print('p', player_data)
 			player_data.observers = player_data.observers.filter(func(_o): return _o != null)
-			var _entities_to_delete : Array[int]
-			var _entities_to_spawn : Array[int]
-			var _entities_to_update : Array[int]
+			var _chunks_to_delete : Array
+			var _chunks_to_update : Array
+			var _chunks_to_spawn : Array
 			for observer : Observer in player_data.observers:
-				_entities_to_delete.append_array(observer.get_entities_to_delete())
-				_entities_to_spawn.append_array(observer.get_entities_to_spawn())
-				_entities_to_update.append_array(observer.get_entities_to_update())
+				_chunks_to_delete.append_array(observer.delete_chunks())
+				_chunks_to_update.append_array(observer.loaded_chunks)
+				_chunks_to_spawn.append_array(observer.load_chunks())
+			
+			var _entities_to_delete : Array[int]
+			var _entities_to_update : Dictionary[int, Array]
+			var _entities_to_spawn : Dictionary[int, Array]
+			
+			for chunk in _chunks_to_delete:
+				if chunks_entities.has(chunk):
+					_entities_to_delete.append_array(chunks_entities[chunk])
+			
+			for chunk in _chunks_to_update:
+				if chunks_entities.has(chunk):
+					for entity_id in chunks_entities[chunk]:
+						_entities_to_update[entity_id] = entities_update_data[entity_id]
+						
+			for chunk in _chunks_to_spawn:
+				if chunks_entities.has(chunk):
+					for entity_id in chunks_entities[chunk]:
+						_entities_to_spawn[entity_id] = entities_spawn_data[entity_id]
 				
-			rpc_id(peer_id, 'guest_update_entities', Dispenser.dupl(entities_update_data))
+				
+			#rpc_id(peer_id,
+			#rpc_id(peer_id,
+			#rpc_id(peer_id,
 			
 			
 func clear_deleted_entities():
@@ -372,14 +395,19 @@ func clear_deleted_entities():
 		
 
 @rpc("authority", 'call_local')
-func guest_spawn_entities(entities):
+func guest_delete_entities(entities : Array[int]):
+	if _ConnectionLogic.peer_role != 'guest': return
+	
+	
+@rpc("authority", 'call_local')
+func guest_spawn_entities(entities : Dictionary[int, Array]):
 	if _ConnectionLogic.peer_role != 'guest': return
 	for entity_id in entities:
 		spawn_entity(entities[entity_id])
 		
 
 @rpc("authority", 'call_local')
-func guest_update_entities(entities):
+func guest_update_entities(entities : Dictionary[int, Array]):
 	if _ConnectionLogic.peer_role != 'guest': return
 	for entity_id in entities:
 		update_entity(FROM_E_POS, entity_id, entities[entity_id])

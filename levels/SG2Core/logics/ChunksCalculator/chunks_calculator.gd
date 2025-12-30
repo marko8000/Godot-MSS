@@ -119,10 +119,138 @@ func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [
 	
 func visualize_chunk(chunk):
 	if chunk is Vector2i:
-		pass
+		visualize_pixel3d(chunk)
+		
+		
+func hide_chunk(chunk):
+	if chunk is Vector2i:
+		delete_if_exist('3d'+str(chunk))
 
 
-func raise_if_wrong_chunk_type(chunk):
-	var _type_of_chunk = typeof(chunk)
-	var _chunk_types = [TYPE_VECTOR2I, TYPE_VECTOR3I, TYPE_VECTOR4I, TYPE_INT]
-	assert(_type_of_chunk in _chunk_types, "Wrong chunk type")
+var chunk_material = StandardMaterial3D.new()
+func _ready():
+	chunk_material.albedo_color = Color(1, 1, 1, 0.5)  # White with some transparency
+	chunk_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	chunk_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	chunk_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+# Function to visualize a chunk's borders
+func visualize_pixel3d(chunk_position: Vector2i):
+	var _chunk_position = Vector3(chunk_position.x, 0, chunk_position.y)
+	var mesh_instance = MeshInstance3D.new()
+	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3(chunk_size, chunk_size, chunk_size))
+	mesh_instance.material_override = chunk_material
+	mesh_instance.position = _chunk_position * Vector3(chunk_size, chunk_size, chunk_size)
+	mesh_instance.name = '3d'+str(chunk_position)
+	
+	if not has_node(str(mesh_instance.name)):
+		add_child(mesh_instance)
+	return mesh_instance
+
+func create_chunk_wireframe_mesh(size: Vector3) -> ArrayMesh:
+	var st = SurfaceTool.new()
+	var mesh = ArrayMesh.new()
+	
+	st.begin(Mesh.PRIMITIVE_LINES)
+	
+	# Define the 8 corners of the chunk
+	var corners = [
+		Vector3(0, 0, 0),
+		Vector3(size.x, 0, 0),
+		Vector3(0, size.y, 0),
+		Vector3(size.x, size.y, 0),
+		Vector3(0, 0, size.z),
+		Vector3(size.x, 0, size.z),
+		Vector3(0, size.y, size.z),
+		Vector3(size.x, size.y, size.z)
+	]
+	
+	# Define the 12 edges of the cube (pairs of corner indices)
+	var edges = [
+		[0, 1], [0, 2], [0, 4],  # Bottom edges
+		[1, 3], [1, 5],          # Right edges
+		[2, 3], [2, 6],          # Left edges
+		[3, 7],                  # Top front edge
+		[4, 5], [4, 6],          # Back edges
+		[5, 7], [6, 7]           # Top back edges
+	]
+	
+	# Add each edge as two vertices
+	for edge in edges:
+		st.add_vertex(corners[edge[0]])
+		st.add_vertex(corners[edge[1]])
+	
+	# REMOVE THIS LINE: st.generate_normals()  # ← ERROR: Doesn't work with PRIMITIVE_LINES
+	st.commit(mesh)
+	return mesh
+	
+# Alternative: Simple ImmediateMesh version (less efficient but straightforward)
+func visualize_simple(chunk_position: Vector3):
+	var _chunk_size = Vector3(chunk_size, chunk_size*2, chunk_size)
+	
+	var mesh_instance = MeshInstance3D.new()
+	var imesh = ImmediateMesh.new()
+	var mesh = ArrayMesh.new()
+	
+	imesh.surface_begin(Mesh.PRIMITIVE_LINES, chunk_material)
+	
+	# Draw the 12 edges
+	var min_pos = Vector3.ZERO
+	var max_pos = _chunk_size
+	
+	# Bottom rectangle
+	imesh.surface_add_vertex(min_pos)
+	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, min_pos.z))
+	
+	imesh.surface_add_vertex(min_pos)
+	imesh.surface_add_vertex(Vector3(min_pos.x, min_pos.y, max_pos.z))
+	
+	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, min_pos.z))
+	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, max_pos.z))
+	
+	imesh.surface_add_vertex(Vector3(min_pos.x, min_pos.y, max_pos.z))
+	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, max_pos.z))
+	
+	# Vertical edges
+	for i in range(4):
+		var base = [
+			Vector3(min_pos.x, min_pos.y, min_pos.z),
+			Vector3(max_pos.x, min_pos.y, min_pos.z),
+			Vector3(min_pos.x, min_pos.y, max_pos.z),
+			Vector3(max_pos.x, min_pos.y, max_pos.z)
+		][i]
+		
+		imesh.surface_add_vertex(base)
+		imesh.surface_add_vertex(Vector3(base.x, max_pos.y, base.z))
+	
+	# Top rectangle
+	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, min_pos.z))
+	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, min_pos.z))
+	
+	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, min_pos.z))
+	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, max_pos.z))
+	
+	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, min_pos.z))
+	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, max_pos.z))
+	
+	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, max_pos.z))
+	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, max_pos.z))
+	
+	imesh.surface_end()
+	mesh = imesh.commit()
+	
+	mesh_instance.mesh = mesh
+	mesh_instance.material_override = chunk_material
+	mesh_instance.position = chunk_position * _chunk_size
+	
+	add_child(mesh_instance)
+	return mesh_instance
+
+# Utility function to clear all visualizations
+func clear_visualizations():
+	for child in get_children():
+		child.queue_free()
+
+func delete_if_exist(path : NodePath):
+	if has_node(path):
+		get_node(path).queue_free()

@@ -42,8 +42,8 @@ func _physics_process(delta: float) -> void:
 		return
 	
 	# Add the gravity.
-	if not is_on_floor():
-		velocity += get_gravity() * delta
+	#if not is_on_floor():
+		#velocity += get_gravity() * delta
 		
 	# Interaction with RigidBody
 	for col_idx in get_slide_collision_count():

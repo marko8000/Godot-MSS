@@ -6,6 +6,7 @@ class_name Observer
 var entity_id : int
 var player_type : String # peer or reg
 var id : int
+var player_data : EntitiesLogic.EntitiesPlayerData
 
 var current_chunk
 var old_chunk
@@ -15,11 +16,13 @@ var direction
 var old_direction
 var loaded_chunks : Array
 var loaded_entities : PackedInt32Array
-var chunks_cache : Array
+var chunks_cache_front : Array
+var chunk_cache_behind : Array
 func _to_string() -> String:
 	return '[{0}, {1}, {2}, {3}, {4}, {5}]'.format([current_chunk, str(old_chunk)+'_old', str(chunk_before_changes)+'_bc', direction, str(len(loaded_chunks)), len(loaded_entities)])
 func clear_chunks_cache():
-	chunks_cache.clear()
+	chunks_cache_front.clear()
+	chunk_cache_behind.clear()
 
 var _SG2Core : SG2Core
 var _EntitiesLogic : EntitiesLogic
@@ -81,16 +84,15 @@ func update_player_data():
 	if _ConnectionLogic.peer_role != 'host':
 		return
 	entity_id = int(get_parent().name.substr(1))
-	var _player_data : EntitiesLogic.EntitiesPlayerData
 	if player_type == 'peer':
 		if _EntitiesLogic.players.has(id):
-			_player_data = _EntitiesLogic.players[id]
+			player_data = _EntitiesLogic.players[id]
 		else:
 			get_parent().queue_free()
 	elif player_type == 'reg':
-		_player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
-	if not _player_data.observers.has(self):
-		_player_data.observers.append(self)
+		player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
+	if not player_data.observers.has(self):
+		player_data.observers.append(self)
 		
 	var _current_chunk = _ChunksCalculator.position_to_chunk(get_parent().global_position)
 	var _direction = _ChunksCalculator.rotation_to_direction(get_parent().global_rotation)
@@ -130,37 +132,35 @@ func update_player_data():
 	
 	if _clear_chunks_cache:
 		clear_chunks_cache()
-	
-	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > sqrt(_player_data.drawing_distance**2*2))
+		
+		
+func delete_chunks() -> Array:
+	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > sqrt(player_data.drawing_distance**2*2)+player_data.drawing_distance*0.5)
 	for chunk in _chunks_to_delete:
-		loaded_chunks.erase(chunk)
+		_ChunksCalculator.hide_chunk(chunk)
 		_EntitiesLogic.chunks_users_num[chunk] -= 1
+		loaded_chunks.erase(chunk)
+	return _chunks_to_delete
 	
-	var chunks = _ChunksCalculator.chunks_in_front_of_player(
+	
+func load_chunks() -> Array:
+	var chunks : Array
+	var chunks_in_front = _ChunksCalculator.chunks_in_front_of_player(
 		current_chunk, 
 		direction,
-		[0, _player_data.drawing_distance],
-		_player_data.chunks_per_second,
-		[]
+		[0, player_data.drawing_distance],
+		player_data.chunks_per_second,
+		chunks_cache_front
 	)
-	for chunk in chunks[0]:
+	chunks_cache_front = chunks_in_front[1]
+	chunks.append_array(chunks_in_front[0])
+	var chunks_behind
+	for chunk in chunks:
+		_ChunksCalculator.visualize_chunk(chunk)
 		if not _EntitiesLogic.chunks_users_num.has(chunk):
 			_EntitiesLogic.chunks_users_num[chunk] = 0
 		if not loaded_chunks.has(chunk):
 			loaded_chunks.append(chunk)
 			_EntitiesLogic.chunks_users_num[chunk] += 1
-		
-		
-func get_entities_to_delete() -> Array[int]:
-	return []
-	
-	
-func get_entities_to_spawn() -> Array[int]:
-	return []
-	
-	
-func get_entities_to_update() -> Array[int]:
-	return []
-	
-	
+	return chunks
 	

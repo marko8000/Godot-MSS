@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://b7me32ea0ucfx"]
 
-[ext_resource type="Theme" uid="uid://dy856cw5iovk6" path="res://levels/SG2Core/x_res/x_fonts/sg2_pixel.tres" id="1_v7iq1"]
+[ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/SG2Core/x_res/x_themes/theme.tres" id="1_v7iq1"]
 [ext_resource type="Script" uid="uid://dvkoqx7wwfj0b" path="res://levels/mainmenu_alpha_dev/level_button.gd" id="2_uxyt7"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="3_su2nf"]
 [ext_resource type="Texture2D" uid="uid://tfs1l50we5kq" path="res://levels/SG2Core/x_res/x_images/missing_texture.svg" id="4_4pflh"]
