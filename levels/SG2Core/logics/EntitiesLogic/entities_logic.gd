@@ -45,8 +45,7 @@ enum {
 }
 
 @export_category('Drawing Settings')
-@export var drawing_distance : int = 2 # host's parameter is max for guest. 0 is 1 chunk
-@export var chunks_per_second : int = 16 # host's parameter is max for guest
+@export var drawing_distance : int = 1 # host's parameter is max for guest. 0 is 1 chunk
 var players : Dictionary[int, EntitiesPlayerData]
 
 
@@ -70,8 +69,8 @@ func _process(delta : float) -> void:
 		host_manage_chunks_users()
 		clear_deleted_entities()
 		if Input.is_action_just_pressed('ui_accept'):
-			var chunks = _ChunksCalculator.chunks_in_front_of_player(Vector2i(0, 0), Vector2i(0, 1), [0, 2], chunks_per_second)
-			for chunk in chunks[0]:
+			var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
+			for chunk in chunks:
 				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.y)}))
 	elif _ConnectionLogic.peer_role == 'guest':
 		track_entities()
@@ -95,7 +94,7 @@ func _peer_connected(peer_id):
 ## use "reg" if player will play on same entity after reconnect
 func spawn_player(player_type : String, id):
 	if player_type == 'peer':
-		players[id] = EntitiesPlayerData.new(drawing_distance, chunks_per_second)
+		players[id] = EntitiesPlayerData.new(drawing_distance)
 		file_entity_summon(EntityFileData('CharacterBody3D_FPS', {'position': Vector3(0, 50, 0), '$Observer.player_type': player_type, '$Observer.id': id}))
 		rpc_id(id, 'guest_spawn_entities', Dispenser.dupl(entities_spawn_data))
 	elif player_type == 'reg':
@@ -123,13 +122,11 @@ func EntityUpdateData(_values_array, _path_from_entities_storage_to_parent : Str
 	
 class EntitiesPlayerData:
 	var drawing_distance : int
-	var chunks_per_second : int 
 	var observers : Array[Observer]
-	func _init(_drawing_distance :  int, _chunks_per_second : int) -> void:
+	func _init(_drawing_distance :  int) -> void:
 		drawing_distance = _drawing_distance
-		chunks_per_second = _chunks_per_second
 	func _to_string() -> String:
-		return '{drawing_distance: {dd}, chunks_per_second: {cps}, observers: {od}}'.format({'dd': drawing_distance, 'cps': chunks_per_second, 'od': observers})
+		return '{drawing_distance: {dd}, observers: {od}}'.format({'dd': drawing_distance, 'od': observers})
 	
 	
 func get_new_entity_id():
@@ -324,7 +321,6 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 
 func host_manage_chunks_users():
 	if current_update_frame == 1:
-		print('hhhhhhhhhhhhhhhhhh')
 		for chunk in chunks_users_num:
 			if chunks_users_num[chunk] <= 0:
 				save_chunk(chunk)
@@ -397,6 +393,7 @@ func clear_deleted_entities():
 @rpc("authority", 'call_local')
 func guest_delete_entities(entities : Array[int]):
 	if _ConnectionLogic.peer_role != 'guest': return
+	
 	
 	
 @rpc("authority", 'call_local')

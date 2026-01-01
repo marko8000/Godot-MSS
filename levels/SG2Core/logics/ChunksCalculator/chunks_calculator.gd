@@ -4,13 +4,7 @@ extends Node
 class_name ChunksCalculator
 
 
-@export var chunk_size : int = 16
-@export var chunk_type : ChunkType = ChunkType.Pixel
-enum ChunkType {
-	## Vector2i chunk
-	Pixel,
-	## Vector3i chunk
-	Voxel}
+@export var chunk_size : int = 64
 
 
 # TERMS
@@ -21,130 +15,66 @@ enum ChunkType {
 
 
 func position_to_chunk(position) -> Variant:
-	if chunk_type == ChunkType.Pixel:
-		if position is Vector3:
-			return Vector2i(floor(position.x / chunk_size), floor(position.z / chunk_size))
-		elif position is Vector2:
-			pass
-	elif chunk_type == ChunkType.Voxel:
-		if position is Vector3:
-			pass
-		elif position is Vector2:
-			pass
+	if position is Vector3:
+		return Vector3i(floor(position.x / chunk_size), floor(position.y / chunk_size), floor(position.z / chunk_size))
+	elif position is Vector2:
+		return Vector2i(floor(position.x / chunk_size), floor(position.y / chunk_size))
 	return null
 		
 		
 func rotation_to_direction(rotation):
-	if chunk_type == ChunkType.Pixel:
-		if rotation is Vector3:
-			return -Vector2i(round(sin(rotation.y)), round(cos(rotation.y)))
-		elif rotation is Vector2:
-			pass
-	elif chunk_type == ChunkType.Pixel:
-		if rotation is Vector3:
-			pass
-		elif rotation is Vector2:
-			pass
-				
+	if rotation is Vector3:
+		return (Basis.from_euler(rotation) * Vector3.FORWARD).normalized()
+	elif rotation is int:
+		pass
+			
 
-func dist(chunk1, chunk2):
-	if chunk1 is Vector2i or chunk1 is Vector3i:
-		return chunk1.distance_to(chunk2)
+func dist(from, to):
+	if from is Vector2i or from is Vector3i:
+		return from.distance_to(to)
+		#return abs((from-to)[(from-to).max_axis_index()])
 	else:
 		return 0
 	
 	
-## CLEAR CACHE IF PLAYER_DIRECTION OR PLAYER_CHUNK HAS CHANGED
-func chunks_in_front_of_player(player_chunk, player_direction, drawing_range = [0, 1], max_count_of_chunks = 1, cache = []):
-	var chunks : Array
-	var new_cache
-	if player_chunk is Vector2i:
-		new_cache = []
-		var is_crooked_movement = false if abs(player_direction.x) + abs(player_direction.y) == 1 else true
-		var right_side = Vector2i(-player_direction.y, player_direction.x)
-		var left_side = Vector2i(player_direction.y, -player_direction.x)
-		var crooks_dict = {Vector2i(1, -1): [Vector2i(0, 1), Vector2i(-1, 0)], 
-							Vector2i(-1, -1): [Vector2i(1, 0), Vector2i(0, 1)], 
-							Vector2i(-1, 1): [Vector2i(0, -1), Vector2i(1, 0)], 
-							Vector2i(1, 1): [Vector2i(-1, 0), Vector2i(0, -1)]}
-		var right_crook = crooks_dict[player_direction][0] if is_crooked_movement else null
-		var left_crook = crooks_dict[player_direction][1] if is_crooked_movement else null
-		var width_range = range(0, drawing_range[1]+2) if cache == [] else range(cache[0], drawing_range[1]+2)
-		for width_level in width_range:
-			var is_crooked_level = false if not is_crooked_movement or (is_crooked_movement and width_level % 2 != 0) else true
-			if new_cache != []:
-				break
-			if width_level == 0:
-				if cache != []:
-					if cache[0] > 0:
-						continue
-				else:
-					if drawing_range[0] > 0:
-						continue
-				if len(chunks)+1 > max_count_of_chunks and drawing_range[1] != 0:
-					new_cache = [width_level, 0]
-					continue
-				chunks.append(player_chunk)
-			elif width_level == 1:
-				var length_range = range(drawing_range[0], drawing_range[1]+1) if drawing_range[0] != 0 else range(drawing_range[0]+1, drawing_range[1]+1)
-				if cache != []:
-					if width_level == cache[0]:
-						length_range = range(cache[1], drawing_range[1]+1)
-				for length in length_range:
-					if len(chunks)+1 > max_count_of_chunks:
-						new_cache = [width_level, length]
-						break
-					chunks.append(player_chunk + (player_direction * length))
-			else:
-				var length_range = range(drawing_range[0]-1-(drawing_range[0]-1), drawing_range[1]+1) if width_level > drawing_range[0] else range(drawing_range[0], drawing_range[1]+1)
-				if cache != []:
-					if width_level == cache[0]:
-						length_range = range(cache[0]-2-(drawing_range[0]-1), drawing_range[1]+1) if width_level > drawing_range[0] else range(cache[0], drawing_range[1]+1)
-				for length in length_range:
-					if len(chunks)+2 > max_count_of_chunks:
-						new_cache = [width_level, length]
-						break
-					if not is_crooked_level:
-						if not is_crooked_movement:
-							chunks.append(player_chunk + (right_side * (width_level-1)) + (player_direction * length))
-							chunks.append(player_chunk + (left_side * (width_level-1)) + (player_direction * length))
-						else:
-							chunks.append(player_chunk + (right_side * ((width_level-1)/2)) + (player_direction * length))
-							chunks.append(player_chunk + (left_side * ((width_level-1)/2)) + (player_direction * length))
-					else:
-						chunks.append(player_chunk + right_crook + (right_side * (width_level/2-1)) + (player_direction * length))
-						chunks.append(player_chunk + left_crook + (left_side * (width_level/2-1)) + (player_direction * length))
-	return [chunks, new_cache]
+func get_chunks_around(current_chunk: Vector3i, drawing_distance: int) -> Array:
+	var negative_chunk := current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
+	var positive_chunk := current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
+	var chunks : Array[Vector3i]
+	for x in range(negative_chunk.x, positive_chunk.x):
+		for y in range(negative_chunk.y, positive_chunk.y):
+			for z in range(negative_chunk.z, positive_chunk.z):
+				chunks.append(Vector3i(x, y, z))
+	return chunks
 	
 	
-func visualize_chunk(chunk):
-	if chunk is Vector2i:
-		visualize_pixel3d(chunk)
+func visualize_chunk(chunk, color : String = '#ffffff'):
+	if chunk is Vector3i:
+		visualize3d(chunk)
 		
 		
 func hide_chunk(chunk):
-	if chunk is Vector2i:
+	if chunk is Vector3i:
 		delete_if_exist('3d'+str(chunk))
 
 
 var chunk_material = StandardMaterial3D.new()
 func _ready():
-	chunk_material.albedo_color = Color(1, 1, 1, 0.5)  # White with some transparency
 	chunk_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	chunk_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	chunk_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 
 # Function to visualize a chunk's borders
-func visualize_pixel3d(chunk_position: Vector2i):
-	var _chunk_position = Vector3(chunk_position.x, 0, chunk_position.y)
-	var mesh_instance = MeshInstance3D.new()
+func visualize3d(chunk_position: Vector3i, color : String = '#ffffff'):
+	if has_node('3d'+str(chunk_position)): return
+	chunk_material.albedo_color = Color.html(color)
+	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3(chunk_size, chunk_size, chunk_size))
 	mesh_instance.material_override = chunk_material
-	mesh_instance.position = _chunk_position * Vector3(chunk_size, chunk_size, chunk_size)
+	mesh_instance.position = chunk_position * Vector3i(chunk_size, chunk_size, chunk_size)
 	mesh_instance.name = '3d'+str(chunk_position)
 	
-	if not has_node(str(mesh_instance.name)):
-		add_child(mesh_instance)
+	add_child(mesh_instance)
 	return mesh_instance
 
 func create_chunk_wireframe_mesh(size: Vector3) -> ArrayMesh:
