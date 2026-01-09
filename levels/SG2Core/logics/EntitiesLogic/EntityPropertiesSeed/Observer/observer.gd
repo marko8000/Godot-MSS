@@ -89,7 +89,7 @@ func update_player_data():
 	
 		
 func delete_chunks() -> Array:
-	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > sqrt(player_data.drawing_distance**2*2))
+	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > _ChunksCalculator.max_dist(current_chunk, player_data.drawing_distance))
 	for chunk in _chunks_to_delete:
 		_ChunksCalculator.hide_chunk(chunk)
 		_EntitiesLogic.chunks_users_num[chunk] -= 1

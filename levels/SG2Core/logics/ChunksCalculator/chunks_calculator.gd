@@ -29,24 +29,29 @@ func rotation_to_direction(rotation):
 		pass
 			
 
-func dist(from, to):
+func dist(from, to) -> float:
 	if from is Vector2i or from is Vector3i:
 		return from.distance_to(to)
-		#return abs((from-to)[(from-to).max_axis_index()])
-	else:
-		return 0
+	return 0
+		
+		
+func max_dist(current_chunk, drawing_distance: int) -> float:
+	if current_chunk is Vector3i:
+		return drawing_distance * sqrt(3)
+	return 0
 	
 	
 func get_chunks_around(current_chunk: Vector3i, drawing_distance: int) -> Array:
-	var negative_chunk := current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
-	var positive_chunk := current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
-	var chunks : Array[Vector3i]
-	for x in range(negative_chunk.x, positive_chunk.x):
-		for y in range(negative_chunk.y, positive_chunk.y):
-			for z in range(negative_chunk.z, positive_chunk.z):
-				chunks.append(Vector3i(x, y, z))
-	return chunks
-	
+	if current_chunk is Vector3i:
+		var negative_chunk := current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
+		var positive_chunk := current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
+		var chunks : Array[Vector3i]
+		for x in range(negative_chunk.x, positive_chunk.x):
+			for y in range(negative_chunk.y, positive_chunk.y):
+				for z in range(negative_chunk.z, positive_chunk.z):
+					chunks.append(Vector3i(x, y, z))
+		return chunks
+	return []
 	
 func visualize_chunk(chunk, color : String = '#ffffff'):
 	if chunk is Vector3i:
