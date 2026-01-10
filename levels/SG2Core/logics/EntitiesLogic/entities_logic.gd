@@ -65,8 +65,8 @@ func _process(delta : float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
 		await get_tree().process_frame
 		track_entities()
-		send_entities_to_guests()
 		host_manage_chunks_users()
+		send_entities_to_guests()
 		clear_deleted_entities()
 		if Input.is_action_just_pressed('ui_accept'):
 			var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
@@ -289,7 +289,8 @@ func track_entities():
 		entities_update_data[entity_id][0] = entities_empty_properties_array[entities_spawn_data[entity_id][0]].duplicate(true)
 		for tracker in trackers:
 			tracker.track_entity(entity_id)
-		update_check[entity_id] = old_data != entities_update_data[entity_id]
+		if old_data != entities_update_data[entity_id]:
+			update_check[entity_id] = true
 	for empty_chunk in chunks_entities.keys().filter(func(chunk): return chunks_entities[chunk] == PackedInt32Array()):
 		chunks_entities.erase(empty_chunk)
 	
@@ -353,47 +354,39 @@ func send_entities_to_guests():
 			var player_data := players[peer_id]
 			print('p', player_data)
 			player_data.observers = player_data.observers.filter(func(_o): return _o != null)
-			var _chunks_to_delete : Array
-			var _chunks_to_update : Array
-			var _chunks_to_spawn : Array
-			for observer : Observer in player_data.observers:
-				_chunks_to_delete.append_array(observer.delete_chunks())
-				_chunks_to_update.append_array(observer.loaded_chunks)
-				_chunks_to_spawn.append_array(observer.load_chunks())
-			
-			var _entities_to_delete : Array[int]
+			var _entities_to_delete : PackedInt32Array
 			var _entities_to_update : Dictionary[int, Array]
 			var _entities_to_spawn : Dictionary[int, Array]
-			
-			for chunk in _chunks_to_delete:
-				if chunks_entities.has(chunk):
-					_entities_to_delete.append_array(chunks_entities[chunk])
-			
-			for chunk in _chunks_to_update:
-				if chunks_entities.has(chunk):
-					for entity_id in chunks_entities[chunk]:
+			for observer : Observer in player_data.observers:
+				for entity_id in observer.loaded_entities:
+					if deleted_entities.has(entity_id):
+						observer.loaded_entities.erase(entity_id)
+						_entities_to_delete.append(entity_id)
+					elif update_check[entity_id]:
+						update_check[entity_id] = false
 						_entities_to_update[entity_id] = entities_update_data[entity_id]
-						
-			for chunk in _chunks_to_spawn:
-				if chunks_entities.has(chunk):
+				for chunk in observer.loaded_chunks:
+					if not chunks_entities.has(chunk): continue
 					for entity_id in chunks_entities[chunk]:
-						_entities_to_spawn[entity_id] = entities_spawn_data[entity_id]
-				
-				
-			#rpc_id(peer_id,
-			#rpc_id(peer_id,
-			#rpc_id(peer_id,
+						if not observer.loaded_entities.has(entity_id):
+							observer.loaded_entities.append(entity_id)
+							_entities_to_spawn[entity_id] = entities_spawn_data[entity_id]
 			
-			
+			rpc_id(peer_id, 'guest_delete_entities', _entities_to_delete)
+			rpc_id(peer_id, 'guest_update_entities', _entities_to_update)
+			rpc_id(peer_id, 'guest_spawn_entities', _entities_to_spawn)
+
+
 func clear_deleted_entities():
 	if current_update_frame == 1:
 		deleted_entities.clear()
 		
 
 @rpc("authority", 'call_local')
-func guest_delete_entities(entities : Array[int]):
+func guest_delete_entities(entities : PackedInt32Array):
 	if _ConnectionLogic.peer_role != 'guest': return
-	
+	for entity_id in entities:
+		_entities_storage.get_node(entities_spawn_data[entity_id][2]+'/e'+str(entity_id))
 	
 	
 @rpc("authority", 'call_local')

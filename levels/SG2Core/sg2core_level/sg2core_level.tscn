@@ -17,11 +17,6 @@
 [sub_resource type="Environment" id="Environment_dfx6i"]
 background_mode = 1
 background_color = Color(0.6477238, 0.9622573, 0.99999994, 1)
-ssr_enabled = true
-ssao_enabled = true
-ssil_enabled = true
-sdfgi_enabled = true
-glow_enabled = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_l0mfm"]
 

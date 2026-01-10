@@ -41,11 +41,11 @@ func max_dist(current_chunk, drawing_distance: int) -> float:
 	return 0
 	
 	
-func get_chunks_around(current_chunk: Vector3i, drawing_distance: int) -> Array:
+func get_chunks_around(current_chunk, drawing_distance: int) -> Array:
 	if current_chunk is Vector3i:
-		var negative_chunk := current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
-		var positive_chunk := current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
-		var chunks : Array[Vector3i]
+		var negative_chunk = current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
+		var positive_chunk = current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
+		var chunks : Array
 		for x in range(negative_chunk.x, positive_chunk.x):
 			for y in range(negative_chunk.y, positive_chunk.y):
 				for z in range(negative_chunk.z, positive_chunk.z):

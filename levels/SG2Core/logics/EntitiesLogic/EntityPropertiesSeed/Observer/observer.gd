@@ -86,22 +86,24 @@ func update_player_data():
 		player_data.observers.append(self)
 		
 	current_chunk = _ChunksCalculator.position_to_chunk(get_parent().global_position)
+	delete_chunks()
+	load_chunks()
 	
 		
-func delete_chunks() -> Array:
+func delete_chunks():
 	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > _ChunksCalculator.max_dist(current_chunk, player_data.drawing_distance))
 	for chunk in _chunks_to_delete:
 		_ChunksCalculator.hide_chunk(chunk)
 		_EntitiesLogic.chunks_users_num[chunk] -= 1
 		loaded_chunks.erase(chunk)
-	return _chunks_to_delete
 	
 	
-func load_chunks() -> Array:
+func load_chunks():
 	var chunks : Array = _ChunksCalculator.get_chunks_around(
 		current_chunk, 
 		player_data.drawing_distance
 	)
+	chunks.append(null)
 	for chunk in chunks:
 		_ChunksCalculator.visualize_chunk(chunk)
 		if not _EntitiesLogic.chunks_users_num.has(chunk):
@@ -109,5 +111,4 @@ func load_chunks() -> Array:
 		if not loaded_chunks.has(chunk):
 			loaded_chunks.append(chunk)
 			_EntitiesLogic.chunks_users_num[chunk] += 1
-	return chunks
 	
