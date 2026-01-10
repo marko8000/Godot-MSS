@@ -11,6 +11,7 @@ var player_data : EntitiesLogic.EntitiesPlayerData
 var current_chunk
 var loaded_chunks : Array
 var loaded_entities : PackedInt32Array
+var _chunks_to_delete
 func _to_string() -> String:
 	return '[{0}, {1}, {2}]'.format([current_chunk, str(len(loaded_chunks)), len(loaded_entities)])
 
@@ -91,7 +92,7 @@ func update_player_data():
 	
 		
 func delete_chunks():
-	var _chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > _ChunksCalculator.max_dist(current_chunk, player_data.drawing_distance))
+	_chunks_to_delete = loaded_chunks.filter(func (chunk): return _ChunksCalculator.dist(chunk, current_chunk) > _ChunksCalculator.max_dist(current_chunk, player_data.drawing_distance))
 	for chunk in _chunks_to_delete:
 		_ChunksCalculator.hide_chunk(chunk)
 		_EntitiesLogic.chunks_users_num[chunk] -= 1

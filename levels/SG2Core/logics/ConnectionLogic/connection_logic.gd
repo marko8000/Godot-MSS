@@ -17,7 +17,7 @@ var my_peer_id
 	
 	
 func _process(delta: float) -> void:
-	Debug.dstate('peer_role', peer_role)
+	Debug.dstate('peer_role', peer_role, self)
 	
 	
 func host_create_server():
