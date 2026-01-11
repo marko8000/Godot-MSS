@@ -25,7 +25,7 @@ class_name EntitiesLogic
 var entities_can_start_work : bool = false
 signal _entities_start_work
 var trackers : Array[AbstractSync]
-var updates_per_frame : int = 30
+var updates_per_second : int = 30
 var entities_spawn_data : Dictionary[int, Array] # Array = [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
 var entities_update_data : Dictionary[int, Array] # Array = [values_array : Array, path_from_entities_storage_to_parent : String = '.']
 #var entities_file_data : Dictionary[int, Array] # Array = [entity_type : int, values_dict : Dictionary, path_from_entities_storage_to_parent : String = '.']
@@ -72,8 +72,8 @@ func _process(delta : float) -> void:
 			var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
 			for chunk in chunks:
 				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.y)}))
-	#if _ConnectionLogic.peer_role == 'guest':
-		#print(entities_spawn_data)
+	elif _ConnectionLogic.peer_role == 'guest':
+		track_entities()
 		
 		
 func _connection_peer_changed(new_peer):
@@ -255,7 +255,8 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 func track_entities():
 	var entities_range : PackedInt32Array
 	if current_update_frame == 1:
-		current_frames_per_update = _InterpolationLogic.server_FPS / updates_per_frame
+		var FPS = {'host': _InterpolationLogic.server_FPS, 'guest': _InterpolationLogic.guest_FPS}[_ConnectionLogic.peer_role]
+		current_frames_per_update = ceil(float(FPS) / float(updates_per_second))
 		current_update_range_size = len(entities_update_data) / current_frames_per_update
 	if not current_update_frame == current_frames_per_update:
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1), current_update_range_size*current_update_frame)
@@ -294,6 +295,7 @@ func track_entities():
 	for empty_chunk in chunks_entities.keys().filter(func(chunk): return chunks_entities[chunk] == PackedInt32Array()):
 		chunks_entities.erase(empty_chunk)
 	
+	
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var entity_type = spawn_data[0]
 	if not entities_resources.has(entity_type):
@@ -319,6 +321,10 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 		tracker.update_entity(chunk, entity_id, update_data)		
 
 
+func reparent_entity(entity_node : Node, new_parent : Node):
+	entity_node.reparent(new_parent, true)
+	
+	
 func host_manage_chunks_users():
 	if current_update_frame == 1:
 		for chunk in chunks_users_num:
@@ -358,8 +364,10 @@ func send_entities_to_guests():
 			var _entities_to_spawn : Dictionary[int, Array]
 			for observer : Observer in player_data.observers:
 				for chunk in observer._chunks_to_delete:
+					if not chunks_entities.has(chunk): continue
 					for entity_id in chunks_entities[chunk]:
-						pass
+						observer.loaded_entities.erase(entity_id)
+						_entities_to_delete.append(entity_id)
 				for entity_id in observer.loaded_entities:
 					if deleted_entities.has(entity_id):
 						observer.loaded_entities.erase(entity_id)
@@ -379,6 +387,7 @@ func send_entities_to_guests():
 		for entity_id in _checked_entities:
 			update_check[entity_id] = false
 
+
 func clear_deleted_entities():
 	if current_update_frame == 1:
 		deleted_entities.clear()
@@ -395,7 +404,7 @@ func guest_delete_entities(entities : PackedInt32Array):
 func guest_spawn_entities(entities : Dictionary[int, Array]):
 	if _ConnectionLogic.peer_role != 'guest': return
 	for entity_id in entities:
-		spawn_entity(entities[entity_id])
+		spawn_entity(entities[entity_id], FROM_E_POS, entity_id)
 		
 
 @rpc("authority", 'call_local')

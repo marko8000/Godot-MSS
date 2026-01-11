@@ -31,9 +31,9 @@ func track_entity(entity_id : int):
 		
 
 func update_entity(chunk, entity_id : int, update_data : Array):
-	if not tracked_entities.has(entity_id): return
+	#if not tracked_entities.has(entity_id): return
 	for i in range(len(update_data[0])):
-		if update_data[0] != null:
+		if update_data[0] != null and tracked_entities[entity_id][0] != null:
 			Dispenser.set_resource(tracked_entities[entity_id][0], tracked_entities[entity_id][4][i], update_data[0][i])
 		
 		
