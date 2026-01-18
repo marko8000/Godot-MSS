@@ -1,6 +1,7 @@
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
 extends Node
-## EntitiesLogic saves/loads entities state, transfers entities data between host and guests
+## EntitiesLogic saves/loads entities state, transfers entities data between host and guests.
+## chunk = null is used for nonchunk entities
 class_name EntitiesLogic
 
 
@@ -26,24 +27,22 @@ var entities_can_start_work : bool = false
 signal _entities_start_work
 var trackers : Array[AbstractSync]
 var updates_per_second : int = 30
-var entities_spawn_data : Dictionary[int, Array] # Array = [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
-var entities_update_data : Dictionary[int, Array] # Array = [values_array : Array, path_from_entities_storage_to_parent : String = '.']
-#var entities_file_data : Dictionary[int, Array] # Array = [entity_type : int, values_dict : Dictionary, path_from_entities_storage_to_parent : String = '.']
-var entities_chunks : Dictionary[int, Variant] # = {entity_id: chunk}
-var chunks_entities : Dictionary[Variant, PackedInt32Array] # = {chunk: [entity_id, ...], ...}
-var update_check : Dictionary[int, bool] # {entity_id: bool} if nothing is changed: false
-var parent_link : Dictionary[int, int] # {entity_id: root_parent_entity_id}
-var chunks_users_num : Dictionary[Variant, int] # if number of users is equal to or less than zero, chunk will be unloaded
-var entities_property_path_property_array_num : Dictionary[int, Dictionary] # {entity_type: {value_path: values_array_num}}
-var entities_property_array_num_property_path : Dictionary[int, Array] # {entity_type: [value_path, ...]}
+var entities_spawn_data : Dictionary[int, Array] ## Array = [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
+var entities_update_data : Dictionary[int, Array] ## Array = [values_array : Array, path_from_entities_storage_to_parent : String = '.']
+var entities_chunks : Dictionary[int, Variant] ## = {entity_id: chunk}
+var chunks_entities : Dictionary[Variant, PackedInt32Array] ## = {chunk: [entity_id, ...], ...}
+var update_check : Dictionary[int, bool] ## {entity_id: bool} if nothing is changed: false
+var parent_link : Dictionary[int, int] ## {entity_id: root_parent_entity_id}
+var entities_nodes : Dictionary[int, Node] ## {entity_id: entity_node}
+var chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloaded
+var entities_property_path_property_array_num : Dictionary[int, Dictionary] ## {entity_type: {property_path: property_array_num}}
+var entities_property_array_num_property_path : Dictionary[int, Array] ## {entity_type: [property_path, ...]}
 var entities_empty_properties_array : Dictionary[int, Array]
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
 var deleted_entities : PackedInt32Array
-enum {
-	FROM_E_POS # that means that chunk will be found from entity_position
-}
+var FROM_E_POS = 'f' ## if chunk == FROM_E_POS: the chunk will be calculated from entity global_position
 
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 1 # host's parameter is max for guest. drawing distance 1 is minimum
@@ -56,7 +55,7 @@ func _ready() -> void:
 
 
 func start():
-	emit_signal('_entities_start_work')
+	_entities_start_work.emit()
 	entities_can_start_work = true
 	
 
@@ -65,18 +64,17 @@ func _process(delta : float) -> void:
 	Debug.dstate('Entities / chunks', str(entities_chunks.size())+'e / '+str(chunks_entities.size())+'ch', self)
 	if _ConnectionLogic.peer_role == 'host':
 		await get_tree().process_frame
-		track_entities()
 		if current_update_frame == 1:
 			host_manage_chunks_users()
 			send_entities_to_guests()
 			clear_deleted_entities()
+		track_entities()
 		if Input.is_action_just_pressed('ui_accept'):
 			var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
 			for chunk in chunks:
 				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.z)}))
 	elif _ConnectionLogic.peer_role == 'guest':
 		track_entities()
-		print(entities_chunks.keys())
 	manage_debug_keybindings()
 		
 		
@@ -200,19 +198,11 @@ func load_entities_resources():
 	
 func save_entities_data():
 	var _eglobal_file = FileAccess.open(entities_global_file, FileAccess.WRITE)
+	#update_entities_global()
 	_eglobal_file.store_var(entities_global)
 	_eglobal_file.close()
 	for chunk in chunks_entities:
 		save_chunk(chunk)
-		
-		
-func get_parent_entity(node):
-	var current_node = node
-	while current_node != _entities_storage:
-		current_node = current_node.get_parent()
-		if len(current_node.name) >= 2 and str(current_node.name[0]) == 'e' and get_parent().name.substr(1).is_valid_int():
-			break
-	return current_node
 				
 		
 func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entities : Dictionary[Variant, PackedInt32Array]):
@@ -247,7 +237,7 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 			chunk_node = _entities_storage.get_node(_chunk_node_path)
 			break
 	if typeof(chunk) == typeof(FROM_E_POS):
-		chunk = _ChunksCalculator.position_to_chunk(chunk_node.global_position)
+		chunk = _ChunksCalculator.position_to_chunk(null if not 'global_position' in chunk_node else chunk_node.global_position)
 	if not chunks_entities.has(chunk):
 		chunks_entities[chunk] = PackedInt32Array()
 	if not chunks_users_num.has(chunk):
@@ -269,8 +259,8 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 func track_entities():
 	var entities_range : PackedInt32Array
 	if current_update_frame == 1:
-		var FPS = {'host': _InterpolationLogic.server_FPS, 'guest': _InterpolationLogic.guest_FPS}[_ConnectionLogic.peer_role]
-		current_frames_per_update = ceil(float(FPS) / float(updates_per_second))
+		var FPS : float = {'host': _InterpolationLogic.server_FPS, 'guest': _InterpolationLogic.guest_FPS}[_ConnectionLogic.peer_role]
+		current_frames_per_update = ceil(FPS / float(updates_per_second))
 		current_update_range_size = len(entities_update_data) / current_frames_per_update
 	if not current_update_frame == current_frames_per_update:
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1), current_update_range_size*current_update_frame)
@@ -279,18 +269,20 @@ func track_entities():
 		entities_range = entities_update_data.keys().slice(current_update_range_size*(current_update_frame-1))
 		current_update_frame = 1
 	for entity_id in entities_range:
-		if not _entities_storage.has_node(entities_spawn_data[entity_id][2] + '/e'+str(entity_id)):
+		if not is_instance_valid(entities_nodes[entity_id]):
 			deleted_entities.append(entity_id)
 			entities_spawn_data.erase(entity_id)
 			entities_update_data.erase(entity_id)
 			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
 			entities_chunks.erase(entity_id)
 			update_check.erase(entity_id)
+			entities_nodes.erase(entity_id)
+			parent_link.erase(entity_id)
 			for tracker in trackers:
 				tracker.stop_tracking(entity_id)
 			continue
 		if entities_chunks[entity_id] != null:
-			var new_chunk = _ChunksCalculator.position_to_chunk(_entities_storage.get_node(entities_spawn_data[parent_link[entity_id]][2]).get_node('e'+str(parent_link[entity_id])).global_position)
+			var new_chunk = _ChunksCalculator.position_to_chunk(entities_nodes[parent_link[entity_id]].global_position)
 			if new_chunk != entities_chunks[entity_id]:
 				if not chunks_entities.has(new_chunk):
 					chunks_entities[new_chunk] = PackedInt32Array()
@@ -317,15 +309,16 @@ func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_ne
 	var entity_instance = entities_resources[entity_type].instantiate()
 	entity_instance.name = 'e'+str(entity_id)
 	var entity_parent_node = _entities_storage.get_node(spawn_data[2])
+	entities_nodes[entity_id] = entity_instance
 	entity_parent_node.add_child(entity_instance)
 	if typeof(chunk) == typeof(FROM_E_POS):
 		if entities_property_path_property_array_num[entity_type].has('position'):
 			chunk = _ChunksCalculator.position_to_chunk(spawn_data[1][entities_property_path_property_array_num[entity_type]['position']])
 		else:
 			chunk = FROM_E_POS
-	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityPropertiesSeed').nonchunk = chunk==null
-	entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityPropertiesSeed').presets()
-	start_tracking(entity_id, entity_parent_node.get_node('e'+str(entity_id)), entity_parent_node.get_node('e'+str(entity_id)).get_node('EntityPropertiesSeed').tracked_properties, chunk)
+	entity_instance.get_node('EntityPropertiesSeed').nonchunk = chunk==null
+	entity_instance.get_node('EntityPropertiesSeed').presets()
+	start_tracking(entity_id, entity_instance, entity_instance.get_node('EntityPropertiesSeed').tracked_properties, chunk)
 	update_entity(chunk, entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
 
 
@@ -336,7 +329,13 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 
 
 func host_reparent_entity(entity_node : Node, new_parent : Node):
-	entity_node.reparent(new_parent, true)
+	if str(entity_node.name)[0] == 'e' and entity_node.name.substr(1).is_valid_int():
+		entity_node.reparent(new_parent, true)
+		parent_link[int(entity_node.name.substr(1))] = int(new_parent.name.substr(1))
+	
+	
+func process_reparent_buffer():
+	pass
 	
 	
 func host_manage_chunks_users():

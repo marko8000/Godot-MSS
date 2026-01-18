@@ -26,11 +26,12 @@ func entity_prepare():
 	if not _EntitiesLogic.entities_can_start_work:
 		await _EntitiesLogic._entities_start_work
 	
-	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
+	if _EntitiesLogic.entities_nodes.find_key(get_parent()) == null:
 		if _ConnectionLogic.peer_role == 'guest':
 			get_parent().queue_free()
 		elif _ConnectionLogic.peer_role == 'host':
 			var entity_id = _EntitiesLogic.get_new_entity_id()
+			_EntitiesLogic.entities_nodes[entity_id] = get_parent()
 			get_parent().name = 'e'+str(entity_id)
 			presets()
 			start_tracking(entity_id)
