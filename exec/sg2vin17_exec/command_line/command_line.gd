@@ -31,7 +31,7 @@ func _input(event: InputEvent) -> void:
 		execute_command(_command_text)
 		%LineEdit.clear()
 		hide()
-	if Input.is_action_just_pressed("command"):
+	if Input.is_action_pressed('debug') and Input.is_action_just_pressed("command"):
 		if visible:
 			%LineEdit.clear()
 			hide()

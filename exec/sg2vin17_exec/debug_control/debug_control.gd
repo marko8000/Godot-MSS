@@ -15,15 +15,17 @@ var static_engine_debug_labels : Array[String]
 func _ready() -> void:
 	Debug.on_dstate.connect(_debug_state)
 	
+
+func _input(event: InputEvent) -> void:
+	if Input.is_action_pressed("debug") and Input.is_action_just_pressed('panel'):
+		visible = not visible
+	
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	manage_debug_labels()
 	
 	_current_level = _SG2Exec.get_current_level(self)
-	
-	if Input.is_action_just_pressed("debug"):
-		visible = not visible
 	
 	exec_debug('current exec name', ExecManager.get_current_exec_name(self))
 	exec_debug('current level name', null if _current_level == null else _current_level.name)
