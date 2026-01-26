@@ -43,7 +43,8 @@ var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
 var deleted_entities : PackedInt32Array
-var reparenting_buffer : Dictionary[int, Array] # = {entity_id: [entity_node, new_parent, path_to_parent]}
+var entities_spawn_buffer : Dictionary[int, Array] ## = {entity_id: [spawn_data, chunk], ...}
+var reparenting_buffer : Dictionary[int, Array] ## = {entity_id: [entity_node, new_parent, path_to_parent], ...}
 var FROM_E_POS = 'f' ## if chunk == FROM_E_POS: the chunk will be calculated from entity global_position
 var NONCHUNK = null
 
@@ -65,20 +66,22 @@ func start():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta : float) -> void:
 	Debug.dstate('Entities / chunks', str(entities_chunks.size())+'e / '+str(chunks_entities.size())+'ch', self)
-	if _ConnectionLogic.peer_role == 'host':
-		process_reparent_buffer()
+	if _ConnectionLogic.peer_role in ['host', 'guest']:
+		process_entities_spawn_buffer()
+		process_reparenting_buffer()
 		await get_tree().process_frame
-		if current_update_frame == 1:
-			host_manage_chunks_users()
-			send_entities_to_guests()
-			clear_deleted_entities()
 		track_entities()
-		if Input.is_action_just_pressed('ui_accept'):
-			var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
-			for chunk in chunks:
-				file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.z)}))
-	elif _ConnectionLogic.peer_role == 'guest':
-		track_entities()
+		if _ConnectionLogic.peer_role == 'host':
+			if current_update_frame == 1:
+				host_manage_chunks_users()
+				send_entities_to_guests()
+				clear_deleted_entities()
+			if Input.is_action_just_pressed('ui_accept'):
+				var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
+				for chunk in chunks:
+					file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.z)}))
+		elif _ConnectionLogic.peer_role == 'guest':
+			pass
 	manage_debug_keybindings()
 		
 		
@@ -215,6 +218,7 @@ func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entitie
 			file_entity_summon(_entities_file_data[entity_id], entity_id, chunk)
 			
 
+## EntityFileData version of [method spawn_entity]
 func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
 	var array : Array
 	if not entities_property_array_num_property_path.has(file_data[0]):
@@ -251,7 +255,7 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 			trackers.append(tracked_properties[res_num])
 		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, entity_node, tracked_properties[res_num].property_path, tracked_properties[res_num].property_config)
 	
-
+	
 func track_entities():
 	var entities_range : PackedInt32Array
 	if current_update_frame == 1:
@@ -299,26 +303,36 @@ func track_entities():
 		chunks_entities.erase(empty_chunk)
 	
 	
+## Method doesn't spawn entity immediately, it adds entity to [member entities_spawn_buffer]
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
-	var entity_type = spawn_data[0]
-	if not entities_resources.has(entity_type):
-		return
-	var entity_instance = entities_resources[entity_type].instantiate()
-	entity_instance.name = 'e'+str(entity_id)
-	var entity_parent_node = _entities_storage.get_node(spawn_data[2])
-	entities_nodes[entity_id] = entity_instance
-	entity_parent_node.add_child(entity_instance)
-	if typeof(chunk) == typeof(FROM_E_POS):
-		if entities_property_path_property_array_num[entity_type].has('position'):
-			chunk = _ChunksCalculator.position_to_chunk(spawn_data[1][entities_property_path_property_array_num[entity_type]['position']])
-		else:
-			chunk = FROM_E_POS
-	entity_instance.get_node('EntityPropertiesSeed').nonchunk = chunk==null
-	entity_instance.get_node('EntityPropertiesSeed').presets()
-	start_tracking(entity_id, entity_instance, entity_instance.get_node('EntityPropertiesSeed').tracked_properties, chunk)
-	update_entity(chunk, entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
-
-
+	entities_spawn_buffer[entity_id] = [spawn_data, chunk]
+	
+	
+func process_entities_spawn_buffer():
+	for entity_id in entities_spawn_buffer:
+		var spawn_data : Array = entities_spawn_buffer[entity_id][0]
+		var chunk = entities_spawn_buffer[entity_id][1]
+		entities_spawn_buffer.erase(entity_id)
+		
+		var entity_type = spawn_data[0]
+		if not entities_resources.has(entity_type):
+			return
+		var entity_instance = entities_resources[entity_type].instantiate()
+		entity_instance.name = 'e'+str(entity_id)
+		var entity_parent_node = _entities_storage.get_node(spawn_data[2])
+		entities_nodes[entity_id] = entity_instance
+		entity_parent_node.add_child(entity_instance)
+		if typeof(chunk) == typeof(FROM_E_POS):
+			if entities_property_path_property_array_num[entity_type].has('position'):
+				chunk = _ChunksCalculator.position_to_chunk(spawn_data[1][entities_property_path_property_array_num[entity_type]['position']])
+			else:
+				chunk = FROM_E_POS
+		entity_instance.get_node('EntityPropertiesSeed').nonchunk = chunk==null
+		entity_instance.get_node('EntityPropertiesSeed').presets()
+		start_tracking(entity_id, entity_instance, entity_instance.get_node('EntityPropertiesSeed').tracked_properties, chunk)
+		update_entity(chunk, entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
+	
+	
 func update_entity(chunk, entity_id : int, update_data : Array):
 	# TODO: path_from_parent changes
 	for tracker:AbstractSync in trackers:
@@ -329,6 +343,7 @@ func update_entity(chunk, entity_id : int, update_data : Array):
 func establish_entity_parenthood(entity_node : Node, entity_id : int, path_to_parent : NodePath) -> Node:
 	var chunk_node : Node = entity_node
 	var _chunk_node_path = ''
+	parent_link[entity_id] = entity_id
 	for node_name in str(path_to_parent).split('/'):
 		_chunk_node_path += node_name + '/'
 		if node_name[0] == 'e' and node_name.substr(1).is_valid_int():
@@ -347,7 +362,7 @@ func reparent_entity(entity_node : Node, new_parent : Node):
 		reparenting_buffer[entity_id] = [entity_node, new_parent, path_to_parent]
 	
 	
-func process_reparent_buffer():
+func process_reparenting_buffer():
 	for entity_id in reparenting_buffer:
 		reparenting_buffer[entity_id][0].reparent(reparenting_buffer[entity_id][1])
 		establish_entity_parenthood(reparenting_buffer[entity_id][0], entity_id, reparenting_buffer[entity_id][2])
@@ -441,5 +456,5 @@ func guest_update_entities(entities : Dictionary[int, Array]):
 
 
 func manage_debug_keybindings():
-	if Input.is_action_pressed("debug") and Input.is_action_just_pressed("hide"):
+	if Input.is_action_pressed("debug") and Input.is_action_just_pressed("change_visibility"):
 		_SG2Core.get_node('Logics/VoxelTerrain/TransvoxelTerrain').visible = not _SG2Core.get_node('Logics/VoxelTerrain/TransvoxelTerrain').visible

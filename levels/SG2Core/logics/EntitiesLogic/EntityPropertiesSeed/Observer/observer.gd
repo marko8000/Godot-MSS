@@ -39,6 +39,7 @@ func presets():
 	var id_sync = NoninterpolatedSync.new()
 	id_sync.property_path = '$'+str(Entity.get_path_to(self))+'.id'
 	EPropertiesSeed.tracked_properties.append_array([player_type_sync, id_sync])
+	update_player_data()
 
 
 func _get_configuration_warnings():
@@ -70,7 +71,6 @@ func _process(delta: float) -> void:
 	
 	
 func update_player_data():
-	if _EntitiesLogic.current_update_frame != 1: return
 	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
 		return
 	if _ConnectionLogic.peer_role != 'host':
@@ -83,6 +83,8 @@ func update_player_data():
 			get_parent().queue_free()
 	elif player_type == 'reg':
 		player_data = _EntitiesLogic.players[_MultiplayerLogic.reg_id_to_peer_id(id)]
+	if player_data == null:
+		return
 	if not player_data.observers.has(self):
 		player_data.observers.append(self)
 		
