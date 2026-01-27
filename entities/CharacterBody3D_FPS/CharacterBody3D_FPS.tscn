@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_5spkx"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_ir1cf"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/entity_properties_seed.gd" id="3_1wfgu"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/SyncTypes/abstract_sync.gd" id="4_t3uhe"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/SyncTypes/noninterpolated_sync.gd" id="5_4vhj7"]
-[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/Observer/observer.gd" id="6_s6vr0"]
-[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/PlayerInput/player_input.gd" id="7_2vrci"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed.gd" id="3_1wfgu"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/abstract_tracker.gd" id="4_t3uhe"]
+[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/noninterpolated_tracker.gd" id="5_4vhj7"]
+[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Observer/observer.gd" id="6_s6vr0"]
+[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/PlayerInput/player_input.gd" id="7_2vrci"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -60,7 +60,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.20176512)
 mesh = SubResource("BoxMesh_80mxe")
 
-[node name="EntityPropertiesSeed" type="Node" parent="."]
+[node name="EntitySeed" type="Node" parent="."]
 script = ExtResource("3_1wfgu")
 tracked_properties = Array[ExtResource("4_t3uhe")]([SubResource("Resource_6gn8f"), SubResource("Resource_80mxe"), SubResource("Resource_ol233")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

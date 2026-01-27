@@ -11,7 +11,7 @@ var player_data : EntitiesLogic.EntitiesPlayerData
 var current_chunk
 var loaded_chunks : Array
 var loaded_entities : PackedInt32Array
-var _chunks_to_delete
+var _chunks_to_delete : Array
 func _to_string() -> String:
 	return '[{0}, {1}, {2}]'.format([current_chunk, str(len(loaded_chunks)), len(loaded_entities)])
 
@@ -23,33 +23,35 @@ var _ConnectionLogic : ConnectionLogic
 	
 	
 func presets():
+	print('pp', player_type)
 	_SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 	_EntitiesLogic = _SG2Core._EntitiesLogic
 	_MultiplayerLogic = _SG2Core._MultiplayerLogic
 	_ChunksCalculator = _SG2Core._ChunksCalculator
 	_ConnectionLogic = _SG2Core._ConnectionLogic
 	
-	if not get_parent().has_node('EntityPropertiesSeed'):
+	if not get_parent().has_node('EntitySeed'):
 		return
 	get_parent().add_child(VoxelViewer.new())
-	var EPropertiesSeed : EntityPropertiesSeed = $'../EntityPropertiesSeed'
+	var ESeed : EntitySeed = $'../EntitySeed'
 	var Entity = get_parent()
-	var player_type_sync = NoninterpolatedSync.new()
+	var player_type_sync = NoninterpolatedTracker.new()
 	player_type_sync.property_path = '$'+str(Entity.get_path_to(self))+'.player_type'
-	var id_sync = NoninterpolatedSync.new()
+	var id_sync = NoninterpolatedTracker.new()
 	id_sync.property_path = '$'+str(Entity.get_path_to(self))+'.id'
-	EPropertiesSeed.tracked_properties.append_array([player_type_sync, id_sync])
-	update_player_data()
+	ESeed.tracked_properties.append_array([player_type_sync, id_sync])
+	entity_id = int(get_parent().name.substr(1))
+	host_update_player_data()
 
 
 func _get_configuration_warnings():
 	var warnings = []
-	var has_entity_logic = false
+	var has_entity_seed = false
 	for child in get_parent().get_children():
-		if child is EntityPropertiesSeed:
-			has_entity_logic = true
-	if not has_entity_logic:
-		warnings.append('Observer must be child of Node with EntityLogic')
+		if child is EntitySeed and child.name == 'EntitySeed':
+			has_entity_seed = true
+	if not has_entity_seed:
+		warnings.append('Observer must be child of Node with EntitySeed')
 	return warnings
 	
 	
@@ -67,15 +69,16 @@ func is_player() -> bool:
 func _process(delta: float) -> void:
 	if _EntitiesLogic != null:
 		if _EntitiesLogic.entities_can_start_work:
-			update_player_data()
+			if _ConnectionLogic.peer_role == 'host':
+				if _EntitiesLogic.current_update_frame == 1:
+					host_update_player_data()
 	
 	
-func update_player_data():
+func host_update_player_data():
 	if not str(get_parent().name)[0] == 'e' and not get_parent().name.substr(1).is_valid_int():
 		return
 	if _ConnectionLogic.peer_role != 'host':
 		return
-	entity_id = int(get_parent().name.substr(1))
 	if player_type == 'peer':
 		if _EntitiesLogic.players.has(id):
 			player_data = _EntitiesLogic.players[id]
@@ -106,7 +109,7 @@ func load_chunks():
 		current_chunk, 
 		player_data.drawing_distance
 	)
-	chunks.append(null)
+	chunks.append(_EntitiesLogic.NONCHUNK)
 	for chunk in chunks:
 		_ChunksCalculator.visualize_chunk(chunk)
 		if not _EntitiesLogic.chunks_users_num.has(chunk):

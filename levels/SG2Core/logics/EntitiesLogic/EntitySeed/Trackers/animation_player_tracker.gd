@@ -1,3 +1,3 @@
 @icon('res://levels/SG2Core/x_res/x_images/AnimationPlayer.svg')
-extends AbstractSync
-class_name AnimationPlayerSync
+extends AbstractTracker
+class_name AnimationPlayerTracker

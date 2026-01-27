@@ -1,5 +1,5 @@
 extends Resource
-class_name AbstractSync
+class_name AbstractTracker
 
 
 var _SG2Core : SG2Core
@@ -19,7 +19,7 @@ func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _
 	pass
 	
 	
-func update_entity(chunk, entity_id : int, entity_data):
+func update_entity(entity_node : Node, entity_type : int, entity_id : int, update_data):
 	pass
 	
 	

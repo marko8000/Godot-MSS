@@ -2,14 +2,14 @@
 @tool
 extends Node
 ## EntityLogic is start point for entity properties tracking, the node is deleted after the function EntitiesLogic.start_tracking is called
-class_name EntityPropertiesSeed
+class_name EntitySeed
 
 
 @onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _EntitiesLogic := _SG2Core._EntitiesLogic
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
-@export var tracked_properties : Array[AbstractSync]
+@export var tracked_properties : Array[AbstractTracker]
 @export var guest_presets : Dictionary[String, Variant]
 ## nonchunk entities are visible everywhere
 @export var nonchunk : bool = false
@@ -34,7 +34,9 @@ func entity_prepare():
 			_EntitiesLogic.entities_nodes[entity_id] = get_parent()
 			get_parent().name = 'e'+str(entity_id)
 			presets()
-			start_tracking(entity_id)
+			@warning_ignore("incompatible_ternary")
+			_EntitiesLogic.start_tracking(entity_id, get_parent(), tracked_properties, null if nonchunk else _EntitiesLogic.FROM_E_POS)
+			_EntitiesLogic.register_entity(entity_id)
 					
 
 func _get_configuration_warnings():
@@ -46,7 +48,7 @@ func _get_configuration_warnings():
 	else:
 		parent_warning = true
 	if parent_warning:
-		warnings.append('EntityPropertiesSeed must be child of entity scene saved in res://entities/{entity_type}/{entity_type}.tscn')
+		warnings.append('EntitySeed must be child of entity scene that saved in res://entities/{entity_type}/{entity_type}.tscn')
 	return warnings
 	
 	
@@ -64,7 +66,7 @@ func _entity_node_renamed():
 	get_parent().name = get_parent().scene_file_path.get_slice('/', 3)
 	var base_control = EditorInterface.get_base_control()
 	
-	var warning_window = load('res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/popup.tscn').instantiate()
+	var warning_window = load('res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/popup.tscn').instantiate()
 	warning_window.entity_type = get_parent().name
 	warning_window.page('NodeRename')
 	
@@ -84,8 +86,3 @@ func presets():
 func apply_guest_presets():
 	for property_path in guest_presets:
 		Dispenser.set_resource(get_parent(), property_path, guest_presets[property_path])
-	
-	
-func start_tracking(entity_id : int):
-	@warning_ignore("incompatible_ternary")
-	_EntitiesLogic.start_tracking(entity_id, get_parent(), tracked_properties, null if nonchunk else _EntitiesLogic.FROM_E_POS)

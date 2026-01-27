@@ -4,7 +4,7 @@ extends Node
 class_name ChunksCalculator
 
 
-@export var chunk_size : int = 64
+var chunk_size : int = 64
 
 
 # TERMS

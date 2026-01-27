@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bljxsp0q650i6" path="res://entities/block/block.gd" id="1_qf533"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="3_2u8q7"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntityPropertiesSeed/entity_properties_seed.gd" id="3_ged6v"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed.gd" id="3_ged6v"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_d3hoe"]
 size = Vector3(0.5, 0.5, 0.5)
@@ -16,7 +16,7 @@ texture_filter = 0
 [sub_resource type="BoxShape3D" id="BoxShape3D_mxrhb"]
 size = Vector3(0.5, 0.5, 0.5)
 
-[node name="ExampleBlock" type="AnimatableBody3D"]
+[node name="block" type="AnimatableBody3D"]
 script = ExtResource("1_qf533")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -26,6 +26,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_sj0rn")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_mxrhb")
 
-[node name="EntityPropertiesSeed" type="Node" parent="."]
+[node name="EntitySeed" type="Node" parent="."]
 script = ExtResource("3_ged6v")
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
