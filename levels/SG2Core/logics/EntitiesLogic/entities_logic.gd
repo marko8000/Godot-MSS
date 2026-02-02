@@ -27,10 +27,8 @@ var entities_can_start_work : bool = false
 signal _entities_start_work
 var trackers : Array[AbstractTracker]
 var updates_per_second : int = 30
-## = [entity_id, ...]
-## . Entity can be tracked only if it's in this array (watch [method register_entity])
-var entities_list : PackedInt32Array
-var entities_types : Dictionary[int, int] # = {entity_id: entity_type_shortcut, ...}
+var entities_list : PackedInt32Array ## = [entity_id, ...]
+var entities_types : Dictionary[int, int] ## = {entity_id: entity_type_shortcut, ...}
 var entities_spawn_data : Dictionary[int, Array] ## = {entity_id: [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.'], ...}
 var entities_update_data : Dictionary[int, Array] ## = {entity_id: [values_array : Array, path_from_entities_storage_to_parent : String = '.'], ...}
 var entities_chunks : Dictionary[int, Variant] ## = {entity_id: chunk, ...}
@@ -39,6 +37,7 @@ var entities_hierarchy_value : Dictionary[int, int] ## = {entity_id: hierarchy_v
 var update_check : Dictionary[int, bool] ## {entity_id: bool} if nothing is changed: false
 var parent_link : Dictionary[int, int] ## {entity_id: root_parent_entity_id}
 var entities_nodes : Dictionary[int, Node] ## {entity_id: entity_node}
+var nodes_entities : Dictionary[Node, int]
 var chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloaded
 var entities_property_path_property_array_num : Dictionary[int, Dictionary] ## {entity_type: {property_path: property_array_num}}
 var entities_property_array_num_property_path : Dictionary[int, Array] ## {entity_type: [property_path, ...]}
@@ -82,9 +81,10 @@ func _process(delta : float) -> void:
 			if Input.is_action_just_pressed('ui_accept'):
 				var chunks = _ChunksCalculator.get_chunks_around(Vector3i(0, 0, 0), 2)
 				for chunk in chunks:
-					file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 10, chunk.z)}))
+					file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 30, chunk.z)}))
 		elif _ConnectionLogic.peer_role == 'guest':
-			pass
+			if current_update_frame == 1:
+				print(entities_spawn_data.keys())
 	manage_debug_keybindings()
 		
 		
@@ -186,14 +186,15 @@ func load_entities_resources():
 			if not entity_instance.has_node('EntitySeed'):
 				entities_without_EntitySeed.append(entity_type)
 				continue
-			entity_instance.get_node('EntitySeed').presets()
+			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
+			ESeed.prepare_properties()
 			if not entities_property_path_property_array_num.has(entities_types_shortcuts[entity_type]):
 				entities_property_path_property_array_num[entities_types_shortcuts[entity_type]] = {}
 				entities_property_array_num_property_path[entities_types_shortcuts[entity_type]] = []
 				entities_empty_properties_array[entities_types_shortcuts[entity_type]] = []
-				for property_num in range(len(entity_instance.get_node('EntitySeed').tracked_properties)):
-					entities_property_path_property_array_num[entities_types_shortcuts[entity_type]][entity_instance.get_node('EntitySeed').tracked_properties[property_num].property_path] = property_num
-					entities_property_array_num_property_path[entities_types_shortcuts[entity_type]].append(entity_instance.get_node('EntitySeed').tracked_properties[property_num].property_path)
+				for property_num in range(len(ESeed.tracked_properties)):
+					entities_property_path_property_array_num[entities_types_shortcuts[entity_type]][ESeed.tracked_properties[property_num].property_path] = property_num
+					entities_property_array_num_property_path[entities_types_shortcuts[entity_type]].append(ESeed.tracked_properties[property_num].property_path)
 					entities_empty_properties_array[entities_types_shortcuts[entity_type]].append(null)
 		else:
 			entities_file_excepted.append(entity_type)
@@ -234,9 +235,26 @@ func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = g
 	spawn_entity(EntitySpawnData(file_data[0], array, file_data[2]), chunk, entity_id)
 	
 	
-func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Array[AbstractTracker], chunk=FROM_E_POS):
+func prepare_trackers(entity_id, tracked_properties : Array[AbstractTracker]):
+	var already_used_tracker_types = []
+	for res_num in range(len(tracked_properties)):
+		for tracker in trackers:
+			already_used_tracker_types.append(tracker.get_script().get_global_name())
+		if not already_used_tracker_types.has(tracked_properties[res_num].get_script().get_global_name()):
+			tracked_properties[res_num].start()
+			trackers.append(tracked_properties[res_num])
+		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, tracked_properties[res_num].property_path, tracked_properties[res_num].property_config)
+	
+	
+func register_entity(entity_id : int, entity_node : Node):
+	entities_nodes[entity_id] = entity_node
+	nodes_entities[entity_node] = entity_id
+	entities_types[entity_id] = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
+	
+	
+func start_tracking(entity_id : int, entity_node : Node, chunk=FROM_E_POS):
 	entity_node.get_node('EntitySeed').queue_free()
-	var entity_type = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
+	var entity_type : int = entities_types[entity_id]
 	var path_to_parent : NodePath = _entities_storage.get_path_to(entity_node.get_parent())
 	var chunk_node = establish_entity_parenthood(entity_node, entity_id, path_to_parent)
 	if typeof(chunk) == typeof(FROM_E_POS):
@@ -245,22 +263,12 @@ func start_tracking(entity_id : int, entity_node : Node, tracked_properties : Ar
 		chunks_entities[chunk] = PackedInt32Array()
 	if not chunks_users_num.has(chunk):
 		load_chunk(chunk)
-	entities_types[entity_id] = entity_id
+	entities_types[entity_id] = entity_type
 	chunks_entities[chunk].append(entity_id)
 	entities_chunks[entity_id] = chunk
 	entities_spawn_data[entity_id] = EntitySpawnData(entity_type, entities_empty_properties_array[entity_type], path_to_parent)
 	entities_update_data[entity_id] = EntityUpdateData(entities_empty_properties_array[entity_type], path_to_parent)
-	var already_used_tracker_types = []
-	for res_num in range(len(tracked_properties)):
-		for tracker in trackers:
-			already_used_tracker_types.append(tracker.get_script().get_global_name())
-		if not already_used_tracker_types.has(tracked_properties[res_num].get_script().get_global_name()):
-			tracked_properties[res_num].start()
-			trackers.append(tracked_properties[res_num])
-		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, entity_node, tracked_properties[res_num].property_path, tracked_properties[res_num].property_config)
 	
-	
-func register_entity(entity_id : int):
 	entities_list.append(entity_id)
 	
 
@@ -287,6 +295,7 @@ func track_entities():
 			entities_chunks.erase(entity_id)
 			entities_hierarchy_value.erase(entity_id)
 			update_check.erase(entity_id)
+			nodes_entities.erase(entities_nodes[entity_id])
 			entities_nodes.erase(entity_id)
 			parent_link.erase(entity_id)
 			for tracker in trackers:
@@ -320,19 +329,22 @@ func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_ne
 	var entity_instance = entities_resources[entity_type].instantiate()
 	entity_instance.name = 'e'+str(entity_id)
 	var entity_parent_node = _entities_storage.get_node(spawn_data[2])
-	entities_nodes[entity_id] = entity_instance
-	entity_instance.get_node('EntitySeed').nonchunk = chunk==null
-	update_entity(entity_type, entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
-	entity_instance.get_node('EntitySeed').presets()
-	start_tracking(entity_id, entity_instance, entity_instance.get_node('EntitySeed').tracked_properties, chunk)
+	var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
+	ESeed.nonchunk = chunk==NONCHUNK
+	
+	register_entity(entity_id, entity_instance)
+	ESeed.prepare_properties()
+	prepare_trackers(entity_id, ESeed.tracked_properties)
+	update_entity(entity_id, EntityUpdateData(spawn_data[1], spawn_data[2]))
+	ESeed.presets()
 	entity_parent_node.add_child(entity_instance)
-	register_entity(entity_id)
+	start_tracking(entity_id, entity_instance, chunk)
 	
 	
-func update_entity(entity_type : int, entity_id : int, update_data : Array):
+func update_entity(entity_id : int, update_data : Array):
 	# TODO: path_from_parent changes
 	for tracker:AbstractTracker in trackers:
-		tracker.update_entity(entities_nodes[entity_id], entity_type, entity_id, update_data)
+		tracker.update_entity(entity_id, update_data)
 
 
 ## Establishes entity parenthood and returns chunk_node
@@ -407,6 +419,8 @@ func send_entities_to_guests():
 				for entity_id in chunks_entities[chunk]:
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
+			if peer_id != 1:
+				print('h', observer.loaded_entities)
 			for entity_id in observer.loaded_entities:
 				if deleted_entities.has(entity_id):
 					observer.loaded_entities.erase(entity_id)
@@ -417,12 +431,11 @@ func send_entities_to_guests():
 			for chunk in observer.loaded_chunks:
 				if not chunks_entities.has(chunk): continue
 				for entity_id in chunks_entities[chunk]:
+					if not entities_list.has(entity_id): continue
 					if not observer.loaded_entities.has(entity_id):
 						observer.loaded_entities.append(entity_id)
 						_entities_to_spawn[entity_id] = entities_spawn_data[entity_id]
-		rpc_id(peer_id, 'guest_delete_entities', _entities_to_delete)
-		rpc_id(peer_id, 'guest_update_entities', _entities_to_update)
-		rpc_id(peer_id, 'guest_spawn_entities', _entities_to_spawn)
+		rpc_id(peer_id, 'guest_sync_entities', _entities_to_delete, _entities_to_spawn, _entities_to_update)
 	for entity_id in _checked_entities:
 		update_check[entity_id] = false
 
@@ -432,24 +445,17 @@ func clear_deleted_entities():
 		
 
 @rpc("authority", 'call_local')
-func guest_delete_entities(entities : PackedInt32Array):
+func guest_sync_entities(_delete_entities : PackedInt32Array, _spawn_entities : Dictionary[int, Array], _update_entities : Dictionary[int, Array]):
 	if _ConnectionLogic.peer_role != 'guest': return
-	for entity_id in entities:
+	
+	for entity_id in _delete_entities:
 		entities_nodes[entity_id].queue_free()
-	
-	
-@rpc("authority", 'call_local')
-func guest_spawn_entities(entities : Dictionary[int, Array]):
-	if _ConnectionLogic.peer_role != 'guest': return
-	for entity_id in entities:
-		spawn_entity(entities[entity_id], FROM_E_POS, entity_id)
 		
-
-@rpc("authority", 'call_local')
-func guest_update_entities(entities : Dictionary[int, Array]):
-	if _ConnectionLogic.peer_role != 'guest': return
-	for entity_id in entities:
-		update_entity(FROM_E_POS, entity_id, entities[entity_id])
+	for entity_id in _spawn_entities:
+		spawn_entity(_spawn_entities[entity_id], FROM_E_POS, entity_id)
+		
+	for entity_id in _update_entities:
+		update_entity(entity_id, _update_entities[entity_id])
 
 
 func manage_debug_keybindings():

@@ -22,17 +22,9 @@ var _ChunksCalculator : ChunksCalculator
 var _ConnectionLogic : ConnectionLogic
 	
 	
-func presets():
-	print('pp', player_type)
-	_SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
-	_EntitiesLogic = _SG2Core._EntitiesLogic
-	_MultiplayerLogic = _SG2Core._MultiplayerLogic
-	_ChunksCalculator = _SG2Core._ChunksCalculator
-	_ConnectionLogic = _SG2Core._ConnectionLogic
-	
-	if not get_parent().has_node('EntitySeed'):
-		return
-	get_parent().add_child(VoxelViewer.new())
+func prepare_properties():
+	var voxel_viewer = VoxelViewer.new()
+	get_parent().add_child(voxel_viewer)
 	var ESeed : EntitySeed = $'../EntitySeed'
 	var Entity = get_parent()
 	var player_type_sync = NoninterpolatedTracker.new()
@@ -40,7 +32,17 @@ func presets():
 	var id_sync = NoninterpolatedTracker.new()
 	id_sync.property_path = '$'+str(Entity.get_path_to(self))+'.id'
 	ESeed.tracked_properties.append_array([player_type_sync, id_sync])
+	
+	
+func presets():
+	_SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
+	_EntitiesLogic = _SG2Core._EntitiesLogic
+	_MultiplayerLogic = _SG2Core._MultiplayerLogic
+	_ChunksCalculator = _SG2Core._ChunksCalculator
+	_ConnectionLogic = _SG2Core._ConnectionLogic
+	
 	entity_id = int(get_parent().name.substr(1))
+	
 	host_update_player_data()
 
 

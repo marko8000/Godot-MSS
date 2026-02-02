@@ -1,7 +1,7 @@
 @icon('res://levels/SG2Core/x_res/x_images/entity_icon.png')
 @tool
 extends Node
-## EntityLogic is start point for entity properties tracking, the node is deleted after the function EntitiesLogic.start_tracking is called
+## EntitySeed is start point for entity properties tracking
 class_name EntitySeed
 
 
@@ -11,7 +11,7 @@ class_name EntitySeed
 
 @export var tracked_properties : Array[AbstractTracker]
 @export var guest_presets : Dictionary[String, Variant]
-## nonchunk entities are visible everywhere
+## nonchunk entities are visible everywhere, can't be changed in runtime
 @export var nonchunk : bool = false
 
 
@@ -26,17 +26,18 @@ func entity_prepare():
 	if not _EntitiesLogic.entities_can_start_work:
 		await _EntitiesLogic._entities_start_work
 	
-	if _EntitiesLogic.entities_nodes.find_key(get_parent()) == null:
+	if not _EntitiesLogic.nodes_entities.has(get_parent()):
 		if _ConnectionLogic.peer_role == 'guest':
 			get_parent().queue_free()
 		elif _ConnectionLogic.peer_role == 'host':
 			var entity_id = _EntitiesLogic.get_new_entity_id()
-			_EntitiesLogic.entities_nodes[entity_id] = get_parent()
 			get_parent().name = 'e'+str(entity_id)
+			
+			_EntitiesLogic.register_entity(entity_id, get_parent())
+			prepare_properties()
+			_EntitiesLogic.prepare_trackers(entity_id, tracked_properties)
 			presets()
-			@warning_ignore("incompatible_ternary")
-			_EntitiesLogic.start_tracking(entity_id, get_parent(), tracked_properties, null if nonchunk else _EntitiesLogic.FROM_E_POS)
-			_EntitiesLogic.register_entity(entity_id)
+			_EntitiesLogic.start_tracking(entity_id, get_parent(), _EntitiesLogic.NONCHUNK if nonchunk else _EntitiesLogic.FROM_E_POS)
 					
 
 func _get_configuration_warnings():
@@ -73,11 +74,17 @@ func _entity_node_renamed():
 	base_control.add_child(warning_window)
 	
 
+func prepare_properties():
+	for child in get_parent().get_children():
+		if child.has_method('prepare_properties') and child != self:
+			child.prepare_properties()
+		
+		
 func presets():
 	for child in get_parent().get_children():
 		if child.has_method('presets') and child != self:
 			child.presets()
-	if _ConnectionLogic == null:
+	if not is_instance_valid(_ConnectionLogic):
 		return
 	if _ConnectionLogic.peer_role == 'guest':
 		apply_guest_presets()

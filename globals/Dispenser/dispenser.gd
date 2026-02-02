@@ -28,8 +28,12 @@ func get_resource(from : Node, resource_path : String, cache_key=null, _cache : 
 			for property in resource_path.split('.'):
 				if not '/' in property:
 					if property in resource:
-						resource = resource.get(property)
-						_cache[-1] += ':'+property
+						if not len(resource_path.split('.')) == 1:
+							resource = resource.get(property)
+							_cache[-1] += ':'+property
+						else:
+							resource = resource.get(property)
+							_cache[-1] = property
 					else:
 						return [null, ERR_DOES_NOT_EXIST]
 				else:
@@ -85,7 +89,7 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 						_cache[-1] += ':'+property
 					else:
 						resource.set(property, value)
-						_cache.append(property)
+						_cache[-1] = property
 						if cache_key != null:
 							setter_cache[cache_key] = _cache.duplicate(true)
 						return OK

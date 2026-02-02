@@ -15,11 +15,11 @@ func start():
 	_EntitiesLogic = _SG2Core._EntitiesLogic
 	
 	
-func start_tracking(entity_id : int, entity_node : Node, _value_path : String, _param_data):
+func start_tracking(entity_id : int, _value_path : String, _param_data):
 	pass
 	
 	
-func update_entity(entity_node : Node, entity_type : int, entity_id : int, update_data):
+func update_entity(entity_id : int, update_data):
 	pass
 	
 	
