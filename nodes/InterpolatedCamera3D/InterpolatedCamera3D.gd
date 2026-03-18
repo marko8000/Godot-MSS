@@ -29,7 +29,7 @@ class_name InterpolatedCamera3D
 var target_changed_on_process = false
 
 	
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if target == null or str(target) == '':
 		return
 

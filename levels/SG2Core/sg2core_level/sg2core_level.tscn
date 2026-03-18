@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dk216gheeqnhw"]
+[gd_scene format=3 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/SG2Core/sg2core_level/sg2core_level.gd" id="1_igffl"]
 [ext_resource type="PackedScene" uid="uid://c24xijdlisvfw" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.tscn" id="2_11ecv"]
@@ -24,7 +24,7 @@ background_color = Color(0.6477238, 0.9622573, 0.99999994, 1)
 script = ExtResource("4_7044o")
 metadata/_custom_type_script = "uid://cox4umbac26ux"
 
-[node name="SG2Core" type="Node" node_paths=PackedStringArray("_ConnectionLogic", "_AuthLogic", "_MultiplayerLogic", "_DirectoriesPathsDistributor", "_EntitiesLogic", "_entities_storage", "_ChunksCalculator", "_PlayersActionsLogic", "_InterpolationLogic")]
+[node name="SG2Core" type="Node" unique_id=772013971 node_paths=PackedStringArray("_ConnectionLogic", "_AuthLogic", "_MultiplayerLogic", "_DirectoriesPathsDistributor", "_EntitiesLogic", "_entities_storage", "_ChunksCalculator", "_PlayersActionsLogic", "_InterpolationLogic")]
 script = ExtResource("1_igffl")
 _ConnectionLogic = NodePath("Logics/ConnectionLogic")
 _AuthLogic = NodePath("Logics/AuthLogic")
@@ -36,45 +36,45 @@ _ChunksCalculator = NodePath("Logics/ChunksCalculator")
 _PlayersActionsLogic = NodePath("Logics/PlayersActionsLogic")
 _InterpolationLogic = NodePath("Logics/InterpolationLogic")
 
-[node name="Node3D" type="Node3D" parent="."]
+[node name="Node3D" type="Node3D" parent="." unique_id=1938275434]
 
-[node name="Camera" parent="Node3D" instance=ExtResource("4_k8imj")]
+[node name="Camera" parent="Node3D" unique_id=598262460 instance=ExtResource("4_k8imj")]
 transform = Transform3D(1, 0, 0, 0, 0.67978704, 0.73340964, 0, -0.73340964, 0.67978704, 0, 28.662369, 38.23881)
 translate_speed = 5.0
 rotate_speed = 3.0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D" unique_id=594570041]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 0)
 shadow_enabled = true
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D" unique_id=1363489985]
 environment = SubResource("Environment_dfx6i")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D" unique_id=761801748]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, -2, -10)
 mesh = SubResource("BoxMesh_l0mfm")
 
-[node name="entities_storage" type="Node3D" parent="."]
+[node name="entities_storage" type="Node3D" parent="." unique_id=1915691266]
 
-[node name="Logics" type="Node" parent="."]
+[node name="Logics" type="Node" parent="." unique_id=1172719514]
 
-[node name="ConnectionLogic" parent="Logics" instance=ExtResource("2_11ecv")]
+[node name="ConnectionLogic" parent="Logics" unique_id=1607753961 instance=ExtResource("2_11ecv")]
 connection_mode = SubResource("Resource_dfx6i")
 
-[node name="AntiDDoS" parent="Logics" instance=ExtResource("6_7044o")]
+[node name="AntiDDoS" parent="Logics" unique_id=92478278 instance=ExtResource("6_7044o")]
 
-[node name="AuthLogic" parent="Logics" instance=ExtResource("6_hpyvy")]
+[node name="AuthLogic" parent="Logics" unique_id=1750183913 instance=ExtResource("6_hpyvy")]
 
-[node name="MultiplayerLogic" parent="Logics" instance=ExtResource("3_84t7g")]
+[node name="MultiplayerLogic" parent="Logics" unique_id=243710606 instance=ExtResource("3_84t7g")]
 
-[node name="DirectoriesPathsDistributor" parent="Logics" instance=ExtResource("4_wxnwx")]
+[node name="DirectoriesPathsDistributor" parent="Logics" unique_id=782714419 instance=ExtResource("4_wxnwx")]
 
-[node name="EntitiesLogic" parent="Logics" instance=ExtResource("6_lp5fp")]
+[node name="EntitiesLogic" parent="Logics" unique_id=2088395463 instance=ExtResource("6_lp5fp")]
 
-[node name="InterpolationLogic" parent="Logics" instance=ExtResource("18_dfx6i")]
+[node name="InterpolationLogic" parent="Logics" unique_id=867121876 instance=ExtResource("18_dfx6i")]
 
-[node name="ChunksCalculator" parent="Logics" instance=ExtResource("8_7x2pq")]
+[node name="ChunksCalculator" parent="Logics" unique_id=1330293769 instance=ExtResource("8_7x2pq")]
 
-[node name="PlayersActionsLogic" parent="Logics" instance=ExtResource("10_4g3w8")]
+[node name="PlayersActionsLogic" parent="Logics" unique_id=649734048 instance=ExtResource("10_4g3w8")]
 
-[node name="VoxelTerrain" parent="Logics" instance=ExtResource("21_dfx6i")]
+[node name="VoxelTerrain" parent="Logics" unique_id=1943784626 instance=ExtResource("21_dfx6i")]

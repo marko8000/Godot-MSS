@@ -27,29 +27,32 @@ var entities_can_start_work : bool = false
 signal _entities_start_work
 var trackers : Array[AbstractTracker]
 var updates_per_second : int = 30
+var entities : Dictionary[int, EntityData]
 var entities_list : PackedInt32Array ## = [entity_id, ...]
-var entities_types : Dictionary[int, int] ## = {entity_id: entity_type_shortcut, ...}
-var entities_spawn_data : Dictionary[int, Array] ## = {entity_id: [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.'], ...}
-var entities_update_data : Dictionary[int, Array] ## = {entity_id: [values_array : Array, path_from_entities_storage_to_parent : String = '.'], ...}
-var entities_chunks : Dictionary[int, Variant] ## = {entity_id: chunk, ...}
 var chunks_entities : Dictionary[Variant, PackedInt32Array] ## = {chunk: [entity_id, ...], ...}
-var entities_hierarchy_value : Dictionary[int, int] ## = {entity_id: hierarchy_value, ...}
-var update_check : Dictionary[int, bool] ## {entity_id: bool} if nothing is changed: false
-var parent_link : Dictionary[int, int] ## {entity_id: root_parent_entity_id}
-var entities_nodes : Dictionary[int, Node] ## {entity_id: entity_node}
 var nodes_entities : Dictionary[Node, int]
 var chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloaded
 var entities_property_path_property_array_num : Dictionary[int, Dictionary] ## {entity_type: {property_path: property_array_num}}
 var entities_property_array_num_property_path : Dictionary[int, Array] ## {entity_type: [property_path, ...]}
-var entities_empty_properties_array : Dictionary[int, Array]
+var entities_empty_properties_array : Dictionary[int, Array] ## {entity_type: [null, null, ...]}
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
 var deleted_entities : PackedInt32Array
-var host_entities_spawn_buffer : Dictionary[int, Array] ## = {entity_id: [spawn_data, chunk], ...}
 var reparenting_buffer : Dictionary[int, Array] ## = {entity_id: [entity_node, new_parent, path_to_parent], ...}
 var FROM_E_POS = 'f' ## if chunk == FROM_E_POS: the chunk will be calculated from entity global_position
 var NONCHUNK = null
+class EntityData:
+	var type : int # entity_type_shortcut
+	var spawn_data : Array = [-1, [], '.']# [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
+	var update_data : Array = [[], '.'] # [values_array : Array, path_from_entities_storage_to_parent : String = '.']
+	var chunk
+	var hierarchy_value : int
+	var update_check : bool # if nothing is changed: false
+	var parent_link : int # root_parent_entity_id
+	var node : Node
+	
+	
 
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 1 # host's parameter is max for guest. drawing distance 1 is minimum
@@ -68,7 +71,7 @@ func start():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta : float) -> void:
-	Debug.dstate('Entities / chunks', str(entities_chunks.size())+'e / '+str(chunks_entities.size())+'ch', self)
+	Debug.dstate('Entities / chunks', str(entities_list.size())+'e / '+str(chunks_entities.size())+'ch', self)
 	if _ConnectionLogic.peer_role in ['host', 'guest']:
 		process_reparenting_buffer()
 		await get_tree().process_frame
@@ -84,7 +87,7 @@ func _process(delta : float) -> void:
 					file_entity_summon(EntityFileData('BallRigidBody3D', {'position': Vector3(chunk.x, 30, chunk.z)}))
 		elif _ConnectionLogic.peer_role == 'guest':
 			if current_update_frame == 1:
-				print(entities_spawn_data.keys())
+				pass
 	manage_debug_keybindings()
 		
 		
@@ -117,8 +120,8 @@ func _peer_disconnected(peer_id):
 		if observer.current_chunk in chunks_users_num:
 			chunks_users_num[observer.current_chunk] -= 1
 	players.erase(peer_id)
+		
 	
-
 func EntityFileData(_type, _values_dict : Dictionary, _path_from_entities_storage_to_parent : String = '.') -> Array:
 	return [_type if _type is int else entities_types_shortcuts[_type], _values_dict, _path_from_entities_storage_to_parent]
 	
@@ -247,14 +250,15 @@ func prepare_trackers(entity_id, tracked_properties : Array[AbstractTracker]):
 	
 	
 func register_entity(entity_id : int, entity_node : Node):
-	entities_nodes[entity_id] = entity_node
+	entities[entity_id] = EntityData.new()
+	entities[entity_id].node = entity_node
 	nodes_entities[entity_node] = entity_id
-	entities_types[entity_id] = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
+	entities[entity_id].type = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
 	
 	
 func start_tracking(entity_id : int, entity_node : Node, chunk=FROM_E_POS):
 	entity_node.get_node('EntitySeed').queue_free()
-	var entity_type : int = entities_types[entity_id]
+	var entity_type : int = entities[entity_id].type
 	var path_to_parent : NodePath = _entities_storage.get_path_to(entity_node.get_parent())
 	var chunk_node = establish_entity_parenthood(entity_node, entity_id, path_to_parent)
 	if typeof(chunk) == typeof(FROM_E_POS):
@@ -263,63 +267,64 @@ func start_tracking(entity_id : int, entity_node : Node, chunk=FROM_E_POS):
 		chunks_entities[chunk] = PackedInt32Array()
 	if not chunks_users_num.has(chunk):
 		load_chunk(chunk)
-	entities_types[entity_id] = entity_type
+	entities[entity_id].type = entity_type
 	chunks_entities[chunk].append(entity_id)
-	entities_chunks[entity_id] = chunk
-	entities_spawn_data[entity_id] = EntitySpawnData(entity_type, entities_empty_properties_array[entity_type], path_to_parent)
-	entities_update_data[entity_id] = EntityUpdateData(entities_empty_properties_array[entity_type], path_to_parent)
+	entities[entity_id].chunk = chunk
+	entities[entity_id].spawn_data = EntitySpawnData(entity_type, entities_empty_properties_array[entity_type], path_to_parent)
+	entities[entity_id].update_data = EntityUpdateData(entities_empty_properties_array[entity_type], path_to_parent)
 	
 	entities_list.append(entity_id)
 	
 
 func track_entities():
-	var entities_range : PackedInt32Array
+	var _from : int
+	var _to : int
 	if current_update_frame == 1:
 		var FPS : float = {'host': _InterpolationLogic.server_FPS, 'guest': _InterpolationLogic.guest_FPS}[_ConnectionLogic.peer_role]
 		current_frames_per_update = ceil(FPS / float(updates_per_second))
 		current_update_range_size = len(entities_list) / current_frames_per_update
 	if not current_update_frame == current_frames_per_update:
-		entities_range = entities_list.slice(current_update_range_size*(current_update_frame-1), current_update_range_size*current_update_frame)
+		_from = current_update_range_size*(current_update_frame-1)
+		_to = current_update_range_size*current_update_frame
 		current_update_frame += 1
 	else:
-		entities_range = entities_list.slice(current_update_range_size*(current_update_frame-1))
+		_from = current_update_range_size*(current_update_frame-1)
+		_to = len(entities_list)
 		current_update_frame = 1
-	for entity_id in entities_range:
-		if not is_instance_valid(entities_nodes[entity_id]):
+	for i in range(_from, _to):
+		if len(entities_list)-1 < i:
+			continue
+		var entity_id = entities_list[i]
+		if not is_instance_valid(entities[entity_id].node):
 			entities_list.erase(entity_id)
-			entities_types.erase(entity_id)
 			deleted_entities.append(entity_id)
-			entities_spawn_data.erase(entity_id)
-			entities_update_data.erase(entity_id)
-			chunks_entities[entities_chunks[entity_id]].erase(entity_id)
-			entities_chunks.erase(entity_id)
-			entities_hierarchy_value.erase(entity_id)
-			update_check.erase(entity_id)
-			nodes_entities.erase(entities_nodes[entity_id])
-			entities_nodes.erase(entity_id)
-			parent_link.erase(entity_id)
+			chunks_entities[entities[entity_id].chunk].erase(entity_id)
+			entities.erase(entity_id)
 			for tracker in trackers:
 				tracker.stop_tracking(entity_id)
 			continue
-		if entities_chunks[entity_id] != null:
-			var new_chunk = _ChunksCalculator.position_to_chunk(entities_nodes[parent_link[entity_id]].global_position)
-			if new_chunk != entities_chunks[entity_id]:
+		if entities[entity_id].chunk != null:
+			var new_chunk = _ChunksCalculator.position_to_chunk(entities[entities[entity_id].parent_link].node.global_position)
+			if new_chunk != entities[entity_id].chunk:
 				if not chunks_entities.has(new_chunk):
 					chunks_entities[new_chunk] = PackedInt32Array()
 				if not chunks_users_num.has(new_chunk):
 					load_chunk(new_chunk)
-				chunks_entities[entities_chunks[entity_id]].erase(entity_id)
+				chunks_entities[entities[entity_id].chunk].erase(entity_id)
 				chunks_entities[new_chunk].append(entity_id)
-				entities_chunks[entity_id] = new_chunk
-		var old_data = entities_update_data[entity_id].duplicate(true)
-		entities_spawn_data[entity_id][1] = entities_empty_properties_array[entities_spawn_data[entity_id][0]].duplicate(true)
-		entities_update_data[entity_id][0] = entities_empty_properties_array[entities_spawn_data[entity_id][0]].duplicate(true)
+				entities[entity_id].chunk = new_chunk
+		var old_data = entities[entity_id].update_data.duplicate(true)
+		entities[entity_id].spawn_data[1] = entities_empty_properties_array[entities[entity_id].spawn_data[0]].duplicate(false)
+		entities[entity_id].update_data[0] = entities_empty_properties_array[entities[entity_id].spawn_data[0]].duplicate(false)
 		for tracker in trackers:
 			tracker.track_entity(entity_id)
-		if old_data != entities_update_data[entity_id]:
-			update_check[entity_id] = true
-	for empty_chunk in chunks_entities.keys().filter(func(chunk): return chunks_entities[chunk] == PackedInt32Array()):
-		chunks_entities.erase(empty_chunk)
+		if old_data != entities[entity_id].update_data:
+			entities[entity_id].update_check = true
+	if nodes_entities.has(null):
+		nodes_entities.erase(null)
+	for chunk in chunks_entities:
+		if chunks_entities[chunk].is_empty():
+			chunks_entities.erase(chunk)
 			
 		
 func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_new_entity_id()):
@@ -342,7 +347,9 @@ func spawn_entity(spawn_data : Array, chunk=FROM_E_POS, entity_id : int = get_ne
 	
 	
 func update_entity(entity_id : int, update_data : Array):
-	# TODO: path_from_parent changes
+	# TODO: test path_from_parent changes
+	if entities[entity_id].spawn_data[2] != update_data[1]:
+		reparent_entity(entities[entity_id].node, update_data[1])
 	for tracker:AbstractTracker in trackers:
 		tracker.update_entity(entity_id, update_data)
 
@@ -351,32 +358,34 @@ func update_entity(entity_id : int, update_data : Array):
 func establish_entity_parenthood(entity_node : Node, entity_id : int, path_to_parent : NodePath) -> Node:
 	var chunk_node : Node = entity_node
 	var _chunk_node_path = ''
-	parent_link[entity_id] = entity_id
+	entities[entity_id].parent_link = entity_id
 	for node_name in str(path_to_parent).split('/'):
 		_chunk_node_path += node_name + '/'
 		if node_name[0] == 'e' and node_name.substr(1).is_valid_int():
-			parent_link[entity_id] = int(node_name.substr(1))
+			entities[entity_id].parent_link = int(node_name.substr(1))
 			chunk_node = _entities_storage.get_node(_chunk_node_path)
 			break
-	entities_hierarchy_value[entity_id] = path_to_parent.get_name_count()
+	entities[entity_id].hierarchy_value = path_to_parent.get_name_count()
 	return chunk_node
 	
 
-## Method doesn't reparent entity immediately, it adds entity and its parent to [member reparenting_buffer]
-func reparent_entity(entity_node : Node, new_parent : Node):
-	if str(entity_node.name)[0] == 'e' and entity_node.name.substr(1).is_valid_int():
-		var entity_id = int(entity_node.name.substr(1))
-		var path_to_parent : NodePath = _entities_storage.get_path_to(entity_node.get_parent())
-		reparenting_buffer[entity_id] = [entity_node, new_parent, path_to_parent]
+func reparent_entity(entity_node : Node, new_parent : Node, immediately : bool = false):
+	var entity_id = int(entity_node.name.substr(1))
+	var path_to_parent : NodePath = _entities_storage.get_path_to(entity_node.get_parent())
+	if not immediately:
+		if str(entity_node.name)[0] == 'e' and entity_node.name.substr(1).is_valid_int():
+			reparenting_buffer[entity_id] = [entity_node, new_parent]
+	else:
+		entity_node.reparent(new_parent, false)
+		establish_entity_parenthood(entity_node, entity_id, path_to_parent)
 	
 	
 func process_reparenting_buffer():
 	for entity_id in reparenting_buffer:
-		reparenting_buffer[entity_id][0].reparent(reparenting_buffer[entity_id][1])
-		establish_entity_parenthood(reparenting_buffer[entity_id][0], entity_id, reparenting_buffer[entity_id][2])
+		reparent_entity(reparenting_buffer[entity_id][0], reparenting_buffer[entity_id][1], true)
 		reparenting_buffer.erase(entity_id)
 	
-	
+
 func host_manage_chunks_users():
 	for chunk in chunks_users_num:
 		if chunks_users_num[chunk] <= 0:
@@ -399,7 +408,7 @@ func unload_chunk(chunk):
 	if not chunks_entities.has(chunk):
 		return
 	for entity_id in chunks_entities[chunk]:
-		var entity = _entities_storage.get_node(entities_spawn_data[entity_id][2]+'/e'+str(entity_id))
+		var entity = _entities_storage.get_node(entities[entity_id].spawn_data[2]+'/e'+str(entity_id))
 		if entity:
 			entity.queue_free()
 	
@@ -419,25 +428,24 @@ func send_entities_to_guests():
 				for entity_id in chunks_entities[chunk]:
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
-			if peer_id != 1:
-				print('h', observer.loaded_entities)
 			for entity_id in observer.loaded_entities:
-				if deleted_entities.has(entity_id):
+				if deleted_entities.has(entity_id) or entities[entity_id].chunk not in observer.loaded_chunks:
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
-				elif update_check[entity_id]:
+				elif entities[entity_id].update_check:
 					_checked_entities.append(entity_id)
-					_entities_to_update[entity_id] = entities_update_data[entity_id]
+					_entities_to_update[entity_id] = entities[entity_id].update_data
 			for chunk in observer.loaded_chunks:
 				if not chunks_entities.has(chunk): continue
 				for entity_id in chunks_entities[chunk]:
 					if not entities_list.has(entity_id): continue
 					if not observer.loaded_entities.has(entity_id):
 						observer.loaded_entities.append(entity_id)
-						_entities_to_spawn[entity_id] = entities_spawn_data[entity_id]
+						_entities_to_spawn[entity_id] = entities[entity_id].spawn_data
 		rpc_id(peer_id, 'guest_sync_entities', _entities_to_delete, _entities_to_spawn, _entities_to_update)
 	for entity_id in _checked_entities:
-		update_check[entity_id] = false
+		entities[entity_id].update_check = false
+
 
 
 func clear_deleted_entities():
@@ -449,7 +457,7 @@ func guest_sync_entities(_delete_entities : PackedInt32Array, _spawn_entities : 
 	if _ConnectionLogic.peer_role != 'guest': return
 	
 	for entity_id in _delete_entities:
-		entities_nodes[entity_id].queue_free()
+		entities[entity_id].node.queue_free()
 		
 	for entity_id in _spawn_entities:
 		spawn_entity(_spawn_entities[entity_id], FROM_E_POS, entity_id)
