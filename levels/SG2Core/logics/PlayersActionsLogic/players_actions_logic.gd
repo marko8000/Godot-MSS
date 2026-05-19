@@ -13,6 +13,7 @@ enum {ACTION, MOUSE}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	
 	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 
 

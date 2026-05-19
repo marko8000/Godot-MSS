@@ -12,7 +12,7 @@ func change_exec_to(exec_name : String, caller : Object):
 	Debug.dprint('Exec successfully changed to ' + exec_name, name)
 
 
-func get_current_exec(caller : Object) -> AbstractExec:
+func get_current_exec(caller : Node) -> AbstractExec:
 	return get_tree().current_scene
 	
 

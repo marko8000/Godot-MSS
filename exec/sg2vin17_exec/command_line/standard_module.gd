@@ -1,16 +1,10 @@
 extends CLIModule
-class_name DefaultModule
+class_name StdModule
 
-var _SG2Exec : AbstractExec = ExecManager.get_current_exec(self)
-var _current_level
-var _commandline
 var _debug_control
 
 
-func start():
-	_SG2Exec = ExecManager.get_current_exec(self)
-	_current_level = _SG2Exec.get_current_level(self)
-	_commandline = _SG2Exec._command_line
+func setup():
 	_debug_control = _SG2Exec._debug_control
 
 

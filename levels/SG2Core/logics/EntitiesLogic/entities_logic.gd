@@ -244,9 +244,10 @@ func prepare_trackers(entity_id, tracked_properties : Array[AbstractTracker]):
 		for tracker in trackers:
 			already_used_tracker_types.append(tracker.get_script().get_global_name())
 		if not already_used_tracker_types.has(tracked_properties[res_num].get_script().get_global_name()):
+			tracked_properties[res_num]._SG2Core = _SG2Core
 			tracked_properties[res_num].start()
 			trackers.append(tracked_properties[res_num])
-		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, tracked_properties[res_num].property_path, tracked_properties[res_num].property_config)
+		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, tracked_properties[res_num].property_path, tracked_properties[res_num])
 	
 	
 func register_entity(entity_id : int, entity_node : Node):

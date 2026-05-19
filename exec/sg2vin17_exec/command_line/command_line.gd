@@ -2,7 +2,7 @@ extends MarginContainer
 
 
 @onready var _SG2Exec := ExecManager.get_current_exec(self)
-@onready var _level
+@onready var _current_level
 @export var modules : Array[CLIModule] = []
 
 
@@ -10,18 +10,23 @@ extends MarginContainer
 func _ready() -> void:
 	output('Command Line Log')
 	Debug.on_doutput.connect(_debug_output)
+	for module in modules:
+		module._SG2Exec = _SG2Exec
+		module._current_level = _SG2Exec.get_current_level(self)
+		module._commandline = self
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_level = _SG2Exec.get_current_level(self)
+	_current_level = _SG2Exec.get_current_level(self)
 	$VBoxContainer/RichTextLabel.get_v_scroll_bar().hide()
 	if len(%LineEdit.text) > 0:
 		if %LineEdit.text[0] == '/':
 			%LineEdit.text = %LineEdit.text.substr(1)
 	for module in modules:
-		module.start()
-
+		module._current_level = _current_level
+		module._process(delta)
+		
 
 func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("enter"):

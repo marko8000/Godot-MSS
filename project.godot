@@ -29,7 +29,7 @@ Debug="*res://globals/Debug/debug.gd"
 ZipArchiver="*res://globals/File2ool/ZipArchiver/zip_archiver.gd"
 R="*res://globals/ExecManager/randomizer.gd"
 Dispenser="*res://globals/Dispenser/dispenser.gd"
-G="*res://globals/GetAPI/get_api.gd"
+g="*res://globals/GetAPI/get_api.gd"
 
 [debug]
 

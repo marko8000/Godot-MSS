@@ -4,12 +4,6 @@
 [ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/SG2Core/x_res/x_themes/theme.tres" id="2_1fpld"]
 [ext_resource type="Script" uid="uid://dqj36fslwkrf1" path="res://exec/sg2vin17_exec/debug_control/debug_control.gd" id="3_1fpld"]
 [ext_resource type="Script" uid="uid://vcw23ke10nsk" path="res://exec/sg2vin17_exec/command_line/command_line.gd" id="4_5ycpr"]
-[ext_resource type="Script" uid="uid://c1653dhwjqhnb" path="res://exec/sg2vin17_exec/command_line/cli_module.gd" id="5_b7tt6"]
-[ext_resource type="Script" uid="uid://dpk0gjtcg42bl" path="res://exec/sg2vin17_exec/command_line/standard_module.gd" id="6_1fpld"]
-
-[sub_resource type="Resource" id="Resource_5ycpr"]
-script = ExtResource("6_1fpld")
-metadata/_custom_type_script = "uid://dpk0gjtcg42bl"
 
 [node name="SG2Vin17Exec" type="Node" unique_id=119245812]
 script = ExtResource("1_tqx21")
@@ -70,7 +64,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_5ycpr")
-modules = Array[ExtResource("5_b7tt6")]([SubResource("Resource_5ycpr")])
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CommandLine" unique_id=871228894]
 layout_mode = 2
