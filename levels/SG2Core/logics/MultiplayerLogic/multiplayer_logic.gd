@@ -1,13 +1,10 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## MultiplayerLogic is used to manage players statuses
 class_name MultiplayerLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
-@onready var _AuthLogic := _SG2Core._AuthLogic
-@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
+@onready var _AuthLogic : AuthLogic = _SG2Core._AuthLogic
 
 
 var players_info : Dictionary[int, PlayerData]
@@ -15,15 +12,15 @@ enum player_status {logging_in, preparing, online}
 
 
 class PlayerData:
-	var reg_id
+	var reg_id : int
 	var personal_info := PersonalInfo.new()
 	var status : player_status = player_status.logging_in
 	var status_is_blocked : bool = false
 	func _to_string() -> String:
 		return '{reg_id: {0}, status: {1}, status_is_blocked: {2}}'.format([reg_id, status, status_is_blocked])
 	class PersonalInfo:
-		var player_name : String
-		var language : String
+		var player_name : StringName
+		var language : StringName
 
 
 # Called when the node enters the scene tree for the first time.
@@ -101,3 +98,10 @@ func reg_id_to_peer_id(reg_id):
 func set_language(language):
 	var _peer_id = multiplayer.get_remote_sender_id()
 	players_info[_peer_id].personal_info.language = language
+	
+	
+func string_to_negative_id(player_name: String) -> int:
+	var positive_hash = abs(hash(player_name))
+	if positive_hash == 0:
+		return -1
+	return -positive_hash

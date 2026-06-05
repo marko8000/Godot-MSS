@@ -1,0 +1,2 @@
+class_name Transvoxel
+extends VoxelType

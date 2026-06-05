@@ -4,7 +4,7 @@ extends CharacterBody3D
 @onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
-var _PlayerActions : PlayerActions
+var Actions : PlayerActions
 
 const WALKING_SPEED = 1.5
 const SLOW_SHIFT_SPEED = 3
@@ -16,13 +16,9 @@ var direction : Vector3
 var current_speed : float
 
 
-func _ready() -> void:
-	pass
-
-
 func _process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
-		_PlayerActions = %PlayerInput.get_PlayerActions()
+		Actions = %PlayerInput.get_PlayerActions()
 	
 
 func _physics_process(delta: float) -> void:
@@ -30,27 +26,20 @@ func _physics_process(delta: float) -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_SG2Core.get_node('Node3D/Camera').target = self.get_node('cam')
 	if _ConnectionLogic.peer_role == 'host':
-		if _PlayerActions != null:
-			if not _PlayerActions.input.is_connected(input):
-				_PlayerActions.input.connect(input)
-			if _PlayerActions.sleep:
+		if Actions != null:
+			if not Actions.input.is_connected(input):
+				Actions.input.connect(input)
+			if Actions.sleep:
 				if %Observer.player_type == 'peer':
 					queue_free()
 		else:
 			return
 	else:
 		return
-	
+		
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-		
-	## Interaction with RigidBody
-	#for col_idx in get_slide_collision_count():
-		#var col := get_slide_collision(col_idx)
-		#if col.get_collider() is RigidBody3D:
-			#col.get_collider().apply_central_impulse(-col.get_normal() * 0.3)
-			#col.get_collider().apply_impulse(-col.get_normal() * 0.01, col.get_position())
 	
 	if direction:
 		velocity.x = direction.x * current_speed
@@ -60,26 +49,34 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 
 	move_and_slide()
+	
+	_process_raycast()
+	
+
+@onready var raycast : RayCast3D = $cam/RayCast3D
+var raycast_body : Node
+func _process_raycast() -> void:
+	raycast_body = raycast.get_collider()
 		
 
 var mouse_rotation = Vector2.ZERO
 func input():
 	if _ConnectionLogic.peer_role == 'host':
 		# Handle jump.
-		if _PlayerActions.is_action_just_pressed("jump") and is_on_floor():
+		if Actions.is_action_just_pressed("jump") and is_on_floor():
 			velocity.y = JUMP_VELOCITY
 			
 		# Handle movement speed
-		if _PlayerActions.is_action_pressed('slow_shift'):
+		if Actions.is_action_pressed('slow_shift'):
 			current_speed = SLOW_SHIFT_SPEED
-		elif _PlayerActions.is_action_pressed('fast_shift'):
+		elif Actions.is_action_pressed('fast_shift'):
 			current_speed = FAST_SHIFT_SPEED
 		else:
 			current_speed = WALKING_SPEED
 	
 		# Handle mouse rotation
-		if _PlayerActions.actions.has('mouse_relative'):
-			var mouse_relative = _PlayerActions.actions.mouse_relative[0]
+		if Actions.actions.has('mouse_relative'):
+			var mouse_relative = Actions.actions.mouse_relative[0]
 			mouse_rotation.y -= mouse_relative.x * ROTATION_SPEED
 			mouse_rotation.x -= mouse_relative.y * ROTATION_SPEED
 			if mouse_rotation.x < -1.2: mouse_rotation.x = -1.2
@@ -89,5 +86,10 @@ func input():
 		
 		# Get the input direction and handle the movement/deceleration.
 		# As good practice, you should replace UI actions with custom gameplay actions.
-		var input_dir = _PlayerActions.get_vector("move_left", "move_right", "move_forward", "move_back")
+		var input_dir = Actions.get_vector("move_left", "move_right", "move_forward", "move_back")
 		direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		
+		if Actions.is_action_pressed("break"):
+			pass
+		if Actions.is_action_just_pressed('place'):
+			pass 

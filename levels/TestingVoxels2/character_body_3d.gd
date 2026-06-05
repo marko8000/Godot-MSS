@@ -14,7 +14,6 @@ const ROTATION_SPEED = 0.003
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
@@ -55,7 +54,7 @@ func _physics_process(delta: float) -> void:
 
 
 var rot = Vector2.ZERO
-func _input(e):
+func _input(e) -> void:
 	if e is InputEventMouseMotion:
 		rot.y -= e.relative.x * ROTATION_SPEED
 		rot.x -= e.relative.y * ROTATION_SPEED

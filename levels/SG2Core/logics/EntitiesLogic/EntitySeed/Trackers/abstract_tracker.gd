@@ -1,3 +1,4 @@
+@abstract
 extends Resource
 class_name AbstractTracker
 
@@ -7,9 +8,6 @@ var _EntitiesLogic : EntitiesLogic
 
 ## Example: $SomeNode.value or value or $SomeNode
 @export var property_path : String
-@export var client_side_mode : ClientSideMode
-enum ClientSideMode {REAL_TIME, PREDICT}
-
 
 var tracked_entities : Dictionary[int, TrackedEntity]
 var entity_type_data : Dictionary[int, EntityTypeData]
@@ -21,7 +19,7 @@ class TrackedEntity:
 	
 
 class EntityTypeData:
-	var properties_path_config : Dictionary[String, AbstractTracker]
+	var properties_config : Dictionary[String, AbstractTracker]
 	var entities_property_path_property_array_num : Dictionary
 	var entities_property_array_num_property_path : Array
 

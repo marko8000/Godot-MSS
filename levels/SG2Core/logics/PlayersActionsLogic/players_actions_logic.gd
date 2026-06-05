@@ -1,11 +1,9 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## PlayersActionsLogic is used by host to get guests actions
 ## Examples of player actions: [Input], [InputEvent]
 class_name PlayersActionsLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 
 enum {ACTION, MOUSE}
@@ -13,7 +11,6 @@ enum {ACTION, MOUSE}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	
 	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 
 

@@ -1,14 +1,12 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## AuthLogic is used verify player identification
 class_name AuthLogic
 
 
 #TODO
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
-@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
-@onready var AuthControl = $AuthControl
+@onready var _PathRegistry := _SG2Core._PathRegistry
+#@onready var AuthControl = $AuthControl
 
 #@onready var auth_token_file = _DirectoriesPathsDistributor.path('auth_token_file')
 #@onready var users_auth_database = _DirectoriesPathsDistributor.path('users_auth_database_file')

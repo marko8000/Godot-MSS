@@ -1,5 +1,4 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## ConnectionLogic is used to connect guests with host and share multiplayer peer with other logics
 class_name ConnectionLogic
 

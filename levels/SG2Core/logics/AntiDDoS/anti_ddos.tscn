@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://svh7yub544mr"]
-
-[ext_resource type="Script" uid="uid://c2q0co5tjcop1" path="res://levels/SG2Core/logics/AntiDDoS/anti_ddos.gd" id="1_y2486"]
-
-[node name="AntiDDoS" type="Node"]
-script = ExtResource("1_y2486")

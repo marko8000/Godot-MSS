@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://spgwe2ooiv28"]
 
 [ext_resource type="Script" uid="uid://c6uegurw67chh" path="res://exec/sg2vin17_exec/sg2vin17_exec.gd" id="1_tqx21"]
-[ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/SG2Core/x_res/x_themes/theme.tres" id="2_1fpld"]
 [ext_resource type="Script" uid="uid://dqj36fslwkrf1" path="res://exec/sg2vin17_exec/debug_control/debug_control.gd" id="3_1fpld"]
 [ext_resource type="Script" uid="uid://vcw23ke10nsk" path="res://exec/sg2vin17_exec/command_line/command_line.gd" id="4_5ycpr"]
 [ext_resource type="Script" uid="uid://c1653dhwjqhnb" path="res://exec/sg2vin17_exec/command_line/cli_module.gd" id="5_b7tt6"]
@@ -22,7 +21,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_1fpld")
 
 [node name="Debug" type="MarginContainer" parent="Control" unique_id=951418698]
 visible = false

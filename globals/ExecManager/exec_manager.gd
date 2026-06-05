@@ -2,10 +2,10 @@
 extends Node
 
 
-var language : String = 'EN_us'
+var language : StringName = 'EN_us'
 
 
-func change_exec_to(exec_name : String, caller : Object):
+func change_exec_to(exec_name : StringName, caller : Object):
 	var exec_dir = File2ool.path(['res://exec', exec_name])
 	var exec_scene_path = File2ool.path([exec_dir, exec_name + '.tscn'])
 	get_tree().change_scene_to_file(exec_scene_path)
@@ -14,6 +14,10 @@ func change_exec_to(exec_name : String, caller : Object):
 
 func get_current_exec(caller : Node) -> AbstractExec:
 	return get_tree().current_scene
+	
+
+func get_current_level(caller : Object):
+	return get_current_exec(self).get_current_level(self)
 	
 
 func get_available_execs():

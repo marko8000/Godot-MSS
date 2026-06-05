@@ -1,2 +1,0 @@
-level_main_scene:survgos2.tscn
-developer:vvin17

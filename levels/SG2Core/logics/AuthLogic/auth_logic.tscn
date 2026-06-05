@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dshi5atmhqw0g"]
-
-[ext_resource type="Script" uid="uid://de20o5j16ketc" path="res://levels/SG2Core/logics/AuthLogic/auth_logic.gd" id="1_sjebs"]
-
-[node name="AuthLogic" type="Node"]
-script = ExtResource("1_sjebs")

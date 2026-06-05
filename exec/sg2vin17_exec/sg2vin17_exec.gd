@@ -13,7 +13,7 @@ signal level_loaded
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	load_level('mainmenu_alpha_dev')
+	load_level('MainMenu')
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -23,8 +23,8 @@ func _process(delta: float) -> void:
 
 var loading_level_process_data = {'level_path': null, 'progress': [], 'status': 0}
 func load_level(level_name):
-	assert(FileAccess.file_exists(File2ool.path(['res://levels', level_name, 'level_info.txt'])), 'Failed to load level '+'"'+level_name+'"')
-	var _level_scene_path = File2ool.path(['res://levels/', level_name, File2ool.give_value_from_file_readlines(File2ool.path(['res://levels', level_name, 'level_info.txt']), 'level_main_scene')])
+	assert(FileAccess.file_exists(File2ool.path(['res://levels', level_name, level_name+'.tscn'])), 'Failed to load level '+'"'+level_name+'"')
+	var _level_scene_path = File2ool.path(['res://levels/', level_name, level_name+'.tscn'])
 	loading_level_process_data['level_path'] = _level_scene_path
 	loading_level_process_data['progress'] = []
 	loading_level_process_data['status'] = 0

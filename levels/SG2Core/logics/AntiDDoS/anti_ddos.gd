@@ -1,5 +1,4 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## AntiDDoS is used to protect server from excessive RPC calls
 class_name AntiDDoS
 

@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://coiof8q4p5udw"]
+
+[ext_resource type="Script" uid="uid://dau6w17gd0rkv" path="res://levels/MainMenu/main_menu.gd" id="1_45ot8"]
+[ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/MainMenu/main_menu_theme.tres" id="2_qtvan"]
+[ext_resource type="Texture2D" uid="uid://cwymkxeduqt3u" path="res://levels/SG2Core/x_res/x_images/sg_logo_icon.svg" id="3_h8s48"]
+[ext_resource type="Texture2D" uid="uid://brtuyp1x1xrix" path="res://levels/SG2Core/x_res/x_images/search_icon.png" id="4_pr6oe"]
+
+[node name="MainMenu" type="Node" unique_id=348868686]
+script = ExtResource("1_45ot8")
+
+[node name="Control" type="Control" parent="." unique_id=1341894223]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_qtvan")
+
+[node name="Panel" type="Panel" parent="Control" unique_id=947502936]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=2121614487]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=784973124]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/HBoxContainer" unique_id=50670471]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=195047144]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+texture = ExtResource("3_h8s48")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=596757291]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "SomeGame 2"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/VBoxContainer/HBoxContainer" unique_id=1257215011]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=894765694]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_pr6oe")
+expand_mode = 1
+
+[node name="LineEdit" type="LineEdit" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=2019170709]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 30
+text = "Search"
+
+[node name="TabContainer" type="TabContainer" parent="Control/VBoxContainer" unique_id=1659441120]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 30
+tab_alignment = 1
+current_tab = 0
+tabs_position = 1
+
+[node name="Home" type="TabBar" parent="Control/VBoxContainer/TabContainer" unique_id=62103443]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/VBoxContainer/TabContainer/Home" unique_id=787147104]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/TabContainer/Home/ScrollContainer" unique_id=621685236]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Control/VBoxContainer/TabContainer/Home/ScrollContainer/HBoxContainer" unique_id=1754478760]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Control/VBoxContainer/TabContainer/Home" unique_id=1802177905]
+layout_mode = 0
+offset_left = 481.0
+offset_top = 216.0
+offset_right = 656.0
+offset_bottom = 244.0
+text = "Button"
+
+[node name="Trends" type="TabBar" parent="Control/VBoxContainer/TabContainer" unique_id=901153866]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="TabBar3" type="TabBar" parent="Control/VBoxContainer/TabContainer" unique_id=900899715]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="TabBar4" type="TabBar" parent="Control/VBoxContainer/TabContainer" unique_id=1724295660]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3

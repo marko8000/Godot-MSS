@@ -1,10 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://b5uekkwcq0r5x"]
+[gd_scene format=3 uid="uid://b5uekkwcq0r5x"]
 
-[ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/SG2Core/x_res/x_themes/theme.tres" id="1_rhdnv"]
 [ext_resource type="Script" uid="uid://dhe8nl27v1v3m" path="res://levels/mainmenu_alpha_dev/mainmenu_alpha_dev.gd" id="2_2coch"]
 [ext_resource type="Script" uid="uid://bscaxt4mejjgc" path="res://levels/mainmenu_alpha_dev/game_content_page.gd" id="3_2l15w"]
 [ext_resource type="Texture2D" uid="uid://bn2452e1dr8rp" path="res://levels/SG2Core/x_res/x_images/vin17s_games_logo.png" id="6_rhdnv"]
-[ext_resource type="Texture2D" uid="uid://np5dxnuue8p0" path="res://levels/SG2Core/x_res/x_images/sg_logo.svg" id="6_wumac"]
+[ext_resource type="Texture2D" uid="uid://np5dxnuue8p0" path="res://levels/SG2Core/x_res/x_images/sg_logo_dark.svg" id="6_wumac"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="7_5jy2i"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_p276i"]
@@ -29,7 +28,7 @@ albedo_texture = ExtResource("7_5jy2i")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_vobp1"]
 
-[node name="Mainmenu Alpha Dev" type="Control"]
+[node name="Mainmenu Alpha Dev" type="Control" unique_id=1001412841]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,10 +36,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 8
-theme = ExtResource("1_rhdnv")
 script = ExtResource("2_2coch")
 
-[node name="MainPage" type="Panel" parent="."]
+[node name="MainPage" type="Panel" parent="." unique_id=59644859]
 custom_minimum_size = Vector2(300, 350)
 layout_mode = 1
 anchors_preset = 6
@@ -54,7 +52,7 @@ offset_bottom = 150.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="TextureButton" type="TextureButton" parent="MainPage"]
+[node name="TextureButton" type="TextureButton" parent="MainPage" unique_id=1101169324]
 layout_mode = 1
 offset_left = -852.0
 offset_top = -174.0
@@ -63,7 +61,7 @@ offset_bottom = 1326.0
 scale = Vector2(0.1, 0.1)
 texture_normal = ExtResource("6_rhdnv")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MainPage"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPage" unique_id=1527712882]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -71,44 +69,44 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="GameContent" type="Button" parent="MainPage/VBoxContainer"]
+[node name="GameContent" type="Button" parent="MainPage/VBoxContainer" unique_id=1267170031]
 layout_mode = 2
 size_flags_vertical = 3
 text = "GamesStore"
 
-[node name="Recent" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Recent" type="Button" parent="MainPage/VBoxContainer" unique_id=1673918280]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Recent Games"
 
-[node name="Friends" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Friends" type="Button" parent="MainPage/VBoxContainer" unique_id=2070130816]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Friends"
 
-[node name="Profile" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Profile" type="Button" parent="MainPage/VBoxContainer" unique_id=571069554]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Profile"
 
-[node name="Servers" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Servers" type="Button" parent="MainPage/VBoxContainer" unique_id=986913835]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
 text = "Servers"
 
-[node name="Modifications" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Modifications" type="Button" parent="MainPage/VBoxContainer" unique_id=452337525]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Modifications"
 
-[node name="Levels" type="Button" parent="MainPage/VBoxContainer"]
+[node name="Levels" type="Button" parent="MainPage/VBoxContainer" unique_id=1485128879]
 modulate = Color(1, 1, 1, 0.0941176)
 layout_mode = 2
 size_flags_vertical = 3
 text = "Levels"
 
-[node name="LevelsPage" type="Panel" parent="."]
+[node name="LevelsPage" type="Panel" parent="." unique_id=92317077]
 visible = false
 custom_minimum_size = Vector2(500, 500)
 layout_mode = 1
@@ -119,7 +117,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_2l15w")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="LevelsPage"]
+[node name="ScrollContainer" type="ScrollContainer" parent="LevelsPage" unique_id=912674556]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -127,12 +125,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LevelsPage/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsPage/ScrollContainer" unique_id=846287496]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LevelsSettings" type="Button" parent="LevelsPage"]
+[node name="LevelsSettings" type="Button" parent="LevelsPage" unique_id=113427127]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -145,48 +143,48 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "..."
 
-[node name="Back" type="Button" parent="LevelsPage"]
+[node name="Back" type="Button" parent="LevelsPage" unique_id=1774758979]
 layout_mode = 0
 offset_right = 27.0
 offset_bottom = 39.0
 text = "<"
 
-[node name="Node3D" type="Node3D" parent="."]
+[node name="Node3D" type="Node3D" parent="." unique_id=1858050018]
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Node3D"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Node3D" unique_id=516764789]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/StaticBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/StaticBody3D" unique_id=1574619849]
 mesh = SubResource("BoxMesh_p276i")
 surface_material_override/0 = SubResource("StandardMaterial3D_u8xkt")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/StaticBody3D" unique_id=696591161]
 shape = SubResource("ConcavePolygonShape3D_y8gm7")
 
-[node name="Camera3D" type="Camera3D" parent="Node3D"]
+[node name="Camera3D" type="Camera3D" parent="Node3D" unique_id=412459092]
 transform = Transform3D(-0.987789, 0, -0.155797, 0, 1, 0, 0.155797, 0, -0.987789, -4.3362, 2, -7)
 
-[node name="Timer" type="Timer" parent="Node3D"]
+[node name="Timer" type="Timer" parent="Node3D" unique_id=1154867693]
 wait_time = 2.0
 autostart = true
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D" unique_id=880452866]
 transform = Transform3D(0.836516, 0.375, -0.399519, -0.224144, 0.899519, 0.375, 0.5, -0.224144, 0.836516, -6, 6, 4)
 shadow_enabled = true
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D" unique_id=2070711345]
 environment = SubResource("Environment_y8gm7")
 
-[node name="RigidBody3D" type="RigidBody3D" parent="Node3D"]
+[node name="RigidBody3D" type="RigidBody3D" parent="Node3D" unique_id=1838430104]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/RigidBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/RigidBody3D" unique_id=359784127]
 mesh = SubResource("SphereMesh_wumac")
 surface_material_override/0 = SubResource("StandardMaterial3D_iavgf")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/RigidBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/RigidBody3D" unique_id=71380920]
 shape = SubResource("SphereShape3D_vobp1")
 
-[node name="Timer2" type="Timer" parent="Node3D"]
+[node name="Timer2" type="Timer" parent="Node3D" unique_id=300761715]
 wait_time = 30.0
 autostart = true
 

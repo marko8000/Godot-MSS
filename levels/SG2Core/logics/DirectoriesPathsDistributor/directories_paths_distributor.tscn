@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bjcb4comxta17"]
-
-[ext_resource type="Script" uid="uid://tr8636mmirwa" path="res://levels/SG2Core/logics/DirectoriesPathsDistributor/directories_paths_distributor.gd" id="1_brtjj"]
-
-[node name="DirectoriesPathsDistributor" type="Node"]
-script = ExtResource("1_brtjj")

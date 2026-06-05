@@ -1,21 +1,19 @@
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo.svg')
-extends Node
+extends SG2Logic
 ## EntitiesLogic saves/loads entities state, transfers entities data between host and guests.
 ## chunk = null is used for nonchunk entities
 class_name EntitiesLogic
 
 
-@onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _MultiplayerLogic := _SG2Core._MultiplayerLogic
 @onready var _InterpolationLogic := _SG2Core._InterpolationLogic
-@onready var _DirectoriesPathsDistributor := _SG2Core._DirectoriesPathsDistributor
+@onready var _PathRegistry := _SG2Core._PathRegistry
 @onready var _entities_storage := _SG2Core._entities_storage
 @onready var _ChunksCalculator := _SG2Core._ChunksCalculator
 
-@onready var entities_dir = _DirectoriesPathsDistributor.path('entities_dir')
-@onready var entities_data_dir = _DirectoriesPathsDistributor.path('entities_data_dir')
-@onready var entities_global_file = _DirectoriesPathsDistributor.path('entities_global_file')
+@onready var entities_dir = _PathRegistry.path('entities_dir')
+@onready var entities_data_dir = _PathRegistry.path('entities_data_dir')
+@onready var entities_global_file = _PathRegistry.path('entities_global_file')
 
 @onready var entities_global = load_entities_global()
 @onready var entities_types_shortcuts : Dictionary[String, int] = get_entities_types_shortcuts()

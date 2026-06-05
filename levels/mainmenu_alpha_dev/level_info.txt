@@ -1,2 +1,0 @@
-level_main_scene:mainmenu_alpha_dev.tscn
-developer:vvin17

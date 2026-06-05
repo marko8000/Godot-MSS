@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cdc2coyv3bvdd"]
-
-[ext_resource type="Script" uid="uid://dohcp2ffayt45" path="res://levels/SG2Core/logics/EntitiesLogic/entities_logic.gd" id="1_fn2gw"]
-
-[node name="EntitiesLogic" type="Node"]
-script = ExtResource("1_fn2gw")

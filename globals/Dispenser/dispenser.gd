@@ -1,7 +1,6 @@
 extends Node
 
 
-#TODO
 var getter_cache : Dictionary[Variant, Array] # {cache_key: [PathToNode : NodePath, PropertiesIndexed : String, [GetMethodName, int], ...}
 var setter_cache : Dictionary[Variant, Array] # {cache_key: [PathToNode : NodePath, PropertiesIndexed : String, [GetOrSetMethodName, int], ...}
 

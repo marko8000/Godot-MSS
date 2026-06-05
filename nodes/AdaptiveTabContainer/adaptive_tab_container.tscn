@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://dlqtowtk41bww"]
+
+[ext_resource type="Script" uid="uid://5cd13wsuyhwe" path="res://nodes/AdaptiveTabContainer/adaptive_tab_container.gd" id="1_wlqmo"]
+
+[node name="AdaptiveTabContainer" type="HBoxContainer" unique_id=1002059718]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_wlqmo")
+
+[node name="TabsLeft" type="VBoxContainer" parent="." unique_id=1965372087]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1152164814]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TabsTop" type="HBoxContainer" parent="VBoxContainer" unique_id=1340561243]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer" unique_id=1234069268]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TabsBottom" type="HBoxContainer" parent="VBoxContainer" unique_id=2082454131]
+layout_mode = 2
+
+[node name="TabsRight" type="VBoxContainer" parent="." unique_id=931989997]
+layout_mode = 2
+
+[connection signal="child_entered_tree" from="." to="." method="_on_child_entered_tree"]
