@@ -5,7 +5,7 @@ extends HTTPRequest
 @onready var DirectoriesPathsDistributor = SG2Core.giveo('DirectoriesPathsDistributor')
 @onready var GameResourcesInstallLogic = SG2Core.giveo('GameResourcesInstallLogic')
 
-@onready var DownloadedContent = FilesManager.create_path([DirectoriesPathsDistributor.give_path('DownloadedContent')])
+@onready var DownloadedContent = File2ool.create_path([DirectoriesPathsDistributor.give_path('DownloadedContent')])
 
 
 var game_resource_name : String
@@ -58,7 +58,7 @@ func next_action():
 	
 
 func _http_request_downloaded_file_body(result, response_code, headers, body):
-	var _file_path = FilesManager.create_path([DownloadedContent, game_resource_name + '.sg2downloaded'])
+	var _file_path = File2ool.create_path([DownloadedContent, game_resource_name + '.sg2downloaded'])
 	var file = FileAccess.open(_file_path, FileAccess.WRITE)
 	if file != null:
 		file.store_buffer(body)
@@ -69,18 +69,18 @@ func _http_request_downloaded_file_body(result, response_code, headers, body):
 	
 		
 func _change_source_file_extension(source, new_extension):
-	var _file_extension = FilesManager.get_file_extension(source)
+	var _file_extension = File2ool.get_file_extension(source)
 	if not _file_extension == null and not 'sg2' in _file_extension:
-		game_resource.source = FilesManager.change_file_extension(source, new_extension)
+		game_resource.source = File2ool.change_file_extension(source, new_extension)
 	else:
-		game_resource.source = FilesManager.add_file_extension(source, new_extension)
+		game_resource.source = File2ool.add_file_extension(source, new_extension)
 		
 
 func unzip_game_resource():
-	ZipArchiver.unpack(game_resource.source, FilesManager.create_path([DownloadedContent, game_resource_name]), Callable(self, '_unpacking_game_resource_result'))
+	ZipArchiver.unpack(game_resource.source, File2ool.create_path([DownloadedContent, game_resource_name]), Callable(self, '_unpacking_game_resource_result'))
 	
 	
 func _unpacking_game_resource_result(result):
 	if result.elements_iteration == len(result.list_of_archive_parts):
-		game_resource.source = FilesManager.create_path([DownloadedContent, game_resource_name])
+		game_resource.source = File2ool.create_path([DownloadedContent, game_resource_name])
 		next_action()

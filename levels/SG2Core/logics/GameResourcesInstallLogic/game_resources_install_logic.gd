@@ -11,8 +11,8 @@ extends Node
 
 @onready var DownloadedContent = DirectoriesPathsDistributor.give_path("DownloadedContent")
 
-@onready var GameResourcesInstallLogic_dir = FilesManager.create_path([DirectoriesPathsDistributor.give_path('SavesLogics_dir'), 'GameResourcesInstallLogic'])
-@onready var installer_game_resources_scene_path = FilesManager.create_path([GameResourcesInstallLogic_dir, 'installer_game_resources/installer_game_resources.tscn'])
+@onready var GameResourcesInstallLogic_dir = File2ool.create_path([DirectoriesPathsDistributor.give_path('SavesLogics_dir'), 'GameResourcesInstallLogic'])
+@onready var installer_game_resources_scene_path = File2ool.create_path([GameResourcesInstallLogic_dir, 'installer_game_resources/installer_game_resources.tscn'])
 
 
 @onready var game_resources : Dictionary = {'test_game_resource': {'source': 'https://png.pngtree.com/png-vector/20221217/ourmid/pngtree-example-sample-grungy-stamp-vector-png-image_15560590.png', 'actions': ['http_download_file_from_body', ['change_extension', 'png']]},

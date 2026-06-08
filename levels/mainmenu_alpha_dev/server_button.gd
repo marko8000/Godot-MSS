@@ -50,10 +50,10 @@ func _on_apply_pressed() -> void:
 	DirAccess.rename_absolute('user://ServersDataSaves/'+server_name, 'user://ServersDataSaves/'+$VBoxContainer4/NameLineEdit.text)
 	var address_splitted = $VBoxContainer5/AddressLineEdit.text.split(':')
 	if len(address_splitted) < 2:
-		FilesManager.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'ip', $VBoxContainer5/AddressLineEdit.text)
+		File2ool.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'ip', $VBoxContainer5/AddressLineEdit.text)
 	else:
-		FilesManager.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'ip', address_splitted[0])
-		FilesManager.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'port', address_splitted[1])
+		File2ool.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'ip', address_splitted[0])
+		File2ool.change_value_from_file_readlines('user://ServersDataSaves/'+server_name+'/connection_settings.txt', 'port', address_splitted[1])
 		
 		
 	$'../../../../'.refresh()

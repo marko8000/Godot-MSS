@@ -1,7 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://b0iu1recooreu"]
 
-[ext_resource type="Texture2D" uid="uid://787b1kotgqep" path="res://levels/MainMenu/images/circle.png" id="1_054oc"]
-[ext_resource type="Texture2D" uid="uid://daymbnrm8vvwr" path="res://levels/MainMenu/images/circle_highlight.png" id="2_wfbtg"]
+[ext_resource type="Texture2D" uid="uid://787b1kotgqep" path="res://levels/MainMenu/images/circle.png" id="1_48agk"]
+[ext_resource type="Texture2D" uid="uid://daymbnrm8vvwr" path="res://levels/MainMenu/images/circle_highlight.png" id="2_bkwuv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8cjnd"]
 bg_color = Color(0.28485027, 0.2848503, 0.28485018, 1)
@@ -10,39 +10,33 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dps53"]
-bg_color = Color(0.34781694, 0.34781697, 0.34781682, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6o0dm"]
+bg_color = Color(0.84705883, 0.84705883, 0.84705883, 1)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_un1om"]
-bg_color = Color(0.31431612, 0.31431612, 0.31431603, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tgo2f"]
-bg_color = Color(0.34781694, 0.34781697, 0.34781682, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8hih0"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oeg1c"]
-bg_color = Color(0.7121294, 0.7121294, 0.71212924, 1)
+bg_color = Color(0.84705883, 0.84705883, 0.84705883, 1)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sdqip"]
-bg_color = Color(0.29586652, 0.29586652, 0.29586637, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oeg1c"]
+bg_color = Color(0.9515795, 0.95157963, 0.9515794, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fmdha"]
-bg_color = Color(0.32544088, 0.3254409, 0.32544076, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_48agk"]
+bg_color = Color(0.6624523, 0.66245234, 0.66245216, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3wxs5"]
 bg_color = Color(0.3515629, 0.35156292, 0.35156274, 1)
@@ -59,10 +53,10 @@ bg_color = Color(0.87058824, 0.87058824, 0.87058824, 0.99607843)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3jl2v"]
 bg_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 50
-corner_radius_top_right = 50
-corner_radius_bottom_right = 50
-corner_radius_bottom_left = 50
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_054oc"]
 
@@ -93,21 +87,11 @@ Button/colors/font_hover_color = Color(0, 0, 0, 1)
 Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
 Button/colors/font_outline_color = Color(1, 1, 1, 1)
 Button/colors/font_pressed_color = Color(0, 0, 0, 1)
-Button/colors/icon_disabled_color = Color(1, 1, 1, 0.4)
-Button/colors/icon_focus_color = Color(0, 0, 0, 1)
-Button/colors/icon_hover_color = Color(0, 0, 0, 1)
-Button/colors/icon_hover_pressed_color = Color(0, 0, 0, 1)
-Button/colors/icon_normal_color = Color(0, 0, 0, 1)
-Button/colors/icon_pressed_color = Color(0, 0, 0, 1)
 Button/styles/disabled = SubResource("StyleBoxFlat_8cjnd")
-Button/styles/focus = SubResource("StyleBoxFlat_dps53")
 Button/styles/hover = SubResource("StyleBoxFlat_6o0dm")
-Button/styles/hover_mirrored = SubResource("StyleBoxFlat_un1om")
 Button/styles/hover_pressed = SubResource("StyleBoxFlat_tgo2f")
-Button/styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_8hih0")
 Button/styles/normal = SubResource("StyleBoxFlat_oeg1c")
-Button/styles/normal_mirrored = SubResource("StyleBoxFlat_sdqip")
-Button/styles/pressed_mirrored = SubResource("StyleBoxFlat_fmdha")
+Button/styles/pressed = SubResource("StyleBoxFlat_48agk")
 CheckBox/colors/checkbox_checked_color = Color(0, 0, 0, 1)
 CheckBox/colors/checkbox_unchecked_color = Color(0, 0, 0, 1)
 CheckBox/colors/font_color = Color(0, 0, 0, 1)
@@ -152,10 +136,11 @@ ColorPickerButton/colors/icon_hover_color = Color(1, 1, 1, 1)
 ColorPickerButton/colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 ColorPickerButton/colors/icon_normal_color = Color(1, 1, 1, 1)
 ColorPickerButton/colors/icon_pressed_color = Color(1, 1, 1, 1)
-HSlider/icons/grabber = ExtResource("1_054oc")
-HSlider/icons/grabber_highlight = ExtResource("2_wfbtg")
+HSlider/icons/grabber = ExtResource("1_48agk")
+HSlider/icons/grabber_highlight = ExtResource("2_bkwuv")
 Label/colors/font_color = Color(0, 0, 0, 1)
 LineEdit/colors/font_color = Color(0, 0, 0, 1)
+LineEdit/colors/font_placeholder_color = Color(0.31431574, 0.3143163, 0.31431577, 0.6)
 LineEdit/styles/normal = SubResource("StyleBoxFlat_d8aud")
 LineEdit/styles/read_only = SubResource("StyleBoxFlat_pjy8a")
 MenuButton/colors/font_color = Color(0, 0, 0, 1)
@@ -221,5 +206,5 @@ TextEdit/colors/selection_color = Color(0.5, 0.5, 0.5, 1)
 TextEdit/colors/word_highlighted_color = Color(0.5, 0.5, 0.5, 0.25)
 TextEdit/styles/normal = SubResource("StyleBoxFlat_f8swg")
 TextEdit/styles/read_only = SubResource("StyleBoxFlat_5sbyc")
-VSlider/icons/grabber = ExtResource("1_054oc")
-VSlider/icons/grabber_highlight = ExtResource("2_wfbtg")
+VSlider/icons/grabber = ExtResource("1_48agk")
+VSlider/icons/grabber_highlight = ExtResource("2_bkwuv")
