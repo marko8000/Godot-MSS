@@ -4,10 +4,13 @@
 [ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/MainMenu/main_menu_theme_light.tres" id="2_qtvan"]
 [ext_resource type="Texture2D" uid="uid://cwymkxeduqt3u" path="res://levels/SG2Core/x_res/x_images/sg_logo_icon.svg" id="3_h8s48"]
 [ext_resource type="Texture2D" uid="uid://brtuyp1x1xrix" path="res://levels/SG2Core/x_res/x_images/search_icon.png" id="4_pr6oe"]
-[ext_resource type="PackedScene" uid="uid://dlqtowtk41bww" path="res://nodes/AdaptiveTabContainer/adaptive_tab_container.tscn" id="5_obe7s"]
-[ext_resource type="Script" uid="uid://co8neb3eojesa" path="res://nodes/IconFlatHoverButton/icon_flat_hover_button.gd" id="6_da0pr"]
-[ext_resource type="Texture2D" uid="uid://787b1kotgqep" path="res://levels/MainMenu/images/circle.png" id="6_pdm73"]
-[ext_resource type="Texture2D" uid="uid://daymbnrm8vvwr" path="res://levels/MainMenu/images/circle_highlight.png" id="8_dvenc"]
+[ext_resource type="Script" uid="uid://mb8fethyj45n" path="res://nodes/AdaptiveTabContainer/adaptive_tab_container.gd" id="5_da0pr"]
+[ext_resource type="Texture2D" uid="uid://daymbnrm8vvwr" path="res://levels/MainMenu/images/circle_highlight.png" id="6_0j2b2"]
+[ext_resource type="Script" uid="uid://d08mlj2o4r1th" path="res://nodes/PageContainer/page_container.gd" id="6_7onnh"]
+[ext_resource type="Script" uid="uid://co8neb3eojesa" path="res://nodes/IconFlatHoverButton/icon_flat_hover_button.gd" id="6_dvenc"]
+[ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="7_pdm73"]
+[ext_resource type="Texture2D" uid="uid://bk0ng08jmwh3r" path="res://levels/SG2Core/x_res/x_images/cross.png" id="8_dvenc"]
+[ext_resource type="Texture2D" uid="uid://787b1kotgqep" path="res://levels/MainMenu/images/circle.png" id="8_fcy57"]
 
 [node name="MainMenu" type="Node" unique_id=348868686]
 script = ExtResource("1_45ot8")
@@ -73,75 +76,97 @@ size_flags_vertical = 4
 theme_override_font_sizes/font_size = 30
 placeholder_text = "Search"
 
-[node name="AdaptiveTabContainer" parent="Control/VBoxContainer" unique_id=1002059718 instance=ExtResource("5_obe7s")]
+[node name="AdaptiveTabContainer" type="BoxContainer" parent="Control/VBoxContainer" unique_id=2042065744 node_paths=PackedStringArray("tab_buttons", "page_container")]
 layout_mode = 2
-current_tab = 0
+size_flags_vertical = 3
+script = ExtResource("5_da0pr")
 icon_alignment_landscape = 1
 vertical_icon_alignment_landscape = 0
 portrait_tabs_position = 1
 icon_alignment_portrait = 1
 vertical_icon_alignment_portrait = 0
+tab_buttons = NodePath("TabButtons")
+page_container = NodePath("PageContainer")
+metadata/_custom_type_script = "uid://mb8fethyj45n"
 
-[node name="HomePage" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1267080853]
-visible = false
+[node name="TabButtons" type="BoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1585026599]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+vertical = true
+
+[node name="HomeButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=1903873525]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+toggle_mode = true
+text = "Home"
+icon = ExtResource("8_fcy57")
+flat = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+script = ExtResource("6_dvenc")
+normal_icon = ExtResource("8_fcy57")
+pressed_icon = ExtResource("6_0j2b2")
+metadata/_custom_type_script = "uid://co8neb3eojesa"
+
+[node name="TrendsButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=1793411418]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 toggle_mode = true
 button_pressed = true
-text = "Home"
-icon = ExtResource("8_dvenc")
-flat = true
-script = ExtResource("6_da0pr")
-normal_icon = ExtResource("6_pdm73")
-pressed_icon = ExtResource("8_dvenc")
-metadata/_custom_type_script = "uid://co8neb3eojesa"
-
-[node name="TrendsPage" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=2143825038]
-visible = false
-layout_mode = 2
-toggle_mode = true
 text = "Trends"
-icon = ExtResource("6_pdm73")
+icon = ExtResource("6_0j2b2")
 flat = true
-script = ExtResource("6_da0pr")
-normal_icon = ExtResource("6_pdm73")
-pressed_icon = ExtResource("8_dvenc")
+icon_alignment = 1
+vertical_icon_alignment = 0
+script = ExtResource("6_dvenc")
+normal_icon = ExtResource("8_fcy57")
+pressed_icon = ExtResource("6_0j2b2")
 metadata/_custom_type_script = "uid://co8neb3eojesa"
 
-[node name="AvatarPage" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=43307632]
-visible = false
+[node name="PageContainer" type="Container" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1743738881 node_paths=PackedStringArray("current_page", "page_link_button")]
 layout_mode = 2
-toggle_mode = true
-text = "Avatar"
-icon = ExtResource("6_pdm73")
-flat = true
-script = ExtResource("6_da0pr")
-normal_icon = ExtResource("6_pdm73")
-pressed_icon = ExtResource("8_dvenc")
-metadata/_custom_type_script = "uid://co8neb3eojesa"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("6_7onnh")
+current_page = NodePath("TrendsTab")
+page_link_button = {
+NodePath("../TabButtons/HomeButton"): NodePath("HomeTab"),
+NodePath("../TabButtons/TrendsButton"): NodePath("TrendsTab")
+}
 
-[node name="PartyPage" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1610205118]
+[node name="HomeTab" type="Control" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=1417338046]
 visible = false
 layout_mode = 2
-toggle_mode = true
-text = "Party"
-icon = ExtResource("6_pdm73")
-flat = true
-script = ExtResource("6_da0pr")
-normal_icon = ExtResource("6_pdm73")
-pressed_icon = ExtResource("8_dvenc")
-metadata/_custom_type_script = "uid://co8neb3eojesa"
 
-[node name="MorePage" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1659489556]
-visible = false
+[node name="TextureButton" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab" unique_id=1090389278]
+layout_mode = 0
+offset_left = 436.0
+offset_top = 171.0
+offset_right = 564.0
+offset_bottom = 299.0
+texture_normal = ExtResource("7_pdm73")
+
+[node name="TrendsTab" type="Control" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=294105060]
 layout_mode = 2
-toggle_mode = true
-text = "More"
-icon = ExtResource("6_pdm73")
-flat = true
-script = ExtResource("6_da0pr")
-normal_icon = ExtResource("6_pdm73")
-pressed_icon = ExtResource("8_dvenc")
-metadata/_custom_type_script = "uid://co8neb3eojesa"
+
+[node name="TextureButton" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/TrendsTab" unique_id=1357176847]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 335.0
+offset_top = 67.00001
+offset_right = 335.0
+offset_bottom = 67.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.38703832, 0.7886969)
+texture_normal = ExtResource("8_dvenc")
+ignore_texture_size = true
+stretch_mode = 0
 
 [node name="Timer" type="Timer" parent="Control" unique_id=378844812]
 wait_time = 3.0
