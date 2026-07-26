@@ -3,14 +3,18 @@
 [ext_resource type="Script" uid="uid://dau6w17gd0rkv" path="res://levels/MainMenu/main_menu.gd" id="1_45ot8"]
 [ext_resource type="Theme" uid="uid://b0iu1recooreu" path="res://levels/MainMenu/main_menu_theme_light.tres" id="2_qtvan"]
 [ext_resource type="Texture2D" uid="uid://cwymkxeduqt3u" path="res://levels/SG2Core/x_res/x_images/sg_logo_icon.svg" id="3_h8s48"]
+[ext_resource type="Script" uid="uid://bm680b8cc503y" path="res://nodes/LineEditLink/line_edit_link.gd" id="4_05oa7"]
 [ext_resource type="Texture2D" uid="uid://brtuyp1x1xrix" path="res://levels/SG2Core/x_res/x_images/search_icon.png" id="4_pr6oe"]
 [ext_resource type="Script" uid="uid://mb8fethyj45n" path="res://nodes/AdaptiveTabContainer/adaptive_tab_container.gd" id="5_da0pr"]
 [ext_resource type="Texture2D" uid="uid://daymbnrm8vvwr" path="res://levels/MainMenu/images/circle_highlight.png" id="6_0j2b2"]
 [ext_resource type="Script" uid="uid://d08mlj2o4r1th" path="res://nodes/PageContainer/page_container.gd" id="6_7onnh"]
 [ext_resource type="Script" uid="uid://co8neb3eojesa" path="res://nodes/IconFlatHoverButton/icon_flat_hover_button.gd" id="6_dvenc"]
-[ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="7_pdm73"]
-[ext_resource type="Texture2D" uid="uid://bk0ng08jmwh3r" path="res://levels/SG2Core/x_res/x_images/cross.png" id="8_dvenc"]
 [ext_resource type="Texture2D" uid="uid://787b1kotgqep" path="res://levels/MainMenu/images/circle.png" id="8_fcy57"]
+[ext_resource type="Script" uid="uid://d4afiayvcwu5h" path="res://nodes/AdaptiveBoxContainer/adaptive_box_container.gd" id="10_fcy57"]
+[ext_resource type="Script" uid="uid://dte67mrrus2p4" path="res://levels/MainMenu/live_screen.gd" id="11_fcy57"]
+[ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="12_tm6dg"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tm6dg"]
 
 [node name="MainMenu" type="Node" unique_id=348868686]
 script = ExtResource("1_45ot8")
@@ -55,33 +59,45 @@ expand_mode = 1
 
 [node name="Label" type="Label" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=596757291]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 20
 text = "SomeGame 2"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Control/VBoxContainer/HBoxContainer" unique_id=1257215011]
+[node name="LinkEditLink" type="LineEdit" parent="Control/VBoxContainer/HBoxContainer" unique_id=968764800 node_paths=PackedStringArray("redirect_to")]
+custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+script = ExtResource("4_05oa7")
+redirect_to = NodePath("HBoxContainer2/LineEdit")
+metadata/_custom_type_script = "uid://bm680b8cc503y"
 
-[node name="TextureRect" type="TextureRect" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=894765694]
-custom_minimum_size = Vector2(50, 50)
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/VBoxContainer/HBoxContainer/LinkEditLink" unique_id=1257215011]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="Control/VBoxContainer/HBoxContainer/LinkEditLink/HBoxContainer2" unique_id=894765694]
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
+size_flags_horizontal = 0
 size_flags_vertical = 4
 texture = ExtResource("4_pr6oe")
 expand_mode = 1
 
-[node name="LineEdit" type="LineEdit" parent="Control/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=2019170709]
+[node name="LineEdit" type="LineEdit" parent="Control/VBoxContainer/HBoxContainer/LinkEditLink/HBoxContainer2" unique_id=2019170709]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 30
 placeholder_text = "Search"
 
-[node name="AdaptiveTabContainer" type="BoxContainer" parent="Control/VBoxContainer" unique_id=2042065744 node_paths=PackedStringArray("tab_buttons", "page_container")]
+[node name="AdaptiveTabContainer" type="BoxContainer" parent="Control/VBoxContainer" unique_id=194109367 node_paths=PackedStringArray("tab_buttons", "page_container")]
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("5_da0pr")
-icon_alignment_landscape = 1
-vertical_icon_alignment_landscape = 0
 portrait_tabs_position = 1
 icon_alignment_portrait = 1
 vertical_icon_alignment_portrait = 0
@@ -89,84 +105,166 @@ tab_buttons = NodePath("TabButtons")
 page_container = NodePath("PageContainer")
 metadata/_custom_type_script = "uid://mb8fethyj45n"
 
-[node name="TabButtons" type="BoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1585026599]
+[node name="TabButtons" type="BoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=853006467]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
 vertical = true
 
-[node name="HomeButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=1903873525]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-toggle_mode = true
-text = "Home"
-icon = ExtResource("8_fcy57")
-flat = true
-icon_alignment = 1
-vertical_icon_alignment = 0
-script = ExtResource("6_dvenc")
-normal_icon = ExtResource("8_fcy57")
-pressed_icon = ExtResource("6_0j2b2")
-metadata/_custom_type_script = "uid://co8neb3eojesa"
-
-[node name="TrendsButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=1793411418]
+[node name="HomeButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=896744891]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 toggle_mode = true
 button_pressed = true
-text = "Trends"
+text = "Home"
 icon = ExtResource("6_0j2b2")
 flat = true
-icon_alignment = 1
-vertical_icon_alignment = 0
 script = ExtResource("6_dvenc")
 normal_icon = ExtResource("8_fcy57")
 pressed_icon = ExtResource("6_0j2b2")
 metadata/_custom_type_script = "uid://co8neb3eojesa"
 
-[node name="PageContainer" type="Container" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1743738881 node_paths=PackedStringArray("current_page", "page_link_button")]
+[node name="SettingsButton" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/TabButtons" unique_id=1181687656]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+toggle_mode = true
+text = "Settings"
+icon = ExtResource("8_fcy57")
+flat = true
+script = ExtResource("6_dvenc")
+normal_icon = ExtResource("8_fcy57")
+pressed_icon = ExtResource("6_0j2b2")
+metadata/_custom_type_script = "uid://co8neb3eojesa"
+
+[node name="PageContainer" type="Control" parent="Control/VBoxContainer/AdaptiveTabContainer" unique_id=1813164536 node_paths=PackedStringArray("current_page", "page_link_button")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("6_7onnh")
-current_page = NodePath("TrendsTab")
+current_page = NodePath("HomeTab")
 page_link_button = {
 NodePath("../TabButtons/HomeButton"): NodePath("HomeTab"),
-NodePath("../TabButtons/TrendsButton"): NodePath("TrendsTab")
+NodePath("../TabButtons/SettingsButton"): NodePath("SettingsTab")
 }
 
-[node name="HomeTab" type="Control" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=1417338046]
+[node name="HomeTab" type="ScrollContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=1629135311]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab" unique_id=220979078]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AdaptiveBoxContainer" type="BoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer" unique_id=491085451]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("10_fcy57")
+metadata/_custom_type_script = "uid://d4afiayvcwu5h"
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer" unique_id=2110649689]
+custom_minimum_size = Vector2(500, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+script = ExtResource("11_fcy57")
+
+[node name="SubViewport" type="SubViewport" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer" unique_id=1700432788]
+handle_input_locally = false
+size = Vector2i(511, 200)
+render_target_update_mode = 4
+
+[node name="Node3D" type="Node3D" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer/SubViewport" unique_id=1871506967]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=196693795]
+transform = Transform3D(1.002268, 0, -0.023874717, 0, 1, 0, 0.023874717, 0, 1.002268, 0, 0, 0)
+mesh = SubResource("BoxMesh_tm6dg")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=1840486247]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 2, 3)
+
+[node name="Camera3D" type="Camera3D" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer/SubViewport" unique_id=1559978393]
+transform = Transform3D(1, 0, 0, 0, 0.977379, 0.21149538, 0, -0.21149538, 0.977379, 0, 1, 2.4815989)
+fov = 90.0
+
+[node name="Button" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/SubViewportContainer" unique_id=1873181502]
 visible = false
 layout_mode = 2
 
-[node name="TextureButton" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab" unique_id=1090389278]
-layout_mode = 0
-offset_left = 436.0
-offset_top = 171.0
-offset_right = 564.0
-offset_bottom = 299.0
-texture_normal = ExtResource("7_pdm73")
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer" unique_id=874536227]
+layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="TrendsTab" type="Control" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=294105060]
+[node name="FriendsContainer" type="VBoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/VBoxContainer" unique_id=2021048768]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/VBoxContainer/FriendsContainer" unique_id=627016242]
+layout_mode = 2
+text = "Friends"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/VBoxContainer/FriendsContainer" unique_id=1200292943]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" type="Button" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/AdaptiveBoxContainer/VBoxContainer/FriendsContainer/HBoxContainer" unique_id=292323244]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 75
+text = "+"
+
+[node name="GamesRecContainer" type="VBoxContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer" unique_id=1981412090]
 layout_mode = 2
 
-[node name="TextureButton" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/TrendsTab" unique_id=1357176847]
-layout_mode = 1
-anchors_preset = 15
+[node name="Label" type="Label" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer" unique_id=788804883]
+layout_mode = 2
+text = "Recommended for you"
+
+[node name="HFlowContainer" type="HFlowContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer" unique_id=565308718]
+layout_mode = 2
+
+[node name="TextureButton" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=918878132]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton2" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=959638273]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton3" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=1109871666]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton4" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=904202688]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton5" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=777748938]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton6" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=1497832616]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton7" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=1756037450]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="TextureButton8" type="TextureButton" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer/HomeTab/VBoxContainer/GamesRecContainer/HFlowContainer" unique_id=99672864]
+layout_mode = 2
+texture_normal = ExtResource("12_tm6dg")
+
+[node name="SettingsTab" type="ScrollContainer" parent="Control/VBoxContainer/AdaptiveTabContainer/PageContainer" unique_id=1009843328]
+visible = false
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 335.0
-offset_top = 67.00001
-offset_right = 335.0
-offset_bottom = 67.0
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.38703832, 0.7886969)
-texture_normal = ExtResource("8_dvenc")
-ignore_texture_size = true
-stretch_mode = 0
 
 [node name="Timer" type="Timer" parent="Control" unique_id=378844812]
 wait_time = 3.0

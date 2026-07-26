@@ -1,4 +1,4 @@
-extends MarginContainer
+extends Control
 
 
 @onready var _SG2Exec := ExecManager.get_current_exec(self)

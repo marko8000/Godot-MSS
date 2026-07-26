@@ -1,6 +1,6 @@
 @tool
 class_name PageContainer
-extends Container
+extends Control
 
 
 @export_tool_button('Add page', "Add") var b_add_page = add_page
@@ -22,7 +22,7 @@ var _backup_links_pages : Dictionary[NodePath, Control]
 
 
 func add_page(base_name : String = 'Page') -> Control:
-	var _page = Control.new()
+	var _page = ScrollContainer.new()
 	g.rename_unique(_page, self, base_name)
 	_page.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_page)
@@ -57,8 +57,14 @@ func connect_page_link_button():
 
 func _on_selection_changed():
 	var selected = EditorInterface.get_selection().get_selected_nodes()
-	if selected.size() > 0 and selected[0].get_parent() == self:
-		current_page = selected[0]
+	if selected.size() > 0:
+		var select = selected[0]
+		if select.get_parent() == self:
+			current_page = select
+		elif select is BaseButton:
+			if select in page_link_button:
+				if is_instance_valid(page_link_button[select]):
+					current_page = page_link_button[select]
 		
 		
 func _on_any_button_pressed(target_page : Control):

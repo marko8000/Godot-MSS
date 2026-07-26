@@ -45,6 +45,7 @@ window/handheld/orientation=6
 [file_customization]
 
 folder_colors={
+"res://entities/": "yellow",
 "res://exec/": "orange",
 "res://globals/": "red",
 "res://levels/": "orange",

@@ -1,4 +1,4 @@
-extends MarginContainer
+extends Control
 
 
 @onready var _SG2Exec := ExecManager.get_current_exec(self)
@@ -8,18 +8,20 @@ extends MarginContainer
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	await get_tree().process_frame
 	output('Command Line Log')
 	Debug.on_doutput.connect(_debug_output)
 	for module in modules:
 		module._SG2Exec = _SG2Exec
 		module._current_level = _SG2Exec.get_current_level(self)
 		module._commandline = self
+		module.setup()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	_current_level = _SG2Exec.get_current_level(self)
-	$VBoxContainer/RichTextLabel.get_v_scroll_bar().hide()
+	%RichTextLabel.get_v_scroll_bar().hide()
 	if len(%LineEdit.text) > 0:
 		if %LineEdit.text[0] == '/':
 			%LineEdit.text = %LineEdit.text.substr(1)
@@ -29,13 +31,12 @@ func _process(delta: float) -> void:
 		
 
 func _input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed("enter"):
+	if Input.is_action_just_pressed("enter") and visible:
 		var _command_text = %LineEdit.get_text()
 		output('/' + _command_text)
 		print('/' + _command_text)
 		execute_command(_command_text)
 		%LineEdit.clear()
-		hide()
 	if Input.is_action_pressed('debug') and Input.is_action_just_pressed("command"):
 		if visible:
 			%LineEdit.clear()
@@ -43,6 +44,9 @@ func _input(event: InputEvent) -> void:
 		else:
 			show()
 			%LineEdit.grab_focus()
+	
+	if Input.is_action_just_pressed("Esc") and visible:
+		hide()
 
 
 func execute_command(command_text):
@@ -83,8 +87,14 @@ func output(text : String):
 	
 func output_error(text : String):
 	output('[color=red]'+text+'[/color]')
+	show()
+	%LineEdit.grab_focus()
 					
 					
 func _debug_output(print_text, printer_name):
 	output(printer_name + ': ' + print_text)
 	
+
+
+func _on_control_focus_exited() -> void:
+	print('focus')

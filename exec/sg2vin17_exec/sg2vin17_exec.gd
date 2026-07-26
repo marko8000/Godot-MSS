@@ -6,9 +6,9 @@ var is_exec
 signal level_loaded
 
 @warning_ignore("unused_private_class_variable")
-@onready var _debug_control = $'Control/Debug'
+@onready var _debug_control = %DebugPanel
 @warning_ignore("unused_private_class_variable")
-@onready var _command_line = $'Control/CommandLine'
+@onready var _command_line = %CommandLine
 		
 
 # Called when the node enters the scene tree for the first time.

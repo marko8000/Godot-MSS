@@ -10,5 +10,9 @@ var _current_level
 var _commandline
 
 
+func setup() -> void:
+	pass
+	
+	
 func _process(delta: float) -> void:
 	pass
