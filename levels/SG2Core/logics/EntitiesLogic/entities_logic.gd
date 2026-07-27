@@ -36,7 +36,7 @@ var entities_empty_properties_array : Dictionary[int, Array] ## {entity_type: [n
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
-var deleted_entities : PackedInt32Array
+var deleted_entities : PackedInt32Array # TODO: check if this variable is needed at all
 var reparenting_buffer : Dictionary[int, Array] ## = {entity_id: [entity_node, new_parent, path_to_parent], ...}
 var FROM_E_POS = 'f' ## if chunk == FROM_E_POS: the chunk will be calculated from entity global_position
 var NONCHUNK = null
@@ -428,7 +428,7 @@ func send_entities_to_guests():
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
 			for entity_id in observer.loaded_entities:
-				if deleted_entities.has(entity_id) or entities[entity_id].chunk not in observer.loaded_chunks:
+				if not entities.has(entity_id) or deleted_entities.has(entity_id) or entities[entity_id].chunk not in observer.loaded_chunks:
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
 				elif entities[entity_id].update_check:

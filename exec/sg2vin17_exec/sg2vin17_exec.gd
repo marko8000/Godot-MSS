@@ -13,7 +13,7 @@ signal level_loaded
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	load_level('MainMenu')
+	load_level('SG2Core')
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
