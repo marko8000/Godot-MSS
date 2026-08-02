@@ -19,7 +19,7 @@ func paths_assignment():
 	
 	paths.entities_data_dir = File2ool.path([paths.CurrentServerData_dir, 'entities_data'])
 	paths.entities_chunks_dir = File2ool.path([paths.entities_data_dir, 'chunks'])
-	paths.entities_global_file = File2ool.path([paths.entities_data_dir, 'entities_global.json'])
+	paths.entities_meta_file = File2ool.path([paths.entities_data_dir, 'entities_meta.json'])
 	
 	for _path in paths:
 		if "_dir" in _path:

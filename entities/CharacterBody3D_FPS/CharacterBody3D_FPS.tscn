@@ -2,11 +2,9 @@
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_5spkx"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_ir1cf"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed.gd" id="3_1wfgu"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/abstract_tracker.gd" id="4_t3uhe"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/noninterpolated_tracker.gd" id="5_4vhj7"]
-[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Observer/observer.gd" id="6_s6vr0"]
-[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/PlayerInput/player_input.gd" id="7_2vrci"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/entity_seed.gd" id="3_1wfgu"]
+[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/Observer/observer.gd" id="6_s6vr0"]
+[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/PlayerInput/player_input.gd" id="7_2vrci"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -20,21 +18,6 @@ albedo_texture = ExtResource("2_ir1cf")
 
 [sub_resource type="BoxMesh" id="BoxMesh_80mxe"]
 size = Vector3(0.54, 0.5, 0.9)
-
-[sub_resource type="Resource" id="Resource_6gn8f"]
-script = ExtResource("5_4vhj7")
-property_path = "position"
-metadata/_custom_type_script = "uid://dl7rg7fbudor7"
-
-[sub_resource type="Resource" id="Resource_80mxe"]
-script = ExtResource("5_4vhj7")
-property_path = "rotation"
-metadata/_custom_type_script = "uid://dl7rg7fbudor7"
-
-[sub_resource type="Resource" id="Resource_ol233"]
-script = ExtResource("5_4vhj7")
-property_path = "$cam.rotation"
-metadata/_custom_type_script = "uid://dl7rg7fbudor7"
 
 [node name="CharacterBody3D_FPS" type="CharacterBody3D" unique_id=256457585]
 script = ExtResource("1_5spkx")
@@ -62,7 +45,6 @@ mesh = SubResource("BoxMesh_80mxe")
 
 [node name="EntitySeed" type="Node" parent="." unique_id=1194583288]
 script = ExtResource("3_1wfgu")
-tracked_properties = Array[ExtResource("4_t3uhe")]([SubResource("Resource_6gn8f"), SubResource("Resource_80mxe"), SubResource("Resource_ol233")])
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
 [node name="Observer" type="Node" parent="." unique_id=1362956912]

@@ -1,9 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://b105k8a0duxoc"]
+[gd_scene format=3 uid="uid://b105k8a0duxoc"]
 
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="1_oh78e"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed.gd" id="2_yutah"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/abstract_tracker.gd" id="3_o68h5"]
-[ext_resource type="Script" uid="uid://dl7rg7fbudor7" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/Trackers/noninterpolated_tracker.gd" id="4_elkij"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/entity_seed.gd" id="2_yutah"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8rfn7"]
 
@@ -12,29 +10,19 @@ albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_enx2m"]
 
-[sub_resource type="Resource" id="Resource_vuocc"]
-script = ExtResource("4_elkij")
-property_path = "position"
-metadata/_custom_type_script = "uid://dl7rg7fbudor7"
+[node name="BallRigidBody3D" type="RigidBody3D" unique_id=1990800275]
 
-[sub_resource type="Resource" id="Resource_hrxbq"]
-script = ExtResource("4_elkij")
-property_path = "rotation"
-metadata/_custom_type_script = "uid://dl7rg7fbudor7"
-
-[node name="BallRigidBody3D" type="RigidBody3D"]
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1308104450]
 mesh = SubResource("SphereMesh_8rfn7")
 surface_material_override/0 = SubResource("StandardMaterial3D_psjoe")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2103100063]
 shape = SubResource("SphereShape3D_enx2m")
 
-[node name="EntitySeed" type="Node" parent="."]
+[node name="EntitySeed" type="Node" parent="." unique_id=1538682676]
 script = ExtResource("2_yutah")
-tracked_properties = Array[ExtResource("3_o68h5")]([SubResource("Resource_vuocc"), SubResource("Resource_hrxbq")])
 guest_presets = Dictionary[String, Variant]({
 "freeze": true
 })
+global = true
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"

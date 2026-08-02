@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dsxko85vrrawt"]
+[gd_scene format=3 uid="uid://dsxko85vrrawt"]
 
-[ext_resource type="Script" uid="uid://ckqjc6krp5nya" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed_popup.gd" id="1_q67eu"]
+[ext_resource type="Script" uid="uid://ckqjc6krp5nya" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/entity_seed_popup.gd" id="1_q67eu"]
 
 [node name="EntityPropertiesSeedPopup" type="Window"]
 oversampling_override = 1.0

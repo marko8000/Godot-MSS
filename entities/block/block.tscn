@@ -1,8 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://cu7nuyq0kwbrl"]
+[gd_scene format=3 uid="uid://cu7nuyq0kwbrl"]
 
 [ext_resource type="Script" uid="uid://bljxsp0q650i6" path="res://entities/block/block.gd" id="1_qf533"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="3_2u8q7"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitiesLogic/EntitySeed/entity_seed.gd" id="3_ged6v"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/entity_seed.gd" id="3_ged6v"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_d3hoe"]
 size = Vector3(0.5, 0.5, 0.5)

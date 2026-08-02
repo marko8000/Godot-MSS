@@ -1,0 +1,2 @@
+extends EntityStorageLogic
+class_name EntityStorageLogicGlobal

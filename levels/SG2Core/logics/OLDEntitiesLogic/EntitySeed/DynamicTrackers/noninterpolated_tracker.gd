@@ -1,14 +1,14 @@
 @icon('res://levels/SG2Core/x_res/x_images/InterpLinear.svg')
-extends AbstractTracker
+extends DynamicTracker
 class_name NoninterpolatedTracker
 	
 	
-func start_tracking(entity_id : int, _property_path : String, _property_config : AbstractTracker):
-	var e_type = _EntitiesLogic.entities[entity_id].type
-	if not tracked_entities.has(entity_id):
-		tracked_entities[entity_id] = TrackedEntity.new()
-		tracked_entities[entity_id].entity_node = _EntitiesLogic.entities[entity_id].node
-		tracked_entities[entity_id].entity_type = e_type
+func start_tracking(idx : int, _property_path : String, _property_config : DynamicTracker):
+	var e_type = _EntitiesLogic.global_entities[idx].type
+	if not tracked_global_entities.has(idx):
+		tracked_global_entities[idx] = TrackedEntity.new()
+		tracked_global_entities[idx].entity_node = _EntitiesLogic.global_entities[entity_id].node
+		tracked_global_entities[idx].entity_type = e_type
 		if not entity_type_data.has(e_type):
 			entity_type_data[e_type] = EntityTypeData.new()
 			entity_type_data[e_type].properties_config = {}

@@ -6,13 +6,14 @@ class_name EntitySeed
 
 
 @onready var _SG2Core : SG2Core = ExecManager.get_current_exec(self).get_current_level(self)
-@onready var _EntitiesLogic := _SG2Core._EntitiesLogic
+@onready var _EntitySync := _SG2Core._EntitySync
+@onready var _EntityFactory := _SG2Core._EntityFactory
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+var _ESL : EntityStorageLogic
 
-@export var tracked_properties : Array[AbstractTracker]
+@export var tracked_properties : Array[DynamicTracker]
 @export var guest_presets : Dictionary[String, Variant]
-## nonchunk entities are visible everywhere, can't be changed in runtime
-@export var nonchunk : bool = false
+@export var global : bool = false
 
 
 func _ready():
@@ -20,26 +21,25 @@ func _ready():
 	
 	
 func entity_prepare():
-	if _EntitiesLogic == null:
-		return
-		
-	if not _EntitiesLogic.entities_can_start_work:
-		await _EntitiesLogic._entities_start_work
+	get_parent().add_to_group('e')
+	if not _EntitySync._entities_can_start_working:
+		await _EntitySync._entities_start_working
 	
-	if not _EntitiesLogic.nodes_entities.has(get_parent()):
-		if _ConnectionLogic.peer_role == 'guest':
-			get_parent().queue_free()
-		elif _ConnectionLogic.peer_role == 'host':
-			var entity_id = _EntitiesLogic.get_new_entity_id()
-			get_parent().name = 'e'+str(entity_id)
+	if _ConnectionLogic.peer_role == 'guest':
+		get_parent().queue_free()
+	elif _ConnectionLogic.peer_role == 'host':
+		var entity_id = _EntityFactory._get_new_entity_id()
+		var entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
+		_ESL = _EntityFactory._get_ESL(get_parent(), entity_type)
+		_prepare_properties()
+		_presets()
+		print('name ', _ESL.name)
+		_ESL._start_tracking(entity_id, entity_type, get_parent())
 			
-			_EntitiesLogic.register_entity(entity_id, get_parent())
-			prepare_properties()
-			_EntitiesLogic.prepare_trackers(entity_id, tracked_properties)
-			presets()
-			_EntitiesLogic.start_tracking(entity_id, get_parent(), _EntitiesLogic.NONCHUNK if nonchunk else _EntitiesLogic.FROM_E_POS)
-					
 
+
+	
+	
 func _get_configuration_warnings():
 	var warnings = []
 	var parent_warning := false
@@ -74,22 +74,22 @@ func _entity_node_renamed():
 	base_control.add_child(warning_window)
 	
 
-func prepare_properties():
+func _prepare_properties():
 	for child in get_parent().get_children():
 		if child.has_method('prepare_properties') and child != self:
 			child.prepare_properties()
 		
 		
-func presets():
+func _presets():
 	for child in get_parent().get_children():
 		if child.has_method('presets') and child != self:
 			child.presets()
 	if not is_instance_valid(_ConnectionLogic):
 		return
 	if _ConnectionLogic.peer_role == 'guest':
-		apply_guest_presets()
+		_apply_guest_presets()
 	
 	
-func apply_guest_presets():
+func _apply_guest_presets():
 	for property_path in guest_presets:
 		Dispenser.set_resource(get_parent(), property_path, guest_presets[property_path])

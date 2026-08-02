@@ -16,9 +16,9 @@ class_name SG2Core
 @warning_ignore("unused_private_class_variable")
 @export var _PathRegistry : PathRegistry
 @warning_ignore("unused_private_class_variable")
-@export var _EntitiesLogic : EntitiesLogic
+@export var _EntityFactory : EntityFactory
 @warning_ignore("unused_private_class_variable")
-@export var _entities_storage : Node
+@export var _EntitySync : EntitySync
 @warning_ignore("unused_private_class_variable")
 @export var _ChunksCalculator : ChunksCalculator
 @warning_ignore("unused_private_class_variable")

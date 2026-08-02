@@ -1,7 +1,7 @@
 extends SG2Logic
 ## EntitiesLogic saves/loads entities state, transfers entities data between host and guests.
 ## chunk = null is used for nonchunk entities
-class_name EntitiesLogic
+#class_name EntitiesLogic
 
 
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
@@ -13,37 +13,36 @@ class_name EntitiesLogic
 
 @onready var entities_dir = _PathRegistry.path('entities_dir')
 @onready var entities_data_dir = _PathRegistry.path('entities_data_dir')
-@onready var entities_global_file = _PathRegistry.path('entities_global_file')
+@onready var entities_meta_file = _PathRegistry.path('entities_meta_file')
 
-@onready var entities_global = load_entities_global()
+@onready var entities_meta = load_entities_meta()
 @onready var entities_types_shortcuts : Dictionary[String, int] = get_entities_types_shortcuts()
 @onready var shortcuts_entities_types : Dictionary[int, String] = get_shortcuts_entities_types()
-@onready var last_used_entity_id : int = 0 if !entities_global.has('last_used_entity_id') else entities_global.last_used_entity_id
+@onready var last_used_entity_id : int = 0 if !entities_meta.has('last_used_entity_id') else entities_meta.last_used_entity_id
 @onready var entities_resources : Dictionary[int, Resource] = load_entities_resources()
 
 var entities_can_start_work : bool = false
 signal _entities_start_work
-var trackers : Array[AbstractTracker]
+var static_trackers : Array[StaticTracker]
+var dynamic_trackers : Array[DynamicTracker]
 var updates_per_second : int = 30
-var entities : Dictionary[int, EntityData]
-var entities_list : PackedInt32Array ## = [entity_id, ...]
-var chunks_entities : Dictionary[Variant, PackedInt32Array] ## = {chunk: [entity_id, ...], ...}
-var nodes_entities : Dictionary[Node, int]
-var chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloaded
+var global_entities : Array[EntityData]
+#var chunks_entities : Dictionary[Variant, PackedInt32Array] ## = {chunk: [entity_id, ...], ...}
+#var nodes_entities : Dictionary[Node, int]
+#var chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloaded
 var entities_property_path_property_array_num : Dictionary[int, Dictionary] ## {entity_type: {property_path: property_array_num}}
 var entities_property_array_num_property_path : Dictionary[int, Array] ## {entity_type: [property_path, ...]}
 var entities_empty_properties_array : Dictionary[int, Array] ## {entity_type: [null, null, ...]}
 var current_update_frame : int = 1
 var current_update_range_size : int
 var current_frames_per_update : int
-var deleted_entities : PackedInt32Array # TODO: check if this variable is needed at all
+var deleted_entities : PackedInt32Array # id
 var reparenting_buffer : Dictionary[int, Array] ## = {entity_id: [entity_node, new_parent, path_to_parent], ...}
 var FROM_E_POS = 'f' ## if chunk == FROM_E_POS: the chunk will be calculated from entity global_position
 var NONCHUNK = null
 class EntityData:
+	var id : int
 	var type : int # entity_type_shortcut
-	var spawn_data : Array = [-1, [], '.']# [entity_type : int, values_array : Array, path_from_entities_storage_to_parent : String = '.']
-	var update_data : Array = [[], '.'] # [values_array : Array, path_from_entities_storage_to_parent : String = '.']
 	var chunk
 	var hierarchy_value : int
 	var update_check : bool # if nothing is changed: false
@@ -69,7 +68,7 @@ func start():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta : float) -> void:
-	Debug.dstate('Entities / chunks', str(entities_list.size())+'e / '+str(chunks_entities.size())+'ch', self)
+	Debug.dstate('Entities / chunks', str(global_entities.size())+'e / '+str(global_entities.size())+'ch', self)
 	if _ConnectionLogic.peer_role in ['host', 'guest']:
 		process_reparenting_buffer()
 		await get_tree().process_frame
@@ -114,9 +113,9 @@ func spawn_player(player_type : String, id):
 	
 	
 func _peer_disconnected(peer_id):
-	for observer : Observer in players[peer_id].observers:
-		if observer.current_chunk in chunks_users_num:
-			chunks_users_num[observer.current_chunk] -= 1
+	#for observer : Observer in players[peer_id].observers:
+		#if observer.current_chunk in chunks_users_num:
+			#chunks_users_num[observer.current_chunk] -= 1
 	players.erase(peer_id)
 		
 	
@@ -146,29 +145,29 @@ func get_new_entity_id():
 	return last_used_entity_id - 1
 	
 
-func load_entities_global():
-	var file = FileAccess.open(entities_global_file, FileAccess.READ)
+func load_entities_meta():
+	var file = FileAccess.open(entities_meta_file, FileAccess.READ)
 	if file != null:
 		var _entities_data = JSON.parse_string(file.get_as_text())
 		file.close()
 		return _entities_data
 	else:
-		push_warning('entities_global_file not found')
+		push_warning('entities_meta_file not found')
 		return {}
 		
 
 func get_entities_types_shortcuts():
 	var _shortcuts : Dictionary[String, int]
-	if entities_global.has('entities_types_shortcuts'):
-		_shortcuts = entities_global.entities_types_shortcuts
+	if entities_meta.has('entities_types_shortcuts'):
+		_shortcuts = entities_meta.entities_types_shortcuts
 	return _shortcuts
 	
 	
 func get_shortcuts_entities_types():
 	var _shortcuts : Dictionary[int, String]
-	if entities_global.has('entities_types_shortcuts'):
-		for entity_type in entities_global.entities_types_shortcuts.keys():
-			var shortcut = entities_global.entities_types_shortcuts[entity_type]
+	if entities_meta.has('entities_types_shortcuts'):
+		for entity_type in entities_meta.entities_types_shortcuts.keys():
+			var shortcut = entities_meta.entities_types_shortcuts[entity_type]
 			shortcuts_entities_types[shortcut] = entity_type
 	return _shortcuts
 		
@@ -209,12 +208,12 @@ func load_entities_resources():
 	
 	
 func save_entities_data():
-	var _eglobal_file = FileAccess.open(entities_global_file, FileAccess.WRITE)
+	var _emeta_file = FileAccess.open(entities_meta_file, FileAccess.WRITE)
 	#update_entities_global()
-	_eglobal_file.store_var(entities_global)
-	_eglobal_file.close()
-	for chunk in chunks_entities:
-		save_chunk(chunk)
+	_emeta_file.store_var(entities_meta)
+	_emeta_file.close()
+	#for chunk in chunks_entities:
+		#save_chunk(chunk)
 				
 		
 func load_entities(_entities_file_data : Dictionary[int, Array], _chunks_entities : Dictionary[Variant, PackedInt32Array]):
@@ -236,43 +235,46 @@ func file_entity_summon(file_data : Array, chunk=FROM_E_POS, entity_id : int = g
 	spawn_entity(EntitySpawnData(file_data[0], array, file_data[2]), chunk, entity_id)
 	
 	
-func prepare_trackers(entity_id, tracked_properties : Array[AbstractTracker]):
+func prepare_trackers(entity_id, tracked_properties : Array[DynamicTracker]):
 	var already_used_tracker_types = []
-	for res_num in range(len(tracked_properties)):
-		for tracker in trackers:
-			already_used_tracker_types.append(tracker.get_script().get_global_name())
-		if not already_used_tracker_types.has(tracked_properties[res_num].get_script().get_global_name()):
-			tracked_properties[res_num]._SG2Core = _SG2Core
-			tracked_properties[res_num].start()
-			trackers.append(tracked_properties[res_num])
-		trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, tracked_properties[res_num].property_path, tracked_properties[res_num])
+	var has_static : bool = false
+	if not has_static:
+		for res_num in range(len(tracked_properties)):
+			for tracker in dynamic_trackers:
+				already_used_tracker_types.append(tracker.get_script().get_global_name())
+			if not already_used_tracker_types.has(tracked_properties[res_num].get_script().get_global_name()):
+				tracked_properties[res_num]._SG2Core = _SG2Core
+				tracked_properties[res_num].start()
+				dynamic_trackers.append(tracked_properties[res_num])
+			dynamic_trackers[already_used_tracker_types.find(tracked_properties[res_num].get_script().get_global_name())].start_tracking(entity_id, tracked_properties[res_num].property_path, tracked_properties[res_num])
 	
 	
-func register_entity(entity_id : int, entity_node : Node):
-	entities[entity_id] = EntityData.new()
-	entities[entity_id].node = entity_node
-	nodes_entities[entity_node] = entity_id
-	entities[entity_id].type = entities_types_shortcuts[entity_node.get_scene_file_path().get_slice('/', 3)]
+func register_entity(entity_id : int, entity_type : int, entity_node : Node):
+	if entity_node is Node3D:
+		pass
+	elif entity_node is Node2D:
+		pass
+	else:
+		var edata := EntityData.new()
+		edata.id = entity_id
+		edata.node = entity_node
+		#nodes_entities[entity_node] = entity_id
+		edata.type = entity_type
+		
 	
 	
-func start_tracking(entity_id : int, entity_node : Node, chunk=FROM_E_POS):
+func start_tracking(entity_id : int, entity_type : int, entity_node : Node, chunk=FROM_E_POS):
 	entity_node.get_node('EntitySeed').queue_free()
-	var entity_type : int = entities[entity_id].type
 	var path_to_parent : NodePath = _entities_storage.get_path_to(entity_node.get_parent())
 	var chunk_node = establish_entity_parenthood(entity_node, entity_id, path_to_parent)
 	if typeof(chunk) == typeof(FROM_E_POS):
 		chunk = _ChunksCalculator.position_to_chunk(null if not 'global_position' in chunk_node else chunk_node.global_position)
-	if not chunks_entities.has(chunk):
-		chunks_entities[chunk] = PackedInt32Array()
-	if not chunks_users_num.has(chunk):
-		load_chunk(chunk)
-	entities[entity_id].type = entity_type
-	chunks_entities[chunk].append(entity_id)
-	entities[entity_id].chunk = chunk
-	entities[entity_id].spawn_data = EntitySpawnData(entity_type, entities_empty_properties_array[entity_type], path_to_parent)
-	entities[entity_id].update_data = EntityUpdateData(entities_empty_properties_array[entity_type], path_to_parent)
-	
-	entities_list.append(entity_id)
+	#if not chunks_entities.has(chunk):
+		#chunks_entities[chunk] = PackedInt32Array()
+	#if not chunks_users_num.has(chunk):
+		#load_chunk(chunk)
+	#chunks_entities[chunk].append(entity_id)
+	#entities[entity_id].chunk = chunk
 	
 
 func track_entities():
@@ -281,28 +283,27 @@ func track_entities():
 	if current_update_frame == 1:
 		var FPS : float = {'host': _InterpolationLogic.server_FPS, 'guest': _InterpolationLogic.guest_FPS}[_ConnectionLogic.peer_role]
 		current_frames_per_update = ceil(FPS / float(updates_per_second))
-		current_update_range_size = len(entities_list) / current_frames_per_update
+		current_update_range_size = global_entities.size() / current_frames_per_update
 	if not current_update_frame == current_frames_per_update:
 		_from = current_update_range_size*(current_update_frame-1)
 		_to = current_update_range_size*current_update_frame
 		current_update_frame += 1
 	else:
 		_from = current_update_range_size*(current_update_frame-1)
-		_to = len(entities_list)
+		_to = global_entities.size()
 		current_update_frame = 1
 	for i in range(_from, _to):
-		if len(entities_list)-1 < i:
+		if global_entities.size()-1 < i:
 			continue
-		var entity_id = entities_list[i]
-		if not is_instance_valid(entities[entity_id].node):
-			entities_list.erase(entity_id)
+		var entity_id = global_entities[i]
+		if not is_instance_valid(global_entities[entity_id].node):
 			deleted_entities.append(entity_id)
-			chunks_entities[entities[entity_id].chunk].erase(entity_id)
-			entities.erase(entity_id)
-			for tracker in trackers:
+			#chunks_entities[entities[entity_id].chunk].erase(entity_id)
+			#entities.erase(entity_id)
+			for tracker in dynamic_trackers:
 				tracker.stop_tracking(entity_id)
 			continue
-		if entities[entity_id].chunk != null:
+		if global_entities[entity_id].chunk != null:
 			var new_chunk = _ChunksCalculator.position_to_chunk(entities[entities[entity_id].parent_link].node.global_position)
 			if new_chunk != entities[entity_id].chunk:
 				if not chunks_entities.has(new_chunk):
@@ -428,7 +429,7 @@ func send_entities_to_guests():
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
 			for entity_id in observer.loaded_entities:
-				if not entities.has(entity_id) or deleted_entities.has(entity_id) or entities[entity_id].chunk not in observer.loaded_chunks:
+				if deleted_entities.has(entity_id) or entities[entity_id].chunk not in observer.loaded_chunks:
 					observer.loaded_entities.erase(entity_id)
 					_entities_to_delete.append(entity_id)
 				elif entities[entity_id].update_check:

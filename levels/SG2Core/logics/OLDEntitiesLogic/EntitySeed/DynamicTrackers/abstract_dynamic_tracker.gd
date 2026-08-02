@@ -1,15 +1,20 @@
 @abstract
 extends Resource
-class_name AbstractTracker
+class_name DynamicTracker
 
 
+@warning_ignore("unused_private_class_variable")
 var _SG2Core : SG2Core
-var _EntitiesLogic : EntitiesLogic
+@warning_ignore("unused_private_class_variable")
+var _ESL : EntityStorageLogic
 
 ## Example: $SomeNode.value or value or $SomeNode
 @export var property_path : String
 
-var tracked_entities : Dictionary[int, TrackedEntity]
+var tracked_global_entities : Array[TrackedEntity]
+var global_active_mask : Array[PackedByteArray]
+var global_index_map : PackedInt32Array
+
 var entity_type_data : Dictionary[int, EntityTypeData]
 
 
@@ -19,16 +24,12 @@ class TrackedEntity:
 	
 
 class EntityTypeData:
-	var properties_config : Dictionary[String, AbstractTracker]
+	var properties_config : Dictionary[String, DynamicTracker]
 	var entities_property_path_property_array_num : Dictionary
 	var entities_property_array_num_property_path : Array
-
-	
-func start():
-	_EntitiesLogic = _SG2Core._EntitiesLogic
 	
 	
-func start_tracking(entity_id : int, _property_path : String, _property_config : AbstractTracker):
+func start_tracking(entity_id : int, _property_path : String, _property_config : DynamicTracker):
 	pass
 	
 	
