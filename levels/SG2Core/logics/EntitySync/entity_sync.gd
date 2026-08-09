@@ -3,28 +3,59 @@ class_name EntitySync
 
 
 @onready var _ConnectionLogic := _SG2Core._ConnectionLogic
+@onready var _MultiplayerLogic := _SG2Core._MultiplayerLogic
+@onready var _EntityFactory := _SG2Core._EntityFactory
 
 var _entities_can_start_working : bool = false
 signal _entities_start_working
-var _storage_set : Array[EntityStorageLogic]
+
+var _requested_chunks : Array
+
+var _chunks_buffer := ChunksBuffer.new()
+class ChunksBuffer:
+	var spawn_byte_data : Dictionary[Variant, PackedByteArray]
+	var spawn_variant_data : Dictionary[Variant, Array]
+	var update_byte_data : Dictionary[Variant, PackedByteArray]
+	var update_variant_data : Dictionary[Variant, Array]
+	var create_byte_data : Dictionary[Variant, PackedByteArray]
+	var create_variant_data : Dictionary[Variant, Array]
+	var destroy_byte_data : Dictionary[Variant, PackedByteArray]
+	
+	func clear():
+		spawn_byte_data.clear()
+		spawn_variant_data.clear()
+		update_byte_data.clear()
+		update_variant_data.clear()
+		create_byte_data.clear()
+		create_variant_data.clear()
+		destroy_byte_data.clear()
+	
 
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 1 # host's parameter is max for guest. drawing distance 1 is minimum
 var _players : Dictionary[int, EntitiesPlayerData]
 class EntitiesPlayerData:
+	var uid : int
 	var drawing_distance : int
 	var observers : Array[Observer]
-	func _init(_drawing_distance :  int) -> void:
+	func _init(_uid : int, _drawing_distance :  int) -> void:
+		uid = uid
 		drawing_distance = _drawing_distance
 	func _to_string() -> String:
-		return '{drawing_distance: {dd}, observers: {od}}'.format({'dd': drawing_distance, 'od': observers})
-var _chunks_users_num : Dictionary[Variant, int] ## if number of users is equal to or less than zero, chunk will be unloadedd
+		return '{uid: {uid}, drawing_distance: {dd}, observers: {od}}'.format({'uid': uid, 'dd': drawing_distance, 'od': observers})
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 
 
+func _process(delta: float) -> void:
+	await get_tree().process_frame
+	_requested_chunks.clear()
+	_chunks_buffer.clear()
+	
+	
 func _connection_peer_changed(new_peer):
 	_start()
 	multiplayer.multiplayer_peer = new_peer
@@ -40,13 +71,17 @@ func _start():
 	
 
 func _peer_connected(peer_id):
-	#spawn_player('peer', peer_id)
-	pass
+	await get_tree().process_frame
+	_players[peer_id] = EntitiesPlayerData.new(_MultiplayerLogic.players_data[peer_id].uid, 1)
+	var player_entity := _EntityFactory.spawn('CharacterBody3D_FPS', {'position': Vector3(0, 10, 0)})
+	_EntityFactory.spawn('Observer', 
+	{'peer_id': peer_id, 'uid': _players[peer_id].uid},
+	player_entity)
 	
 	
 func _peer_disconnected(peer_id):
-	for observer : Observer in _players[peer_id].observers:
-		if observer.current_chunk in _chunks_users_num:
-			_chunks_users_num[observer.current_chunk] -= 1
+	#for observer : Observer in _players[peer_id].observers:
+		#if observer.current_chunk in _chunks_users_num:
+			#_chunks_users_num[observer.current_chunk] -= 1
 	_players.erase(peer_id)
 	

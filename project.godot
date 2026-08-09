@@ -48,6 +48,7 @@ window/handheld/orientation=6
 
 folder_colors={
 "res://entities/": "yellow",
+"res://entities/Observer/": "orange",
 "res://exec/": "orange",
 "res://globals/": "red",
 "res://levels/": "orange",
@@ -147,6 +148,7 @@ panel={
 [physics]
 
 3d/physics_engine="Jolt Physics"
+3d/default_gravity=20.0
 
 [rendering]
 

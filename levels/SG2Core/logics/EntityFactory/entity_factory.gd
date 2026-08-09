@@ -3,6 +3,8 @@ class_name EntityFactory
 
 
 @onready var _PathRegistry := _SG2Core._PathRegistry
+@onready var _EntityStorage := _SG2Core._EntityStorage
+@onready var _EntitySync := _SG2Core._EntitySync
 
 @onready var _entities_dir = _PathRegistry.path('entities_dir')
 @onready var _entities_data_dir = _PathRegistry.path('entities_data_dir')
@@ -10,19 +12,28 @@ class_name EntityFactory
 
 @onready var _entities_meta : Dictionary = _load_entities_meta()
 @onready var _entity_type_shortcuts : Dictionary[String, int] = _get_entity_type_shortcuts()
-@onready var _shortcuts_entity_type : Dictionary[int, String] = _get_shortcuts_entity_type()
+@onready var _shortcuts_entity_type : PackedStringArray = _get_shortcuts_entity_type()
 @onready var _last_used_entity_id : int = 0 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
-@onready var _entity_type_data : Dictionary[int, EntityTypeData] = _load_entity_resources()
+@onready var _entity_type_data : Array[EntityTypeData] = _load_entity_resources()
+var _tracker_names : PackedStringArray
 class EntityTypeData:
 	var resource : PackedScene 
-	var property_path_property_array_num : Dictionary[StringName, int] ## {property_path: property_array_num}
-	var property_array_num_property_path : Array[StringName] ## {entity_type: [property_path, ...]}
-	var empty_property_array : Array ## {entity_type: [null, null, ...]}
 	var dimension : Dimension
 	enum Dimension {GLOBAL, V2, V3}
-	
+	var tracker_indices : PackedInt32Array
+	var cell_size : PackedInt32Array
+	var property_paths : Array[PackedStringArray]
+	var node_paths : Array[PackedStringArray]
+	var update_mask_size : int = 0
+	func _to_string() -> String:
+		return str([resource, dimension, tracker_indices, cell_size, property_paths, node_paths, update_mask_size])
 
-func _get_new_entity_id():
+
+static func get_from(from : Node) -> EntityFactory: 
+	return SG2Core.get_from(from)._EntityFactory
+
+
+func _get_new_entity_id() -> int:
 	_last_used_entity_id += 1
 	return _last_used_entity_id
 	
@@ -46,38 +57,77 @@ func _get_entity_type_shortcuts():
 	
 	
 func _get_shortcuts_entity_type():
-	var _shortcuts : Dictionary[int, String]
+	var _shortcuts : Array
 	if _entities_meta.has('entity_type_shortcuts'):
 		for entity_type in _entities_meta.entity_type_shortcuts.keys():
 			var shortcut = _entities_meta.entity_type_shortcuts[entity_type]
 			_shortcuts_entity_type[shortcut] = entity_type
 	return _shortcuts
 		
-		
-func _load_entity_resources() -> Dictionary[int, EntityTypeData]:
-	var type_data : Dictionary[int, EntityTypeData]
+
+# TODO: Static trackers support
+func _load_entity_resources() -> Array[EntityTypeData]:
+	var type_data : Array[EntityTypeData]
 	var entities_file_excepted : PackedStringArray
 	var entities_without_EntitySeed : PackedStringArray
 	for entity_type in DirAccess.get_directories_at('res://entities/'):
 		if not _entity_type_shortcuts.has(entity_type):
-			_shortcuts_entity_type[_shortcuts_entity_type.size()] = entity_type
+			_shortcuts_entity_type.append(entity_type)
 			_entity_type_shortcuts[entity_type] = _shortcuts_entity_type.size()-1
 		var shortcut := _entity_type_shortcuts[entity_type]
-		type_data[shortcut] = EntityTypeData.new()
+		type_data.append(EntityTypeData.new())
 		var data := type_data[shortcut]
-		if FileAccess.file_exists('res://entities/'+entity_type+'/'+entity_type+'.tscn'):
-			data.resource = load("res://entities/"+entity_type+"/"+entity_type+'.tscn')
+		var name_options : Array = [
+			'res://entities/'+entity_type+'/'+entity_type.to_camel_case()+'.tscn',
+			'res://entities/'+entity_type+'/'+entity_type.to_kebab_case()+'.tscn',
+			'res://entities/'+entity_type+'/'+entity_type.to_snake_case()+'.tscn',
+			'res://entities/'+entity_type+'/'+entity_type.to_pascal_case()+'.tscn',
+			'res://entities/'+entity_type+'/'+entity_type+'.tscn'
+		]
+		var valid_path: String = ""
+		var existing_files = name_options.filter(func(path): return FileAccess.file_exists(path))
+		if not existing_files.is_empty():
+			valid_path = existing_files[0]
+		if FileAccess.file_exists(valid_path):
+			data.resource = load(valid_path)
 			var entity_instance = data.resource.duplicate(true).instantiate()
 			if not entity_instance.has_node('EntitySeed'):
 				entities_without_EntitySeed.append(entity_type)
 				continue
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
-			ESeed._prepare_properties()
-			for property_num in range(len(ESeed.tracked_properties)):
-				data.property_path_property_array_num[ESeed.tracked_properties[property_num].property_path] = property_num
-				data.property_array_num_property_path.append(ESeed.tracked_properties[property_num].property_path)
-				data.empty_property_array.append(null)
-			if ESeed.global:
+			_EntityStorage._activation_queue.append([])
+			
+			for property_num in range(ESeed.trackers.size()):
+				var tracker := ESeed.trackers[property_num]
+				if tracker is AAutoSelectTracker:
+					continue
+				var tracker_name : String = tracker.get_script().get_global_name()
+				if not _tracker_names.has(tracker_name):
+					_tracker_names.append(tracker_name)
+					_EntityStorage._trackers.append(tracker.duplicate())
+				var tracker_idx = _tracker_names.find(tracker_name)
+				var node_path : String = tracker.node_path
+				if node_path == '':
+					node_path = '.'
+				var property_path : String
+				if tracker is PropertyBaseTracker:
+					property_path = tracker.property_path
+				data.update_mask_size += tracker._update_mask_size
+				if not tracker_idx in data.tracker_indices:
+					data.tracker_indices.append(tracker_idx)
+					data.cell_size.append(1)
+					data.node_paths.append(PackedStringArray([node_path]))
+					if property_path:
+						data.property_paths.append(PackedStringArray([property_path]))
+				else:
+					var list_idx := data.tracker_indices.find(tracker_idx)
+					data.cell_size[list_idx] += 1
+					data.node_paths[list_idx].append(node_path)
+					if property_path:
+						data.property_paths[list_idx].append(property_path)
+					
+				
+			if ESeed.is_global:
 				data.dimension = EntityTypeData.Dimension.GLOBAL
 			else:
 				if entity_instance is Node2D:
@@ -89,64 +139,24 @@ func _load_entity_resources() -> Dictionary[int, EntityTypeData]:
 				
 		else:
 			entities_file_excepted.append(entity_type)
-			
+	
 	# Pushing and asserting errors
 	assert(entities_without_EntitySeed.size() == 0, 'Some entities don\'t have EntitySeed as child: '+str(entities_without_EntitySeed))
 	for entity_type in entities_file_excepted:
-		push_error('File excepted to load entity "'+entity_type+'": '+'res://entities/'+entity_type+'/'+entity_type+'.tscn')
+		push_error('File excepted to load entity "'+entity_type+'": '+'res://entities/'+entity_type+'/'+entity_type.to_snake_case()+'.tscn')
 	
 	return type_data
 
 
-func spawn(entity_type : String, data : Dictionary, chunk = null, chunk_from_pos : bool = true, entity_id : int = _get_new_entity_id()):
-	var array : Array
+## Simple entity spawn
+func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
 	if not _entity_type_shortcuts.has(entity_type):
 		return
-	var type_shortcut := _entity_type_shortcuts[entity_type]
-	var tdata := _entity_type_data[type_shortcut]
-	for i in range(len(tdata.property_array_num_property_path)):
-		if data.has(tdata.property_array_num_property_path[i]):
-			array.append(data[tdata.property_array_num_property_path[i]])
-		else:
-			array.append(null)
-	if tdata.dimension == EntityTypeData.Dimension.GLOBAL:
-		_spawn_entity_global(type_shortcut, array, chunk, entity_id)
-	elif tdata.dimension == EntityTypeData.Dimension.V2:
-		pass
-	elif tdata.dimension == EntityTypeData.Dimension.V3:
-		pass
+	var shortcut := _entity_type_shortcuts[entity_type]
+	var tdata := _entity_type_data[shortcut]
+	var entity_instance := tdata.resource.instantiate()
+	for path in data:
+		Dispenser.set_resource(entity_instance, path, data[path], [shortcut, path])
+	where.add_child(entity_instance)
+	return entity_instance
 	
-
-func _get_ESL(entity_node : Node, entity_type : int) -> EntityStorageLogic:
-	var _ESL : EntityStorageLogic
-	var parent := entity_node.get_parent()
-	var storage_entity : Node
-	while true:
-		if parent.is_in_group('s') or parent.is_in_group('e'):
-			storage_entity = parent
-			break
-		if parent == _SG2Core:
-			return
-		parent = parent.get_parent()
-	var logic_instance : EntityStorageLogic
-	var logic_name : String
-	match _entity_type_data[entity_type].dimension:
-		EntityTypeData.Dimension.GLOBAL:
-			logic_instance = EntityStorageLogicGlobal.new()
-			logic_name = 'ESLGlobal'
-		EntityTypeData.Dimension.V2:
-			#logic_instance = EntityStorageLogic2D.new()
-			logic_name = 'ESL2D'
-		EntityTypeData.Dimension.V3:
-			#logic_instance = EntityStorageLogic3D.new()
-			logic_name = 'ESL3D'
-	if storage_entity.has_node(logic_name):
-		return storage_entity.get_node(logic_name)
-	else:
-		logic_instance.name = logic_name
-		storage_entity.add_child(logic_instance)
-		return storage_entity.get_node(logic_name)
-	
-	
-func _spawn_entity_global(entity_type : int, data : Array, chunk : Variant, entity_id : int = _get_new_entity_id()):
-	pass

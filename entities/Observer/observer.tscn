@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://bwfde5b38jo1a"]
+
+[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://entities/Observer/observer.gd" id="1_gvvbv"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="2_kg7qg"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/base_tracker.gd" id="3_kg7qg"]
+[ext_resource type="Script" uid="uid://bt1u2u745wce7" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/int_nointerp_tracker.gd" id="4_6edyg"]
+
+[sub_resource type="Resource" id="Resource_6edyg"]
+script = ExtResource("4_6edyg")
+property_path = "peer_id"
+metadata/_custom_type_script = "uid://bt1u2u745wce7"
+
+[sub_resource type="Resource" id="Resource_m4j5i"]
+script = ExtResource("4_6edyg")
+metadata/_custom_type_script = "uid://bt1u2u745wce7"
+
+[node name="Observer" type="Node" unique_id=1312437699]
+script = ExtResource("1_gvvbv")
+
+[node name="EntitySeed" type="Node" parent="." unique_id=847191381]
+script = ExtResource("2_kg7qg")
+trackers = Array[ExtResource("3_kg7qg")]([SubResource("Resource_6edyg"), SubResource("Resource_m4j5i")])
+setup_on_ready = true
+metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
+
+[node name="VoxelViewer" type="VoxelViewer" parent="." unique_id=702733942]
+unique_name_in_owner = true

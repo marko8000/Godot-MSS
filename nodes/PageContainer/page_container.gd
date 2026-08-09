@@ -28,6 +28,11 @@ func add_page(base_name : String = 'Page') -> Control:
 	add_child(_page)
 	_page.owner = get_tree().edited_scene_root
 	return _page
+	
+	
+func change_page(page_name : String):
+	if has_node(page_name):
+		current_page = get_node(page_name)
 		
 		
 func _ready():

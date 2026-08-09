@@ -1,12 +1,20 @@
-@icon('res://levels/SG2Core/x_res/x_images/level_icon.png')
 @tool
+@icon('res://levels/SG2Core/x_res/x_images/sg_logo_light.svg')
 extends Node
 class_name SG2Core
 
 
-@export var server_name : String = 'SG2CoreServer'
+static func get_from(from : Node) -> SG2Core: return ExecManager.get_current_exec(from).get_current_level(from)
+	
+@export var server_name : String = 'SG2CoreServer':
+	set(value):
+		if value.is_valid_filename():
+			server_name = value
+		else:
+			push_warning("Invalid folder name: '%s'. Change rejected." % value)
 
-@export_category('Components')
+
+@export_group('Logics')
 @warning_ignore("unused_private_class_variable")
 @export var _ConnectionLogic : ConnectionLogic
 @warning_ignore("unused_private_class_variable")
@@ -18,18 +26,14 @@ class_name SG2Core
 @warning_ignore("unused_private_class_variable")
 @export var _EntityFactory : EntityFactory
 @warning_ignore("unused_private_class_variable")
+@export var _EntityStorage : EntityStorage
+@warning_ignore("unused_private_class_variable")
 @export var _EntitySync : EntitySync
 @warning_ignore("unused_private_class_variable")
-@export var _ChunksCalculator : ChunksCalculator
+@export var _ChunkCalculator : ChunkCalculator
 @warning_ignore("unused_private_class_variable")
-@export var _PlayersActionsLogic : PlayersActionsLogic
+@export var _PlayerActionsLogic : PlayerActionsLogic
 @warning_ignore("unused_private_class_variable")
 @export var _InterpolationLogic : InterpolationLogic
 @warning_ignore("unused_private_class_variable")
 @export var _VoxelEditor : VoxelEditor
-	
-
-func _process(delta: float) -> void:
-	for symbol in '.:@/\"%':
-		if server_name.find(symbol) != -1:
-			server_name = server_name.erase(server_name.find(symbol))

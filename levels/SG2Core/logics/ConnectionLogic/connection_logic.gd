@@ -3,7 +3,7 @@ extends SG2Logic
 class_name ConnectionLogic
 
 
-var peer = ENetMultiplayerPeer.new()
+var peer : MultiplayerPeer
 ## host or guest
 var peer_role : String
 
@@ -14,7 +14,11 @@ var peer_role : String
 signal connection_peer_changed(new_peer)
 var my_peer_id
 	
-	
+
+static func get_from(from : Node) -> ConnectionLogic:
+	return SG2Core.get_from(from)._ConnectionLogic
+
+
 func _process(delta: float) -> void:
 	Debug.dstate('peer_role', peer_role, self)
 	
@@ -23,6 +27,7 @@ func host_create_server():
 	peer_role = 'host'
 	if connection_mode is ENetMultiplayerConnectionMode:
 		if connection_mode.server_ip != null and connection_mode.server_port != null:
+			peer = ENetMultiplayerPeer.new()
 			multiplayer.peer_connected.connect(_peer_connected)
 			multiplayer.peer_disconnected.connect(_peer_disconnected)
 			multiplayer.connected_to_server.connect(_connected_to_server)
@@ -75,3 +80,10 @@ func _connection_failed():
 
 func _server_disconnected():
 	Debug.dprint('Server Disconnected', peer_role)
+	
+	
+func is_player(node : Node):
+	var observer := Observer.get_from(node)
+	if observer:
+		return observer.is_player()
+	return false

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bpdatfl74kwpo"]
+
+[ext_resource type="Script" uid="uid://cjwn3gxe4dbei" path="res://levels/SG2Core/logics/PlayerActionsLogic/player_input_event.gd" id="1_cwdsv"]
+
+[node name="PlayerActionsManager" type="Node"]
+script = ExtResource("1_cwdsv")

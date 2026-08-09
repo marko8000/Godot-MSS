@@ -2,13 +2,15 @@
 
 [ext_resource type="Script" uid="uid://d2rxrywyjltkp" path="res://entities/CharacterBody3D_FPS/character_body_3d_fps.gd" id="1_5spkx"]
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_ir1cf"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/entity_seed.gd" id="3_1wfgu"]
-[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/Observer/observer.gd" id="6_s6vr0"]
-[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/OLDEntitiesLogic/EntitySeed/PlayerInput/player_input.gd" id="7_2vrci"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="3_1wfgu"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/base_tracker.gd" id="4_2qgcy"]
+[ext_resource type="Script" uid="uid://cmd1em6nf3iyx" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/position3d_tracker.gd" id="5_5spkx"]
+[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/PlayerActionsLogic/player_input.gd" id="5_hrs1x"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_57n2x"]
+radius = 0.4
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_lii66"]
 size = Vector2(0.54, 0.5)
@@ -18,6 +20,10 @@ albedo_texture = ExtResource("2_ir1cf")
 
 [sub_resource type="BoxMesh" id="BoxMesh_80mxe"]
 size = Vector3(0.54, 0.5, 0.9)
+
+[sub_resource type="Resource" id="Resource_ir1cf"]
+script = ExtResource("5_5spkx")
+metadata/_custom_type_script = "uid://cmd1em6nf3iyx"
 
 [node name="CharacterBody3D_FPS" type="CharacterBody3D" unique_id=256457585]
 script = ExtResource("1_5spkx")
@@ -45,14 +51,12 @@ mesh = SubResource("BoxMesh_80mxe")
 
 [node name="EntitySeed" type="Node" parent="." unique_id=1194583288]
 script = ExtResource("3_1wfgu")
+trackers = Array[ExtResource("4_2qgcy")]([SubResource("Resource_ir1cf")])
+setup_on_ready = true
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
-[node name="Observer" type="Node" parent="." unique_id=1362956912]
-unique_name_in_owner = true
-script = ExtResource("6_s6vr0")
-metadata/_custom_type_script = "uid://cu4bumaj12olc"
-
-[node name="PlayerInput" type="Node" parent="." unique_id=293652930]
-unique_name_in_owner = true
-script = ExtResource("7_2vrci")
+[node name="PlayerInput" type="Node" parent="." unique_id=1438195250]
+script = ExtResource("5_hrs1x")
 metadata/_custom_type_script = "uid://cxsg3x5vw3nlq"
+
+[connection signal="peer_input" from="PlayerInput" to="." method="_on_player_input_peer_input"]

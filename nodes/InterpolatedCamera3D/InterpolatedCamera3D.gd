@@ -30,7 +30,7 @@ var target_changed_on_process = false
 
 	
 func _physics_process(delta: float) -> void:
-	if target == null or str(target) == '':
+	if not is_instance_valid(target):
 		return
 
 	# TODO: Fix delta calculation so it behaves correctly if the speed is set to 1.0.
