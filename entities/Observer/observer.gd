@@ -12,6 +12,8 @@ signal peer_id_changed(peer_id)
 var uid : int
 var peer_id : int :
 	set(value):
+		if _ConnectionLogic and _ConnectionLogic.peer_role == 'host':
+			_player_data = _EntitySync._players[value]
 		peer_id = value
 		peer_id_changed.emit(value)
 var _player_data : EntitySync.EntitiesPlayerData
@@ -20,19 +22,13 @@ var _current_chunk
 var _loaded_chunks : Array
 func _to_string() -> String:
 	return 'Observer:[{0}, {1}]'.format([_current_chunk, str(len(_loaded_chunks))])
-	
-
-static func get_from(from: Node) -> Observer:
-	if not from:
-		return null
-	var observers = from.get_children().filter(func(child): return child is Observer)
-	return observers[0] if not observers.is_empty() else null
 
 
 func _ready() -> void:
-	_SG2Core = SG2Core.get_from(self)
-	_EntitySync = _SG2Core._EntitySync
-	_ConnectionLogic = _SG2Core._ConnectionLogic
+	if not Engine.is_editor_hint():
+		_SG2Core = SG2Core.get_from(self)
+		_EntitySync = _SG2Core._EntitySync
+		_ConnectionLogic = _SG2Core._ConnectionLogic
 	
 	
 func is_player() -> bool:
@@ -44,6 +40,8 @@ func is_player() -> bool:
 func _process(delta: float) -> void:
 	if not Engine.is_editor_hint():
 		%VoxelViewer.global_position = get_parent().global_position
+	
+	
 	#
 	#
 #func host_update_player_data():

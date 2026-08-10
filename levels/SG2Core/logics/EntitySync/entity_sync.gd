@@ -14,21 +14,11 @@ var _requested_chunks : Array
 var _chunks_buffer := ChunksBuffer.new()
 class ChunksBuffer:
 	var spawn_byte_data : Dictionary[Variant, PackedByteArray]
-	var spawn_variant_data : Dictionary[Variant, Array]
 	var update_byte_data : Dictionary[Variant, PackedByteArray]
-	var update_variant_data : Dictionary[Variant, Array]
-	var create_byte_data : Dictionary[Variant, PackedByteArray]
-	var create_variant_data : Dictionary[Variant, Array]
-	var destroy_byte_data : Dictionary[Variant, PackedByteArray]
 	
 	func clear():
 		spawn_byte_data.clear()
-		spawn_variant_data.clear()
 		update_byte_data.clear()
-		update_variant_data.clear()
-		create_byte_data.clear()
-		create_variant_data.clear()
-		destroy_byte_data.clear()
 	
 
 @export_category('Drawing Settings')

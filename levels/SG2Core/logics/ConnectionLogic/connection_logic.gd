@@ -83,7 +83,8 @@ func _server_disconnected():
 	
 	
 func is_player(node : Node):
-	var observer := Observer.get_from(node)
-	if observer:
-		return observer.is_player()
+	var observers := node.get_children().filter(func (child): return child is Observer)
+	for observer in observers:
+		if observer.is_player():
+			return true
 	return false

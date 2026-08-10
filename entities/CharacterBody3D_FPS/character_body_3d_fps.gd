@@ -15,16 +15,15 @@ var direction : Vector3
 var current_speed : float
 	
 
-func _physics_process(delta: float) -> void:
-	var camera : FPSCamera3D = _EntityStorage.get_node('FPSCamera3D')
+func _process(delta: float) -> void:
+	var camera : FPSCamera3D = $cam/FPSCamera3D
 	if _ConnectionLogic.is_player(self):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		camera.target = get_node('cam')
 		camera.make_current()
 	else:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		camera.target = null
 	
+func _physics_process(delta: float) -> void:	
 	if _ConnectionLogic.peer_role == 'guest':
 		return
 		

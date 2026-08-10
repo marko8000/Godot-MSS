@@ -79,6 +79,7 @@ func _process(delta: float) -> void:
 	_process_activation_queue()
 	_process_move_queue()
 	_process_remove_queue()
+	_process_update()
 	
 	
 func _process_activation_queue():
@@ -158,7 +159,6 @@ func _process_activation_queue():
 				type_batch.entity_indices.append(entity_idx)
 				type_batch.children.append(ChunkData.TypeBatch.new())
 				type_batch.flags.append(0)
-				print(type, _EntityFactory._shortcuts_entity_type[type], type_batch, _EntityFactory._shortcuts_entity_type[chunk_node_type], chunk_node_type)
 	
 	# remove invalid entities
 	if root_path_type_batches_i.has(PackedInt32Array()):
@@ -184,4 +184,8 @@ func _process_move_queue():
 
 
 func _process_remove_queue():
+	pass
+
+
+func _process_update():
 	pass

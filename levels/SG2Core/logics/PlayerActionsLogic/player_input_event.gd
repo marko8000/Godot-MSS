@@ -20,7 +20,7 @@ func is_action_just_pressed(action : String):
 	return false
 	
 	
-func is_action_pressed(action : String):
+func is_action_pressed(action: StringName):
 	if action in actions:
 		if 'pressed' in actions[action]:
 			return true
