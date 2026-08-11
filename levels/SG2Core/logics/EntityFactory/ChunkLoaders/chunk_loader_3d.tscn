@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://dso5rpmw1mpg7"]
+
+[node name="ChunkLoader3D" type="Node3D" unique_id=667561586]
+
+[node name="VoxelViewer" type="VoxelViewer" parent="." unique_id=2006093880]

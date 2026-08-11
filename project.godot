@@ -48,7 +48,7 @@ window/handheld/orientation=6
 
 folder_colors={
 "res://entities/": "yellow",
-"res://entities/Observer/": "orange",
+"res://entities/PlayerIdNode/": "orange",
 "res://exec/": "orange",
 "res://globals/": "red",
 "res://levels/": "orange",

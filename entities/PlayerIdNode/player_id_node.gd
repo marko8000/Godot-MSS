@@ -1,7 +1,7 @@
 @tool
 @icon('res://levels/SG2Core/x_res/x_images/sg_logo_light.svg')
 extends Node
-class_name Observer
+class_name PlayerIdNode
 
 
 var _SG2Core : SG2Core
@@ -39,7 +39,7 @@ func is_player() -> bool:
 	
 func _process(delta: float) -> void:
 	if not Engine.is_editor_hint():
-		%VoxelViewer.global_position = get_parent().global_position
+		%ChunkLoader3D.global_position = get_parent().global_position
 	
 	
 	#

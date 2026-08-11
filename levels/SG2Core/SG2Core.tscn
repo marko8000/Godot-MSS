@@ -355,6 +355,7 @@ metadata/_custom_type_script = "uid://bgcxkvl44kr8s"
 
 [node name="EntitySync" type="Node" parent="SG2Logics" unique_id=1326656377]
 script = ExtResource("10_e31fr")
+drawing_distance = null
 metadata/_custom_type_script = "uid://dln1w12yvd1f0"
 
 [node name="InterpolationLogic" type="Node" parent="SG2Logics" unique_id=1073962538]

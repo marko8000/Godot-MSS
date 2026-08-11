@@ -56,7 +56,9 @@ func entity_prepare():
 func _get_configuration_warnings():
 	var warnings = []
 	var parent_warning := false
-	if get_parent() != null:
+	if get_parent() != null and get_parent() == get_tree().edited_scene_root:
+		if get_parent().name != get_parent().scene_file_path.get_slice('/', 3):
+			get_parent().name = get_parent().scene_file_path.get_slice('/', 3)
 		var name_options : PackedStringArray = [
 			'res://entities/'+get_parent().name+'/'+get_parent().name.to_camel_case()+'.tscn',
 			'res://entities/'+get_parent().name+'/'+get_parent().name.to_kebab_case()+'.tscn',
@@ -82,8 +84,11 @@ func _entity_node_renamed():
 	get_parent().renamed.disconnect(_entity_node_renamed)
 	if get_parent() != get_tree().edited_scene_root:
 		return
-	get_parent().name = get_parent().scene_file_path.get_slice('/', 3)
 	get_parent().renamed.connect(_entity_node_renamed)
+	if get_parent().name == get_parent().scene_file_path.get_slice('/', 3):
+		return
+	get_parent().name = get_parent().scene_file_path.get_slice('/', 3)
+
 	var base_control = EditorInterface.get_base_control()
 	
 	var warning_window = load('res://levels/SG2Core/logics/EntitySeed/popup.tscn').instantiate()

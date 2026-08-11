@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bwfde5b38jo1a"]
+
+[ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://entities/PlayerIdNode/player_id_node.gd" id="1_yitv3"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="2_qclnh"]
+[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/base_tracker.gd" id="3_ql65s"]
+[ext_resource type="Script" uid="uid://bt1u2u745wce7" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/int_nointerp_tracker.gd" id="4_g2gam"]
+[ext_resource type="PackedScene" uid="uid://dso5rpmw1mpg7" path="res://levels/SG2Core/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn" id="5_qclnh"]
+
+[sub_resource type="Resource" id="Resource_6edyg"]
+script = ExtResource("4_g2gam")
+property_path = "peer_id"
+metadata/_custom_type_script = "uid://bt1u2u745wce7"
+
+[sub_resource type="Resource" id="Resource_m4j5i"]
+script = ExtResource("4_g2gam")
+metadata/_custom_type_script = "uid://bt1u2u745wce7"
+
+[node name="PlayerIdNode" type="Node" unique_id=1312437699]
+script = ExtResource("1_yitv3")
+
+[node name="EntitySeed" type="Node" parent="." unique_id=847191381]
+script = ExtResource("2_qclnh")
+trackers = Array[ExtResource("3_ql65s")]([SubResource("Resource_6edyg"), SubResource("Resource_m4j5i")])
+setup_on_ready = true
+metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
+
+[node name="ChunkLoader3D" parent="." unique_id=667561586 instance=ExtResource("5_qclnh")]
+unique_name_in_owner = true

@@ -27,12 +27,12 @@ var _players : Dictionary[int, EntitiesPlayerData]
 class EntitiesPlayerData:
 	var uid : int
 	var drawing_distance : int
-	var observers : Array[Observer]
+	var player_id_nodes : Array[PlayerIdNode]
 	func _init(_uid : int, _drawing_distance :  int) -> void:
 		uid = uid
 		drawing_distance = _drawing_distance
 	func _to_string() -> String:
-		return '{uid: {uid}, drawing_distance: {dd}, observers: {od}}'.format({'uid': uid, 'dd': drawing_distance, 'od': observers})
+		return '{uid: {uid}, drawing_distance: {dd}, player_id_nodes: {od}}'.format({'uid': uid, 'dd': drawing_distance, 'od': player_id_nodes})
 
 
 # Called when the node enters the scene tree for the first time.
@@ -63,15 +63,12 @@ func _start():
 func _peer_connected(peer_id):
 	await get_tree().process_frame
 	_players[peer_id] = EntitiesPlayerData.new(_MultiplayerLogic.players_data[peer_id].uid, 1)
-	var player_entity := _EntityFactory.spawn('CharacterBody3D_FPS', {'position': Vector3(0, 10, 0)})
-	_EntityFactory.spawn('Observer', 
-	{'peer_id': peer_id, 'uid': _players[peer_id].uid},
+	var player_entity := await _EntityFactory.spawn_and_load('CharacterBody3D_FPS', {'position': Vector3(0, 5, 0)})
+	_EntityFactory.spawn('PlayerIdNode', 
+	{'peer_id': peer_id, 'uid': _players[peer_id].uid}, 
 	player_entity)
 	
 	
 func _peer_disconnected(peer_id):
-	#for observer : Observer in _players[peer_id].observers:
-		#if observer.current_chunk in _chunks_users_num:
-			#_chunks_users_num[observer.current_chunk] -= 1
 	_players.erase(peer_id)
 	

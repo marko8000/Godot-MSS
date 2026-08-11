@@ -30,3 +30,6 @@ func _remove_batch(entity_indices : PackedInt32Array, type_data : EntityFactory.
 	for entity_idx in entity_indices:
 		_free_cells[cell_size].append(_sparse_array[entity_idx])
 		
+		
+func _update_batch(entity_indices : PackedInt32Array, entity_type_data : EntityFactory.EntityTypeData, chunk):
+	pass

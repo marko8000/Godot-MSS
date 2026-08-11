@@ -5,6 +5,7 @@ class_name EntityFactory
 @onready var _PathRegistry := _SG2Core._PathRegistry
 @onready var _EntityStorage := _SG2Core._EntityStorage
 @onready var _EntitySync := _SG2Core._EntitySync
+@onready var _ChunkCalculator := _SG2Core._ChunkCalculator
 
 @onready var _entities_dir = _PathRegistry.path('entities_dir')
 @onready var _entities_data_dir = _PathRegistry.path('entities_data_dir')
@@ -148,8 +149,7 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 	return type_data
 
 
-## Simple entity spawn
-func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
+func _spawn_json(entity_type : String, data : Dictionary, where : Node = _EntityStorage, entity_id : int = _get_new_entity_id()) -> Node:
 	if not _entity_type_shortcuts.has(entity_type):
 		return
 	var shortcut := _entity_type_shortcuts[entity_type]
@@ -160,3 +160,50 @@ func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorag
 	where.add_child(entity_instance)
 	return entity_instance
 	
+
+func spawn_and_load(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
+	var type_data := _entity_type_data[_entity_type_shortcuts[entity_type]]
+	var position
+	if data.has('position'):
+		position = data.position
+	var chunk
+	var preloader_scene_path : String
+	match type_data.dimension:
+		EntityTypeData.Dimension.V2:
+			if not position:
+				position = Vector2.ZERO
+			chunk = _ChunkCalculator.position2d_to_chunk(position)
+			preloader_scene_path = 'res://levels/SG2Core/logics/EntityFactory/ChunkLoaders/chunk_loader_2d.tscn'				
+		EntityTypeData.Dimension.V3:
+			if not position:
+				position = Vector3.ZERO
+			chunk = _ChunkCalculator.position3d_to_chunk(position)
+			preloader_scene_path = 'res://levels/SG2Core/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn'
+	while true:
+		var wait_time := 5
+		if not has_node(str(chunk)):
+			var preloader_scene : PackedScene = load(preloader_scene_path)
+			var preloader_instance = preloader_scene.instantiate()
+			preloader_instance.name = str(chunk)
+			if position:
+				preloader_instance.position = position
+			var timer_killer := TimerKiller.new()
+			timer_killer.name = 'T'
+			timer_killer.wait_time = wait_time
+			preloader_instance.add_child(timer_killer)
+			add_child(preloader_instance)
+		else:
+			var timer_killer : TimerKiller = get_node_or_null(str(chunk)+'/T')
+			if timer_killer:
+				timer_killer.start()
+			if is_instance_valid(timer_killer):
+				timer_killer.start()
+				break
+	# load_chunk(chunk)
+	await get_node(str(chunk)+'/T').timeout
+	return _spawn_json(entity_type, data)
+	
+	
+## Simple entity spawn
+func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
+	return _spawn_json(entity_type, data, where)
