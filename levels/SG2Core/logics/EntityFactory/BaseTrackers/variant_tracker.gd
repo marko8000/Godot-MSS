@@ -1,2 +1,0 @@
-extends PropertyBaseTracker
-class_name VariantTracker

@@ -4,7 +4,7 @@ class_name EntityFactory
 
 @onready var _PathRegistry := _SG2Core._PathRegistry
 @onready var _EntityStorage := _SG2Core._EntityStorage
-@onready var _EntitySync := _SG2Core._EntitySync
+@onready var _EntityInterest := _SG2Core._EntityInterest
 @onready var _ChunkCalculator := _SG2Core._ChunkCalculator
 
 @onready var _entities_dir = _PathRegistry.path('entities_dir')
@@ -16,18 +16,18 @@ class_name EntityFactory
 @onready var _shortcuts_entity_type : PackedStringArray = _get_shortcuts_entity_type()
 @onready var _last_used_entity_id : int = 0 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
 @onready var _entity_type_data : Array[EntityTypeData] = _load_entity_resources()
-var _tracker_names : PackedStringArray
+var _source_names : PackedStringArray
 class EntityTypeData:
 	var resource : PackedScene 
 	var dimension : Dimension
 	enum Dimension {GLOBAL, V2, V3}
-	var tracker_indices : PackedInt32Array
+	var source_indices : PackedInt32Array
 	var cell_size : PackedInt32Array
 	var property_paths : Array[PackedStringArray]
 	var node_paths : Array[PackedStringArray]
 	var update_mask_size : int = 0
 	func _to_string() -> String:
-		return str([resource, dimension, tracker_indices, cell_size, property_paths, node_paths, update_mask_size])
+		return str([resource, dimension, source_indices, cell_size, property_paths, node_paths, update_mask_size])
 
 
 static func get_from(from : Node) -> EntityFactory: 
@@ -98,30 +98,41 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
 			_EntityStorage._activation_queue.append([])
 			
+			var data_sources : Array[EntityDataSource]
+			data_sources.append_array(ESeed.trackers)
+			data_sources.append_array(ESeed.components)
 			for property_num in range(ESeed.trackers.size()):
-				var tracker := ESeed.trackers[property_num]
-				if tracker is AAutoSelectTracker:
+				var source := data_sources[property_num]
+				if source is AAutoSelectTracker:
 					continue
-				var tracker_name : String = tracker.get_script().get_global_name()
-				if not _tracker_names.has(tracker_name):
-					_tracker_names.append(tracker_name)
-					_EntityStorage._trackers.append(tracker.duplicate())
-				var tracker_idx = _tracker_names.find(tracker_name)
-				var node_path : String = tracker.node_path
+				var source_name : String = source.get_script().get_global_name()
+				if not _source_names.has(source_name):
+					_source_names.append(source_name)
+					source._EntityStorage = _EntityStorage
+					_EntityStorage._data_sources.append(source)
+				var source_idx = _source_names.find(source_name)
+				
+				var node_path : String 
+				if source is NodeTracker:
+					node_path = source.node_path
 				if node_path == '':
 					node_path = '.'
+				elif node_path == '..':
+					node_path = '.'
+				else:
+					node_path = node_path.replace('../', '')
 				var property_path : String
-				if tracker is PropertyBaseTracker:
-					property_path = tracker.property_path
-				data.update_mask_size += tracker._update_mask_size
-				if not tracker_idx in data.tracker_indices:
-					data.tracker_indices.append(tracker_idx)
+				if source is PropertyTracker:
+					property_path = source.property_path
+				data.update_mask_size += source._update_mask_size
+				if not source_idx in data.source_indices:
+					data.source_indices.append(source_idx)
 					data.cell_size.append(1)
 					data.node_paths.append(PackedStringArray([node_path]))
 					if property_path:
 						data.property_paths.append(PackedStringArray([property_path]))
 				else:
-					var list_idx := data.tracker_indices.find(tracker_idx)
+					var list_idx := data.source_indices.find(source_idx)
 					data.cell_size[list_idx] += 1
 					data.node_paths[list_idx].append(node_path)
 					if property_path:

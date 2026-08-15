@@ -25,6 +25,7 @@ var token_symbols : String = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvb
 
 
 func _ready() -> void:
+	await get_tree().process_frame
 	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
 	
 	

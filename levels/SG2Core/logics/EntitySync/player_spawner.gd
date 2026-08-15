@@ -1,2 +1,0 @@
-extends SG2Logic
-class_name PlayerSpawner

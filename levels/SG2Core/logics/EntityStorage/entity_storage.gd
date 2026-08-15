@@ -3,12 +3,18 @@ extends SG2Logic
 class_name EntityStorage
 
 
+@onready var _ConnectionLogic := _SG2Core._ConnectionLogic
 @onready var _EntityFactory := _SG2Core._EntityFactory
-@onready var _EntitySync := _SG2Core._EntitySync
+@onready var _EntityInterest := _SG2Core._EntityInterest
 @onready var _ChunkCalculator := _SG2Core._ChunkCalculator
+@onready var _InterpolationState := _SG2Core._InterpolationState
+
+var _entities_can_start_working : bool = false
+signal _entities_start_working
+var main_tickrate : int = 30
 
 # Allocate
-var _trackers : Array[Tracker]
+var _data_sources : Array[EntityDataSource]
 var _entities : PackedInt64Array
 var _entity_types : PackedInt32Array
 var _nodes : Array[Node]
@@ -33,15 +39,36 @@ class ChunkData:
 		## 3 - moved to chunk (lod_level, chunk_type, chunk_data) [br]
 		## 4 - moved from chunk (lod_level, chunk_type, chunk_data) [br]
 		var flags : PackedInt32Array
-		var free_slots : PackedInt32Array
 		var tickrate_data : Vector2i
 		func _to_string() -> String:
 			return str(entity_indices, children, flags)
 
+var _chunks_buffer := ChunksBuffer.new()
+class ChunksBuffer:
+	var spawn_byte_data : Dictionary[Variant, PackedByteArray]
+	var update_byte_data : Dictionary[Variant, PackedByteArray]
+	
+	func clear():
+		spawn_byte_data.clear()
+		update_byte_data.clear()
+		
 	
 static func get_from(from : Node) -> EntityStorage:
 	return SG2Core.get_from(from)._EntityStorage
 	
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	await get_tree().process_frame
+	_ConnectionLogic.connection_peer_changed.connect(_connection_peer_changed)
+	
+
+func _connection_peer_changed(new_peer):
+	_entities_start_working.emit()
+	_entities_can_start_working = true
+	multiplayer.multiplayer_peer = new_peer
+	Debug.dprint('Connection Peer Setted', self.name)
+		
 
 func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array:
 	var entity_indices : PackedInt32Array
@@ -66,20 +93,30 @@ func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array
 			_entity_root.append(-2)
 			_root_chunk.append(0)
 		entity_indices.append(idx)
-	for tracker_idx in range(_trackers.size()):
-		var tracker_list_idx = type_data.tracker_indices.find(tracker_idx)
-		var tracker = _trackers[tracker_idx]
-		tracker._sparse_array.resize(_entities.size())
-		if not tracker_list_idx == -1:
-			tracker._allocate_batch(entity_indices, nodes, type_data, tracker_list_idx)
+	for source_idx in range(_data_sources.size()):
+		var source_list_idx = type_data.source_indices.find(source_idx)
+		var source = _data_sources[source_idx]
+		source._sparse_array.resize(_entities.size())
+		if not source_list_idx == -1:
+			source._allocate_batch(entity_indices, type_data, source_list_idx)
 	return entity_indices
 	
-		
+
+var current_tick : int = 1
+var budget : int
 func _process(delta: float) -> void:
-	_process_activation_queue()
-	_process_move_queue()
-	_process_remove_queue()
+	if current_tick == 1:
+		_process_activation_queue()
+		_process_move_queue()
+		_process_remove_queue()
+		budget = ceil(float(_entities.size()) / _InterpolationState.server_FPS)
 	_process_update()
+	if current_tick >= main_tickrate:
+		#send_chunks()
+		_chunks_buffer.clear()
+		current_tick = 1
+	else:
+		current_tick += 1
 	
 	
 func _process_activation_queue():
@@ -95,8 +132,8 @@ func _process_activation_queue():
 			var current_entity_idx : int = -2
 			var root_path := PackedInt32Array([entity_idx])
 			while true:
-				if parent_node.has_meta('x'):
-					current_entity_idx = parent_node.get_meta('x')
+				if str(parent_node.name).is_valid_int():
+					current_entity_idx = int(parent_node.name)
 					root_path.append(current_entity_idx)
 				if parent_idx == -2 and bool(current_entity_idx+2):
 					parent_idx = current_entity_idx
@@ -104,6 +141,7 @@ func _process_activation_queue():
 					activation_queue_path_from_parent[type].append(parent_node.get_path_to(_nodes[entity_idx].get_parent()))
 				if parent_node == self:
 					_entity_root[entity_idx] = current_entity_idx
+					root_path.append(-1)
 					break
 					
 				if parent_node == get_tree().root:
@@ -169,11 +207,11 @@ func _process_activation_queue():
 				_nodes[entity_idx].queue_free()
 				remove_indices.append(entity_idx)
 			var type_data := _EntityFactory._entity_type_data[type]
-			for tracker_idx in range(_trackers.size()):
-				var tracker_list_idx = type_data.tracker_indices.find(tracker_idx)
-				var tracker = _trackers[tracker_idx]
-				if not tracker_list_idx == -1:
-					tracker._remove_batch(remove_indices, type_data, tracker_list_idx)
+			for source_idx in range(_data_sources.size()):
+				var source_list_idx = type_data.source_indices.find(source_idx)
+				var source = _data_sources[source_idx]
+				if not source_list_idx == -1:
+					source._remove_batch(remove_indices, type_data, source_list_idx)
 				
 	for type in range(_activation_queue.size()):
 		_activation_queue[type].clear()

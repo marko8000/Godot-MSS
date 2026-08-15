@@ -2,8 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="1_oh78e"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="2_yutah"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/base_tracker.gd" id="3_klufc"]
-[ext_resource type="Script" uid="uid://cmd1em6nf3iyx" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/position3d_tracker.gd" id="4_klufc"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8rfn7"]
 
@@ -11,10 +9,6 @@
 albedo_texture = ExtResource("1_oh78e")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_enx2m"]
-
-[sub_resource type="Resource" id="Resource_1h8a3"]
-script = ExtResource("4_klufc")
-metadata/_custom_type_script = "uid://cmd1em6nf3iyx"
 
 [node name="BallRigidBody3D" type="RigidBody3D" unique_id=1990800275]
 
@@ -27,5 +21,4 @@ shape = SubResource("SphereShape3D_enx2m")
 
 [node name="EntitySeed" type="Node" parent="." unique_id=1538682676]
 script = ExtResource("2_yutah")
-trackers = Array[ExtResource("3_klufc")]([SubResource("Resource_1h8a3")])
 setup_on_ready = true

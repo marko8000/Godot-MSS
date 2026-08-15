@@ -5,13 +5,13 @@
 [ext_resource type="Script" uid="uid://cpnqru2mykw11" path="res://nodes/InterpolatedCamera3D/InterpolatedCamera3D.gd" id="3_iqr5g"]
 [ext_resource type="Script" uid="uid://bs6ign48kbldm" path="res://levels/SG2Core/logics/ConnectionLogic/connection_logic.gd" id="3_kwttr"]
 [ext_resource type="Script" uid="uid://cox4umbac26ux" path="res://levels/SG2Core/logics/ConnectionLogic/ConnectionModes/enetmultiplayer_connection_mode.gd" id="4_clh2q"]
-[ext_resource type="Script" uid="uid://c2q0co5tjcop1" path="res://levels/SG2Core/logics/AntiDDoS/anti_ddos.gd" id="5_53uc8"]
 [ext_resource type="PackedScene" uid="uid://b105k8a0duxoc" path="res://entities/BallRigidBody3D/BallRigidBody3D.tscn" id="5_iqr5g"]
 [ext_resource type="Script" uid="uid://de20o5j16ketc" path="res://levels/SG2Core/logics/AuthLogic/auth_logic.gd" id="6_lltom"]
 [ext_resource type="Script" uid="uid://tr8636mmirwa" path="res://levels/SG2Core/logics/PathRegistry/path_registry.gd" id="7_ocsad"]
-[ext_resource type="Script" uid="uid://bgcxkvl44kr8s" path="res://levels/SG2Core/logics/MultiplayerLogic/multiplayer_logic.gd" id="8_6l2pd"]
-[ext_resource type="Script" uid="uid://dwwhkgkrddwnn" path="res://levels/SG2Core/logics/InterpolationLogic/interpolation_logic.gd" id="10_cnbnu"]
-[ext_resource type="Script" uid="uid://dln1w12yvd1f0" path="res://levels/SG2Core/logics/EntitySync/entity_sync.gd" id="10_e31fr"]
+[ext_resource type="Script" uid="uid://bgcxkvl44kr8s" path="res://levels/SG2Core/logics/PlayerLifecycle/player_lifecycle.gd" id="8_6l2pd"]
+[ext_resource type="Script" uid="uid://dwwhkgkrddwnn" path="res://levels/SG2Core/logics/InterpolationState/interpolation_state.gd" id="10_cnbnu"]
+[ext_resource type="Script" uid="uid://dln1w12yvd1f0" path="res://levels/SG2Core/logics/EntityInterest/entity_interest.gd" id="10_e31fr"]
+[ext_resource type="Script" uid="uid://bibupwpwuw13v" path="res://levels/SG2Core/logics/EntityBehaviorRegistry/entity_behavior_registry.gd" id="11_iqr5g"]
 [ext_resource type="Script" uid="uid://df3c8sk363k1n" path="res://levels/SG2Core/logics/ChunkCalculator/chunk_calculator.gd" id="11_kigak"]
 [ext_resource type="Script" uid="uid://bajwjotqxqrsq" path="res://levels/SG2Core/logics/EntityFactory/entity_factory.gd" id="11_mrox5"]
 [ext_resource type="Script" uid="uid://dko5lkkkd82xr" path="res://levels/SG2Core/logics/PlayerActionsLogic/player_actions_logic.gd" id="12_j8k6k"]
@@ -295,24 +295,23 @@ library = SubResource("VoxelBlockyLibrary_l5d5u")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cmyl6"]
 vertex_color_use_as_albedo = true
 
-[node name="SG2Core" type="Node" unique_id=772013971 node_paths=PackedStringArray("_ConnectionLogic", "_AuthLogic", "_MultiplayerLogic", "_PathRegistry", "_EntityFactory", "_EntityStorage", "_EntitySync", "_ChunkCalculator", "_PlayerActionsLogic", "_InterpolationLogic", "_VoxelEditor")]
+[node name="SG2Core" type="Node" unique_id=772013971 node_paths=PackedStringArray("_ConnectionLogic", "_PlayerLifeCycle", "_AuthLogic", "_PathRegistry", "_EntityFactory", "_EntityStorage", "_EntityInterest", "_ChunkCalculator", "_PlayerActionsLogic", "_InterpolationState", "_VoxelEditor")]
 script = ExtResource("1_mrox5")
 _ConnectionLogic = NodePath("SG2Logics/ConnectionLogic")
-_AuthLogic = NodePath("SG2Logics/AuthLogic")
-_MultiplayerLogic = NodePath("SG2Logics/MultiplayerLogic")
+_PlayerLifeCycle = NodePath("SG2Logics/PlayerLifecycle")
+_AuthLogic = NodePath("SG2Logics/PlayerLifecycle/AuthLogic")
 _PathRegistry = NodePath("SG2Logics/PathRegistry")
 _EntityFactory = NodePath("SG2Logics/EntityFactory")
 _EntityStorage = NodePath("EntityStorage")
-_EntitySync = NodePath("SG2Logics/EntitySync")
+_EntityInterest = NodePath("SG2Logics/EntityInterest")
 _ChunkCalculator = NodePath("SG2Logics/ChunkCalculator")
 _PlayerActionsLogic = NodePath("SG2Logics/PlayerActionsLogic")
-_InterpolationLogic = NodePath("SG2Logics/InterpolationLogic")
+_InterpolationState = NodePath("SG2Logics/InterpolationState")
 _VoxelEditor = NodePath("SG2Logics/VoxelEditor")
 
 [node name="EntityStorage" type="Node" parent="." unique_id=290533106]
 script = ExtResource("2_mrox5")
 metadata/_custom_type_script = "uid://b5o1ptm5sf8vb"
-metadata/x = -1
 
 [node name="ObserverCamera3D" type="Camera3D" parent="EntityStorage" unique_id=41916817]
 transform = Transform3D(1, 0, 0, 0, 0.8660254, 0.5, 0, -0.5, 0.8660254, 0, 19, 17.333782)
@@ -324,6 +323,10 @@ metadata/_custom_type_script = "uid://cpnqru2mykw11"
 [node name="WorldEnvironment" type="WorldEnvironment" parent="EntityStorage" unique_id=39748805]
 environment = SubResource("Environment_mrox5")
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="EntityStorage" unique_id=71922929]
+transform = Transform3D(1, 0, 0, 0, 0.77642053, 0.6302152, 0, -0.6302152, 0.77642053, 0, 23.414022, 0)
+shadow_enabled = true
+
 [node name="BallRigidBody3D" parent="." unique_id=1990800275 instance=ExtResource("5_iqr5g")]
 
 [node name="SG2Logics" type="Node" parent="." unique_id=1172719514]
@@ -333,11 +336,11 @@ script = ExtResource("3_kwttr")
 connection_mode = SubResource("Resource_dfx6i")
 metadata/_custom_type_script = "uid://bs6ign48kbldm"
 
-[node name="AntiDDoS" type="Node" parent="SG2Logics" unique_id=748344862]
-script = ExtResource("5_53uc8")
-metadata/_custom_type_script = "uid://c2q0co5tjcop1"
+[node name="PlayerLifecycle" type="Node" parent="SG2Logics" unique_id=308867589]
+script = ExtResource("8_6l2pd")
+metadata/_custom_type_script = "uid://bgcxkvl44kr8s"
 
-[node name="AuthLogic" type="Node" parent="SG2Logics" unique_id=65823687]
+[node name="AuthLogic" type="Node" parent="SG2Logics/PlayerLifecycle" unique_id=65823687]
 script = ExtResource("6_lltom")
 metadata/_custom_type_script = "uid://de20o5j16ketc"
 
@@ -349,16 +352,15 @@ metadata/_custom_type_script = "uid://tr8636mmirwa"
 script = ExtResource("11_mrox5")
 metadata/_custom_type_script = "uid://bajwjotqxqrsq"
 
-[node name="MultiplayerLogic" type="Node" parent="SG2Logics" unique_id=308867589]
-script = ExtResource("8_6l2pd")
-metadata/_custom_type_script = "uid://bgcxkvl44kr8s"
+[node name="EntityBehaviorRegistry" type="Node" parent="SG2Logics" unique_id=2091025812]
+script = ExtResource("11_iqr5g")
+metadata/_custom_type_script = "uid://bibupwpwuw13v"
 
-[node name="EntitySync" type="Node" parent="SG2Logics" unique_id=1326656377]
+[node name="EntityInterest" type="Node" parent="SG2Logics" unique_id=1326656377]
 script = ExtResource("10_e31fr")
-drawing_distance = null
 metadata/_custom_type_script = "uid://dln1w12yvd1f0"
 
-[node name="InterpolationLogic" type="Node" parent="SG2Logics" unique_id=1073962538]
+[node name="InterpolationState" type="Node" parent="SG2Logics" unique_id=1073962538]
 script = ExtResource("10_cnbnu")
 metadata/_custom_type_script = "uid://dwwhkgkrddwnn"
 

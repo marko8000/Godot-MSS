@@ -4,9 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://cqfvcwg71dml8" path="res://icon.svg" id="2_ir1cf"]
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="3_1wfgu"]
 [ext_resource type="Script" uid="uid://b643ood758qs2" path="res://nodes/FPSCamera3D/fps_camera_3d.gd" id="3_5spkx"]
-[ext_resource type="Script" uid="uid://cykcmtcut85v6" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/base_tracker.gd" id="4_2qgcy"]
-[ext_resource type="Script" uid="uid://cmd1em6nf3iyx" path="res://levels/SG2Core/logics/EntityFactory/BaseTrackers/position3d_tracker.gd" id="5_5spkx"]
+[ext_resource type="Script" uid="uid://banxtb88fe1lm" path="res://levels/SG2Core/logics/EntitySeed/EntityDataSource/NodeTrackers/node_tracker.gd" id="5_5spkx"]
 [ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/SG2Core/logics/PlayerActionsLogic/player_input.gd" id="5_hrs1x"]
+[ext_resource type="Script" uid="uid://c15tlkp1l0u5o" path="res://levels/SG2Core/logics/EntitySeed/EntityDataSource/NodeTrackers/position3d_tracker.gd" id="6_ir1cf"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -22,9 +22,10 @@ albedo_texture = ExtResource("2_ir1cf")
 [sub_resource type="BoxMesh" id="BoxMesh_80mxe"]
 size = Vector3(0.54, 0.5, 0.9)
 
-[sub_resource type="Resource" id="Resource_ir1cf"]
-script = ExtResource("5_5spkx")
-metadata/_custom_type_script = "uid://cmd1em6nf3iyx"
+[sub_resource type="Resource" id="Resource_1wfgu"]
+script = ExtResource("6_ir1cf")
+node_path = NodePath("../cam/FPSCamera3D")
+metadata/_custom_type_script = "uid://c15tlkp1l0u5o"
 
 [node name="CharacterBody3D_FPS" type="CharacterBody3D" unique_id=256457585]
 script = ExtResource("1_5spkx")
@@ -56,7 +57,7 @@ metadata/_custom_type_script = "uid://b643ood758qs2"
 
 [node name="EntitySeed" type="Node" parent="." unique_id=1194583288]
 script = ExtResource("3_1wfgu")
-trackers = Array[ExtResource("4_2qgcy")]([SubResource("Resource_ir1cf")])
+trackers = Array[ExtResource("5_5spkx")]([SubResource("Resource_1wfgu")])
 setup_on_ready = true
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 

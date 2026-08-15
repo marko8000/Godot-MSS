@@ -5,7 +5,7 @@ class_name PlayerIdNode
 
 
 var _SG2Core : SG2Core
-var _EntitySync : EntitySync
+var _EntityInterest : EntityInterest
 var _ConnectionLogic : ConnectionLogic
 
 signal peer_id_changed(peer_id)
@@ -13,10 +13,10 @@ var uid : int
 var peer_id : int :
 	set(value):
 		if _ConnectionLogic and _ConnectionLogic.peer_role == 'host':
-			_player_data = _EntitySync._players[value]
+			_player_data = _EntityInterest._players[value]
 		peer_id = value
 		peer_id_changed.emit(value)
-var _player_data : EntitySync.EntitiesPlayerData
+var _player_data : EntityInterest.EntitiesPlayerData
 
 var _current_chunk
 var _loaded_chunks : Array
@@ -27,12 +27,12 @@ func _to_string() -> String:
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		_SG2Core = SG2Core.get_from(self)
-		_EntitySync = _SG2Core._EntitySync
+		_EntityInterest = _SG2Core._EntityInterest
 		_ConnectionLogic = _SG2Core._ConnectionLogic
 	
 	
 func is_player() -> bool:
-	if _EntitySync.multiplayer.multiplayer_peer.get_unique_id() == peer_id:
+	if _EntityInterest.multiplayer.multiplayer_peer.get_unique_id() == peer_id:
 		return true
 	return false
 	

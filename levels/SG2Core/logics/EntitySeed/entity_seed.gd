@@ -6,14 +6,12 @@ class_name EntitySeed
 
 
 var _SG2Core : SG2Core
-var _EntitySync : EntitySync
-var _EntityFactory : EntityFactory
 var _EntityStorage : EntityStorage
+var _EntityFactory : EntityFactory
 var _ConnectionLogic : ConnectionLogic
 
-@export var trackers : Array[BaseTracker] :
-	set(value):
-		trackers = value
+@export var trackers : Array[NodeTracker]
+@export var components : Array[Component]
 @export_group('Advanced settings')
 @export var is_global : bool = false
 @export var tickrate : int = 0
@@ -34,13 +32,12 @@ func _ready():
 	
 func entity_prepare():
 	_SG2Core = SG2Core.get_from(self)
-	_EntitySync = _SG2Core._EntitySync
 	_EntityFactory = _SG2Core._EntityFactory
 	_EntityStorage = _SG2Core._EntityStorage
 	_ConnectionLogic = _SG2Core._ConnectionLogic
 
-	if not _EntitySync._entities_can_start_working:
-		await _EntitySync._entities_start_working
+	if not _EntityStorage._entities_can_start_working:
+		await _EntityStorage._entities_start_working
 	
 	if _ConnectionLogic.peer_role == 'guest':
 		get_parent().queue_free()
@@ -50,13 +47,14 @@ func entity_prepare():
 		_presets()
 		var indices = _EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
 		_EntityStorage._activation_queue[entity_type] = indices
-		get_parent().set_meta('x', indices[0])
+		get_parent().name = str(indices[0])
 		
 		
 func _get_configuration_warnings():
 	var warnings = []
+	
 	var parent_warning := false
-	if get_parent() != null and get_parent() == get_tree().edited_scene_root:
+	if is_instance_valid(get_parent()) and get_parent() == get_tree().edited_scene_root:
 		if get_parent().name != get_parent().scene_file_path.get_slice('/', 3):
 			get_parent().name = get_parent().scene_file_path.get_slice('/', 3)
 		var name_options : PackedStringArray = [
@@ -72,6 +70,17 @@ func _get_configuration_warnings():
 		parent_warning = true
 	if parent_warning:
 		warnings.append('EntitySeed must be child of entity scene that saved in res://entities/{0}/{1}.tscn'.format([get_parent().name, get_parent().name.to_snake_case()]))
+	
+	var entity_behavior_warning := false
+	if is_instance_valid(get_parent()) and get_parent() == get_tree().edited_scene_root:
+		if is_instance_valid(get_parent().get_script()):
+			entity_behavior_warning = true
+	if entity_behavior_warning:
+		warnings.append('''Consider using EntityBehavior
+This entity contains behavior that can be processed independently for each instance.
+If many instances of this entity are active, centralized processing through EntityBehavior may provide better performance.
+Create a new EntityBehavior node and extend the script to create centralized logic.''')
+	
 	return warnings
 	
 	

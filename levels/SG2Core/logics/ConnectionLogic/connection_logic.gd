@@ -12,7 +12,6 @@ var peer_role : String
 
 
 signal connection_peer_changed(new_peer)
-var my_peer_id
 	
 
 static func get_from(from : Node) -> ConnectionLogic:
@@ -70,7 +69,6 @@ func _peer_disconnected(peer_id):
 
 
 func _connected_to_server():
-	my_peer_id = multiplayer.get_unique_id()
 	Debug.dprint('Connected to Server', peer_role)
 
 

@@ -18,9 +18,9 @@ static func get_from(from : Node) -> SG2Core: return ExecManager.get_current_exe
 @warning_ignore("unused_private_class_variable")
 @export var _ConnectionLogic : ConnectionLogic
 @warning_ignore("unused_private_class_variable")
-@export var _AuthLogic : AuthLogic
+@export var _PlayerLifeCycle : PlayerLifecycle
 @warning_ignore("unused_private_class_variable")
-@export var _MultiplayerLogic : MultiplayerLogic
+@export var _AuthLogic : AuthLogic
 @warning_ignore("unused_private_class_variable")
 @export var _PathRegistry : PathRegistry
 @warning_ignore("unused_private_class_variable")
@@ -28,12 +28,12 @@ static func get_from(from : Node) -> SG2Core: return ExecManager.get_current_exe
 @warning_ignore("unused_private_class_variable")
 @export var _EntityStorage : EntityStorage
 @warning_ignore("unused_private_class_variable")
-@export var _EntitySync : EntitySync
+@export var _EntityInterest : EntityInterest
 @warning_ignore("unused_private_class_variable")
 @export var _ChunkCalculator : ChunkCalculator
 @warning_ignore("unused_private_class_variable")
 @export var _PlayerActionsLogic : PlayerActionsLogic
 @warning_ignore("unused_private_class_variable")
-@export var _InterpolationLogic : InterpolationLogic
+@export var _InterpolationState : InterpolationState
 @warning_ignore("unused_private_class_variable")
 @export var _VoxelEditor : VoxelEditor

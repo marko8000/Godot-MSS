@@ -1,0 +1,2 @@
+extends PropertyTracker
+class_name IntTracker
