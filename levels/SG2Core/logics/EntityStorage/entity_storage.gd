@@ -226,4 +226,6 @@ func _process_remove_queue():
 
 
 func _process_update():
-	pass
+	for chunk in _EntityInterest._chunk_user_counts:
+		pass
+	

@@ -18,10 +18,8 @@ var current_speed : float
 func _process(delta: float) -> void:
 	var camera : FPSCamera3D = $cam/FPSCamera3D
 	if _ConnectionLogic.is_player(self):
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		camera.make_current()
-	else:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
 	
 func _physics_process(delta: float) -> void:	
 	if _ConnectionLogic.peer_role == 'guest':
@@ -51,6 +49,11 @@ func _process_raycast() -> void:
 
 var mouse_rotation = Vector2.ZERO
 func _on_player_input_peer_input(event: PlayerInputEvent) -> void:
+	if not UIManager.has_active_ui():
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	else:
+		return
+		
 	if is_on_floor() and event.is_action_just_pressed("jump"):
 		velocity.y += JUMP_VELOCITY
 			

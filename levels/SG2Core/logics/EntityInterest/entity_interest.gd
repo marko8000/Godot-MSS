@@ -4,8 +4,7 @@ class_name EntityInterest
 
 @onready var _PlayerLifecycle := _SG2Core._PlayerLifeCycle
 
-var _requested_chunks : Array
-	
+var _chunk_user_counts : Dictionary[Variant, int]
 
 @export_category('Drawing Settings')
 @export var drawing_distance : int = 1 # host's parameter is max for guest. drawing distance 1 is minimum
@@ -27,7 +26,7 @@ func _ready() -> void:
 	
 func _process(delta: float) -> void:
 	await get_tree().process_frame
-	_requested_chunks.clear()
+	_chunk_user_counts.clear()
 	
 
 func _player_state_changed(peer_id : int, state : PlayerLifecycle.PlayerState):

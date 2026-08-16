@@ -42,6 +42,7 @@ func _input(event: InputEvent) -> void:
 			%LineEdit.clear()
 			hide()
 		else:
+			UIManager.register(self)
 			show()
 			%LineEdit.grab_focus()
 	
@@ -87,6 +88,7 @@ func output(text : String):
 	
 func output_error(text : String):
 	output('[color=red]'+text+'[/color]')
+	UIManager.register(self)
 	show()
 	%LineEdit.grab_focus()
 					

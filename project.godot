@@ -30,6 +30,7 @@ ZipArchiver="*res://globals/File2ool/ZipArchiver/zip_archiver.gd"
 R="*res://globals/ExecManager/randomizer.gd"
 Dispenser="*res://globals/Dispenser/dispenser.gd"
 g="*res://globals/GetAPI/get_api.gd"
+UIManager="*uid://dq73khukm3hin"
 
 [debug]
 
