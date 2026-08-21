@@ -66,5 +66,5 @@ func get_top_ui() -> Control:
 	
 	
 func _ui_stack_changed() -> void:
-	if ui_stack.is_empty():
+	if not ui_stack.is_empty():
 		Input.set_mouse_mode(default_mouse_mode)

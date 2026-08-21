@@ -62,7 +62,7 @@ func connect_page_link_button():
 
 func _on_selection_changed():
 	var selected = EditorInterface.get_selection().get_selected_nodes()
-	if selected.size() > 0:
+	if not selected.is_empty():
 		var select = selected[0]
 		if select.get_parent() == self:
 			current_page = select

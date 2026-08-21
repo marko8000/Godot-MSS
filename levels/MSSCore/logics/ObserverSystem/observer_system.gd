@@ -1,0 +1,2 @@
+extends MSSLogic
+class_name ObserverSystem

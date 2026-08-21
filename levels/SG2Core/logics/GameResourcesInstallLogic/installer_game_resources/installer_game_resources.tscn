@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bjc8urfccnbgh"]
-
-[ext_resource type="Script" uid="uid://bin8gj3egev7i" path="res://levels/SG2Core/logics/GameResourcesInstallLogic/installer_game_resources/installer_game_resources.gd" id="1_84b86"]
-
-[node name="installer_game_resources" type="HTTPRequest"]
-script = ExtResource("1_84b86")

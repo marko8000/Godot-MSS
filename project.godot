@@ -14,12 +14,17 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="SG2Core"
-run/main_scene="res://exec/sg2_start_exec/sg2_start_exec.tscn"
+config/name="Godot MSS"
+config/description="Godot Multiplayer Synchronization System created by vvin17"
+run/main_scene="res://exec/mss_start_exec/mss_start_exec.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
-boot_splash/image="res://levels/SG2Core/x_res/x_images/vin17_x_godot.png"
-config/icon="uid://cwymkxeduqt3u"
+boot_splash/image="uid://cfnp35txqd42n"
+config/icon="uid://o6oyyxt5q3mq"
+
+[audio]
+
+driver/enable_input=true
 
 [autoload]
 
@@ -53,9 +58,9 @@ folder_colors={
 "res://exec/": "orange",
 "res://globals/": "red",
 "res://levels/": "orange",
-"res://levels/SG2Core/x_res/": "yellow",
-"res://levels/SG2Core/x_res/x_fonts/": "yellow",
-"res://levels/SG2Core/x_res/x_images/": "yellow"
+"res://levels/MSSCore/fonts/": "yellow",
+"res://levels/MSSCore/godot_icons/": "yellow",
+"res://levels/MSSCore/images/": "yellow"
 }
 
 [input]

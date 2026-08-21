@@ -1,4 +1,4 @@
-@icon('res://globals/FilesManager/ZipArchiver/zip_icon.svg')
+@icon('res://globals/File2ool/ZipArchiver/zip_icon.svg')
 extends Node
 
 

@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://bwfde5b38jo1a"]
 
 [ext_resource type="Script" uid="uid://cu4bumaj12olc" path="res://entities/PlayerIdNode/player_id_node.gd" id="1_yitv3"]
-[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/SG2Core/logics/EntitySeed/entity_seed.gd" id="2_qclnh"]
-[ext_resource type="Script" uid="uid://banxtb88fe1lm" path="res://levels/SG2Core/logics/EntitySeed/EntityDataSource/NodeTrackers/node_tracker.gd" id="4_qclnh"]
-[ext_resource type="PackedScene" uid="uid://dso5rpmw1mpg7" path="res://levels/SG2Core/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn" id="5_qclnh"]
-[ext_resource type="Script" uid="uid://cil1ivfxrohax" path="res://levels/SG2Core/logics/EntitySeed/EntityDataSource/NodeTrackers/int_tracker.gd" id="5_ql65s"]
-[ext_resource type="Script" uid="uid://b8yxpw5cecb0b" path="res://levels/SG2Core/logics/EntityBehavior/entity_behavior.gd" id="6_ql65s"]
+[ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/MSSCore/logics/EntitySeed/entity_seed.gd" id="2_qclnh"]
+[ext_resource type="Script" uid="uid://banxtb88fe1lm" path="res://levels/MSSCore/logics/EntitySeed/EntityDataSource/NodeTrackers/node_tracker.gd" id="4_qclnh"]
+[ext_resource type="PackedScene" uid="uid://dso5rpmw1mpg7" path="res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn" id="5_qclnh"]
+[ext_resource type="Script" uid="uid://cil1ivfxrohax" path="res://levels/MSSCore/logics/EntitySeed/EntityDataSource/NodeTrackers/int_tracker.gd" id="5_ql65s"]
+[ext_resource type="Script" uid="uid://b8yxpw5cecb0b" path="res://levels/MSSCore/logics/EntityBehavior/entity_behavior.gd" id="6_ql65s"]
 
 [sub_resource type="Resource" id="Resource_g2gam"]
 script = ExtResource("5_ql65s")

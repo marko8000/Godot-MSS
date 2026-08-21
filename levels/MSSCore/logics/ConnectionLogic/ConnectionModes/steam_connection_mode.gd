@@ -1,0 +1,2 @@
+extends ConnectionMode
+class_name SteamConnectionMode

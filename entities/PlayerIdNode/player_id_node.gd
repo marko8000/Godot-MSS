@@ -1,10 +1,10 @@
 @tool
-@icon('res://levels/SG2Core/x_res/x_images/sg_logo_light.svg')
+@icon('res://levels/MSSCore/x_res/x_images/sg_logo_light.svg')
 extends Node
 class_name PlayerIdNode
 
 
-var _SG2Core : SG2Core
+var _MSSCore : MSSCore
 var _EntityInterest : EntityInterest
 var _ConnectionLogic : ConnectionLogic
 
@@ -26,9 +26,9 @@ func _to_string() -> String:
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
-		_SG2Core = SG2Core.get_from(self)
-		_EntityInterest = _SG2Core._EntityInterest
-		_ConnectionLogic = _SG2Core._ConnectionLogic
+		_MSSCore = MSSCore.get_from(self)
+		_EntityInterest = _MSSCore._EntityInterest
+		_ConnectionLogic = _MSSCore._ConnectionLogic
 	
 	
 func is_player() -> bool:
