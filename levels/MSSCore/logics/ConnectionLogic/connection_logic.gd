@@ -98,7 +98,7 @@ func _server_disconnected():
 func is_player(node : Node) -> bool:
 	if node.name.is_valid_int():
 		var entity_idx := int(node.name)
-		if _EntityInterest._player_entities_by_peer_idx[current_peer_idx].has(entity_idx):
+		if _EntityInterest._player_data[current_peer_idx].player_entities.has(entity_idx):
 			return true
 	return false
 	

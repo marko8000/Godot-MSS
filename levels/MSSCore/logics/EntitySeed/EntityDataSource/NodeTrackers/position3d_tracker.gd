@@ -17,7 +17,7 @@ func _allocate_batch(entity_indices : PackedInt32Array, type_data : EntityFactor
 			cell_idx = _free_cells[cell_size][-1]
 			_free_cells[cell_size].resize(_free_cells[cell_size].size()-1)
 			for j in range(cell_size):
-				_nodes[cell_idx+j] = _EntityStorage.nodes[entity_idx].get_node(type_data.node_paths[tracker_list_idx][j])
+				_nodes[cell_idx+j] = _EntityStorage._nodes[entity_idx].get_node(type_data.node_paths[tracker_list_idx][j])
 		else:
 			cell_idx = _values.size()
 			for j in range(cell_size):

@@ -26,6 +26,12 @@ static func get_from(from : Node) -> MSSCore: return ExecManager.get_current_exe
 @warning_ignore("unused_private_class_variable")
 @export var _EntityStorage : EntityStorage
 @warning_ignore("unused_private_class_variable")
+@export var _EStorage3D : Node3D
+@warning_ignore("unused_private_class_variable")
+@export var _EStorage2D : Node2D
+@warning_ignore("unused_private_class_variable")
+@export var _EStorageGlobal : Node
+@warning_ignore("unused_private_class_variable")
 @export var _EntityInterest : EntityInterest
 @warning_ignore("unused_private_class_variable")
 @export var _ChunkCalculator : ChunkCalculator

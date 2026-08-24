@@ -13,6 +13,12 @@ var _ConnectionLogic : ConnectionLogic
 @export var trackers : Array[NodeTracker]
 @export var components : Array[Component]
 @export_group('Advanced settings')
+@export var scale_level : int = 0 :
+	set(value):
+		scale_level = max(value, 0)
+@export var root_lod_level : int = 0 : 
+	set(value):
+		root_lod_level = max(value, 0)
 @export var is_global : bool = false
 @export var tickrate : int = 0
 @export var setup_on_ready : bool = false
@@ -46,7 +52,7 @@ func entity_prepare():
 			entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
 		_presets()
 		var indices = _EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
-		_EntityStorage._activation_queue[entity_type] = indices
+		_EntityStorage._activation_queue[entity_type].append_array(indices)
 		get_parent().name = str(indices[0])
 		
 		

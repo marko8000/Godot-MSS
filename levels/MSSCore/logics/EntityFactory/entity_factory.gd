@@ -14,7 +14,7 @@ class_name EntityFactory
 @onready var _entities_meta : Dictionary = _load_entities_meta()
 @onready var _entity_type_shortcuts : Dictionary[String, int] = _get_entity_type_shortcuts()
 @onready var _shortcuts_entity_type : PackedStringArray = _get_shortcuts_entity_type()
-@onready var _last_used_entity_id : int = 0 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
+@onready var _last_used_entity_id : int = -1 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
 @onready var _entity_type_data : Array[EntityTypeData] = _load_entity_resources()
 var _source_names : PackedStringArray
 class EntityTypeData:
@@ -160,12 +160,20 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 	return type_data
 
 
-func _spawn_json(entity_type : String, data : Dictionary, where : Node = _EntityStorage, entity_id : int = _get_new_entity_id()) -> Node:
+func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
 	if not _entity_type_shortcuts.has(entity_type):
 		return
 	var shortcut := _entity_type_shortcuts[entity_type]
 	var tdata := _entity_type_data[shortcut]
 	var entity_instance := tdata.resource.instantiate()
+	if where == _EntityStorage:
+		match tdata.dimension:
+			EntityTypeData.Dimension.GLOBAL:
+				where = _MSSCore._EStorageGlobal
+			EntityTypeData.Dimension.V2:
+				where = _MSSCore._EStorage2D
+			EntityTypeData.Dimension.V3:
+				where = _MSSCore._EStorage3D
 	for path in data:
 		Dispenser.set_resource(entity_instance, path, data[path], [shortcut, path])
 	where.add_child(entity_instance)
@@ -182,12 +190,12 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 	match type_data.dimension:
 		EntityTypeData.Dimension.V2:
 			if not position:
-				position = Vector2.ZERO
+				position = _ChunkCalculator.get_zero(type_data.dimension)
 			chunk = _ChunkCalculator.position2d_to_chunk(position)
 			preloader_scene_path = 'res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_2d.tscn'				
 		EntityTypeData.Dimension.V3:
 			if not position:
-				position = Vector3.ZERO
+				position = _ChunkCalculator.get_zero(type_data.dimension)
 			chunk = _ChunkCalculator.position3d_to_chunk(position)
 			preloader_scene_path = 'res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn'
 	while true:
@@ -211,31 +219,18 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 				timer_killer.start()
 				break
 	if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
-		_load_chunk(chunk)
+		var chunk_idx := _EntityStorage._allocate_chunk(chunk)
+		_load_chunk(chunk_idx)
 	await get_node(str(chunk)+'/T').timeout
-	return _spawn_json(entity_type, data)
+	return spawn(entity_type, data)
+		
 	
-	
-## Simple entity spawn
-func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
-	return _spawn_json(entity_type, data, where)
-	
-	
-func _load_chunk(chunk : Variant) -> void:
-	var chunk_idx : int
-	if not _EntityStorage._chunk_free_slots.is_empty():
-		chunk_idx = _EntityStorage._chunk_free_slots[-1]
-		_EntityStorage._chunk_free_slots.resize(_EntityStorage._chunk_free_slots.size()-1)
-		_EntityStorage._chunks[chunk_idx] = chunk
-	else:
-		chunk_idx = _EntityStorage._chunks.size()
-		_EntityStorage._chunks.append(chunk)
-	_EntityStorage._chunk_idx_by_chunk[chunk] = chunk_idx
+func _load_chunk(chunk_idx : int) -> void:
 	var required_size: int = chunk_idx + 1
 	if _EntityStorage._entity_tree.size() < required_size:
 		var old_size: int = _EntityStorage._entity_tree.size()
 		_EntityStorage._entity_tree.resize(required_size)
 		for _i in range(old_size, required_size):
 			_EntityStorage._entity_tree[_i] = _EntityStorage.ChunkData.new()
-
+	_EntityInterest._chunk_requested.resize(max(chunk_idx+1, _EntityInterest._chunk_requested.size()))
 	_EntityInterest._chunk_requested[chunk_idx] = 0

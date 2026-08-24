@@ -16,7 +16,7 @@ var peer_id : int :
 			_player_data = _EntityInterest._players[value]
 		peer_id = value
 		peer_id_changed.emit(value)
-var _player_data : EntityInterest.EntitiesPlayerData
+var _player_data : EntityInterest.PlayerData
 
 var _current_chunk
 var _loaded_chunks : Array

@@ -2,38 +2,67 @@ extends MSSLogic
 class_name ChunkCalculator
 
 
-const CHUNK_SIZE_2D : int = 64
-const CHUNK_SIZE_3D : int = 64
+@export var scale_levels : Array[ScaleLevel]
 
 
-func position2d_to_chunk(position : Vector2) -> Vector2i:
-	return Vector2i(floor(position.x / CHUNK_SIZE_2D), floor(position.y / CHUNK_SIZE_2D))
+func get_zero(dimension : EntityFactory.EntityTypeData.Dimension):
+	match dimension:
+		EntityFactory.EntityTypeData.Dimension.V2:
+			return Vector2.ZERO
+		EntityFactory.EntityTypeData.Dimension.V3:
+			return Vector3.ZERO
 	
 	
-func position3d_to_chunk(position : Vector3) -> Vector3i:
-	return Vector3i(floor(position.x / CHUNK_SIZE_3D), floor(position.y / CHUNK_SIZE_3D), floor(position.z / CHUNK_SIZE_3D))
+func position2d_to_chunk(position : Vector2, scale_level : int) -> Vector3i:
+	var chunk_size := scale_levels[scale_level].chunk_size
+	return Vector3i(floori(position.x / chunk_size), floori(position.y / chunk_size), scale_level)
+	
+	
+func position3d_to_chunk(position : Vector3, scale_level : int) -> Vector4i:
+	var chunk_size := scale_levels[scale_level].chunk_size
+	return Vector4i(floori(position.x / chunk_size), floori(position.y / chunk_size), floori(position.z / chunk_size), scale_level)
 		
-		
+
 func rotation_to_direction(rotation):
 	if rotation is Vector3:
 		return (Basis.from_euler(rotation) * Vector3.FORWARD).normalized()
 	elif rotation is int:
 		pass
 	
+
+func get_chunks_around(chunk : Variant) -> Array:
+	if chunk is Vector4i:
+		return get_3dchunks_around(chunk)
+	elif chunk is Vector3i:
+		return get_2dchunks_around(chunk)
+	return []
 	
-func get_3dchunks_around(current_chunk : Vector3i, drawing_distance: int) -> Array[Vector3i]:
-	var negative_chunk = current_chunk - Vector3i(drawing_distance, drawing_distance, drawing_distance)
-	var positive_chunk = current_chunk + Vector3i(drawing_distance+1, drawing_distance+1, drawing_distance+1)
-	var chunks : Array
+	
+func get_3dchunks_around(chunk : Vector4i) -> Array[Vector4i]:
+	var draw_distance := scale_levels[chunk[-1]].chunk_size
+	var negative_chunk = chunk - Vector4i(draw_distance, draw_distance, draw_distance, 0)
+	var positive_chunk = chunk + Vector4i(draw_distance+1, draw_distance+1, draw_distance+1, 0)
+	var chunks : Array[Vector4i]
 	for x in range(negative_chunk.x, positive_chunk.x):
 		for y in range(negative_chunk.y, positive_chunk.y):
 			for z in range(negative_chunk.z, positive_chunk.z):
-				chunks.append(Vector3i(x, y, z))
+				chunks.append(Vector4i(x, y, z, chunk[-1]))
+	return chunks
+	
+	
+func get_2dchunks_around(chunk : Vector3i) -> Array[Vector3i]:
+	var draw_distance := scale_levels[chunk[-1]].chunk_size
+	var negative_chunk = chunk - Vector3i(draw_distance, draw_distance, 0)
+	var positive_chunk = chunk + Vector3i(draw_distance+1, draw_distance+1, 0)
+	var chunks : Array[Vector3i]
+	for x in range(negative_chunk.x, positive_chunk.x):
+		for y in range(negative_chunk.y, positive_chunk.y):
+			chunks.append(Vector3i(x, y, chunk[-1]))
 	return chunks
 	
 	
 func visualize_chunk(chunk, color : String = '#ffffff'):
-	if chunk is Vector3i:
+	if chunk is Vector4i:
 		visualize3d(chunk)
 		
 		
@@ -49,13 +78,13 @@ func _ready():
 	chunk_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 
 # Function to visualize a chunk's borders
-func visualize3d(chunk: Vector3i, color : String = '#ffffff'):
+func visualize3d(chunk: Vector4i, color : String = '#ffffff'):
 	if has_node('3d'+str(chunk)): return
 	chunk_material.albedo_color = Color.html(color)
 	var mesh_instance := MeshInstance3D.new()
-	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * CHUNK_SIZE_3D)
+	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * scale_levels[chunk[-1]].chunk_size)
 	mesh_instance.material_override = chunk_material
-	mesh_instance.position = chunk * Vector3i.ONE * CHUNK_SIZE_3D
+	mesh_instance.position = Vector3i(chunk.x, chunk.y, chunk.z) * scale_levels[chunk[-1]].chunk_size
 	mesh_instance.name = '3d'+str(chunk)
 	
 	add_child(mesh_instance)
@@ -98,68 +127,7 @@ func create_chunk_wireframe_mesh(size: Vector3) -> ArrayMesh:
 	st.commit(mesh)
 	return mesh
 	
-# Alternative: Simple ImmediateMesh version (less efficient but straightforward)
-func visualize_simple(chunk_position: Vector3):
-	var _chunk_size = Vector3(CHUNK_SIZE_3D, CHUNK_SIZE_3D*2, CHUNK_SIZE_3D)
 	
-	var mesh_instance = MeshInstance3D.new()
-	var imesh = ImmediateMesh.new()
-	var mesh = ArrayMesh.new()
-	
-	imesh.surface_begin(Mesh.PRIMITIVE_LINES, chunk_material)
-	
-	# Draw the 12 edges
-	var min_pos = Vector3.ZERO
-	var max_pos = _chunk_size
-	
-	# Bottom rectangle
-	imesh.surface_add_vertex(min_pos)
-	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, min_pos.z))
-	
-	imesh.surface_add_vertex(min_pos)
-	imesh.surface_add_vertex(Vector3(min_pos.x, min_pos.y, max_pos.z))
-	
-	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, min_pos.z))
-	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, max_pos.z))
-	
-	imesh.surface_add_vertex(Vector3(min_pos.x, min_pos.y, max_pos.z))
-	imesh.surface_add_vertex(Vector3(max_pos.x, min_pos.y, max_pos.z))
-	
-	# Vertical edges
-	for i in range(4):
-		var base = [
-			Vector3(min_pos.x, min_pos.y, min_pos.z),
-			Vector3(max_pos.x, min_pos.y, min_pos.z),
-			Vector3(min_pos.x, min_pos.y, max_pos.z),
-			Vector3(max_pos.x, min_pos.y, max_pos.z)
-		][i]
-		
-		imesh.surface_add_vertex(base)
-		imesh.surface_add_vertex(Vector3(base.x, max_pos.y, base.z))
-	
-	# Top rectangle
-	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, min_pos.z))
-	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, min_pos.z))
-	
-	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, min_pos.z))
-	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, max_pos.z))
-	
-	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, min_pos.z))
-	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, max_pos.z))
-	
-	imesh.surface_add_vertex(Vector3(min_pos.x, max_pos.y, max_pos.z))
-	imesh.surface_add_vertex(Vector3(max_pos.x, max_pos.y, max_pos.z))
-	
-	imesh.surface_end()
-	mesh = imesh.commit()
-	
-	mesh_instance.mesh = mesh
-	mesh_instance.material_override = chunk_material
-	mesh_instance.position = chunk_position * _chunk_size
-	
-	add_child(mesh_instance)
-	return mesh_instance
-
 # Utility function to clear all visualizations
 func clear_visualizations():
 	for child in get_children():
