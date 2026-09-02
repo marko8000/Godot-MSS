@@ -2,23 +2,61 @@ extends MSSLogic
 class_name ChunkCalculator
 
 
-@export var scale_levels : Array[ScaleLevel]
+enum ScaleLevelLabel {
+	NORMAL
+	}
+var scale_levels : Dictionary[ScaleLevelLabel, ScaleLevel] = {
+	ScaleLevelLabel.NORMAL: ScaleLevel.new(16, [1, 2, 3])
+	}
+var scale_level_order : Array[ScaleLevelLabel] = [
+	ScaleLevelLabel.NORMAL
+	]
+var _scale_levels_by_size : Array[ScaleLevelLabel]
+
+enum Dimension {INVALID, V2, V3}
+
+@export var dim_data : Dictionary[Dimension, DimData]
 
 
-func get_zero(dimension : EntityFactory.EntityTypeData.Dimension):
+func _ready() -> void:
+	for label : ScaleLevelLabel in scale_level_order:
+		_scale_levels_by_size.append(label)
+	for data : DimData in dim_data.values():
+		data.storage = get_node(data.storage_path)
+	assert(Dimension.size() == dim_data.size(), 'Invalid dim_data')
+	_setup_materials()
+
+
+func get_dim_from(node : Node) -> Dimension:
+	if node is Node2D:
+		return Dimension.V2
+	elif node is Node3D:
+		return Dimension.V3
+	return Dimension.INVALID
+func get_zero(dimension : Dimension):
 	match dimension:
-		EntityFactory.EntityTypeData.Dimension.V2:
+		Dimension.V2:
 			return Vector2.ZERO
-		EntityFactory.EntityTypeData.Dimension.V3:
+		Dimension.V3:
 			return Vector3.ZERO
 	
 	
-func position2d_to_chunk(position : Vector2, scale_level : int) -> Vector3i:
+func position_to_chunk(position : Variant, scale_level_idx : int, dimension : Dimension):
+	match dimension:
+		Dimension.V2:
+			return position2d_to_chunk(position, scale_level_idx)
+		Dimension.V3:
+			return position3d_to_chunk(position, scale_level_idx)
+			
+			
+func position2d_to_chunk(position : Vector2, scale_level_idx : int) -> Vector3i:
+	var scale_level := scale_level_order[scale_level_idx]
 	var chunk_size := scale_levels[scale_level].chunk_size
 	return Vector3i(floori(position.x / chunk_size), floori(position.y / chunk_size), scale_level)
 	
 	
-func position3d_to_chunk(position : Vector3, scale_level : int) -> Vector4i:
+func position3d_to_chunk(position : Vector3, scale_level_idx : int) -> Vector4i:
+	var scale_level := scale_level_order[scale_level_idx]
 	var chunk_size := scale_levels[scale_level].chunk_size
 	return Vector4i(floori(position.x / chunk_size), floori(position.y / chunk_size), floori(position.z / chunk_size), scale_level)
 		
@@ -72,7 +110,7 @@ func hide_chunk(chunk):
 
 
 var chunk_material = StandardMaterial3D.new()
-func _ready():
+func _setup_materials():
 	chunk_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	chunk_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	chunk_material.cull_mode = BaseMaterial3D.CULL_DISABLED

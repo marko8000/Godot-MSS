@@ -13,27 +13,21 @@ var _ConnectionLogic : ConnectionLogic
 @export var trackers : Array[NodeTracker]
 @export var components : Array[Component]
 @export_group('Advanced settings')
-@export var scale_level : int = 0 :
+@export var root_scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
 	set(value):
-		scale_level = max(value, 0)
-@export var root_lod_level : int = 0 : 
+		root_scale_level = clampi(value, 0, 254)
+@export var root_lod : int = 0 : 
 	set(value):
-		root_lod_level = max(value, 0)
-@export var is_global : bool = false
+		root_lod = clampi(value, 0, 254)
 @export var tickrate : int = 0
-@export var setup_on_ready : bool = false
 
-var entity_type : int
-	
 	
 func _ready():
-	if not Engine.is_editor_hint() and setup_on_ready:
+	if not Engine.is_editor_hint():
 		entity_prepare()
 	else:
 		if get_parent() != null:
 			get_parent().renamed.connect(_entity_node_renamed)
-		if get_parent() == get_tree().edited_scene_root:
-			setup_on_ready = true
 	
 	
 func entity_prepare():
@@ -48,13 +42,10 @@ func entity_prepare():
 	if _ConnectionLogic.peer_role == 'guest':
 		get_parent().queue_free()
 	elif _ConnectionLogic.peer_role == 'host':
-		if not entity_type:
-			entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
+		var entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
 		_presets()
-		var indices = _EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
-		_EntityStorage._activation_queue[entity_type].append_array(indices)
-		get_parent().name = str(indices[0])
-		
+		_EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
+
 		
 func _get_configuration_warnings():
 	var warnings = []

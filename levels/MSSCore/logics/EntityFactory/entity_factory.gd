@@ -19,13 +19,14 @@ class_name EntityFactory
 var _source_names : PackedStringArray
 class EntityTypeData:
 	var resource : PackedScene 
-	var dimension : Dimension
-	enum Dimension {GLOBAL, V2, V3}
+	var dimension : ChunkCalculator.Dimension
 	var source_indices : PackedInt32Array
 	var cell_size : PackedInt32Array
 	var property_paths : Array[PackedStringArray]
 	var node_paths : Array[PackedStringArray]
 	var update_mask_size : int = 0
+	var root_scale_level_idx : int
+	var root_lod : int
 	func _to_string() -> String:
 		return str([resource, dimension, source_indices, cell_size, property_paths, node_paths, update_mask_size])
 
@@ -66,7 +67,6 @@ func _get_shortcuts_entity_type():
 	return _shortcuts
 		
 
-# TODO: Static trackers support
 func _load_entity_resources() -> Array[EntityTypeData]:
 	var type_data : Array[EntityTypeData]
 	var entities_file_excepted : PackedStringArray
@@ -96,7 +96,10 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 				entities_without_EntitySeed.append(entity_type)
 				continue
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
-			_EntityStorage._activation_queue.append([])
+			
+			data.root_lod = ESeed.root_lod
+			data.root_scale_level_idx = _ChunkCalculator._scale_levels_by_size.find(
+				ESeed.root_scale_level)
 			
 			var data_sources : Array[EntityDataSource]
 			data_sources.append_array(ESeed.trackers)
@@ -138,16 +141,10 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 					if property_path:
 						data.property_paths[list_idx].append(property_path)
 					
-				
-			if ESeed.is_global:
-				data.dimension = EntityTypeData.Dimension.GLOBAL
-			else:
-				if entity_instance is Node2D:
-					data.dimension = EntityTypeData.Dimension.V2
-				elif entity_instance is Node3D:
-					data.dimension = EntityTypeData.Dimension.V3
-				else:
-					data.dimension = EntityTypeData.Dimension.GLOBAL
+			data.dimension = _ChunkCalculator.get_dim_from(entity_instance)
+			if not data.dimension:
+				@warning_ignore("assert_always_true")
+				assert(true, 'Unsupported entity node type')
 				
 		else:
 			entities_file_excepted.append(entity_type)
@@ -167,13 +164,7 @@ func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorag
 	var tdata := _entity_type_data[shortcut]
 	var entity_instance := tdata.resource.instantiate()
 	if where == _EntityStorage:
-		match tdata.dimension:
-			EntityTypeData.Dimension.GLOBAL:
-				where = _MSSCore._EStorageGlobal
-			EntityTypeData.Dimension.V2:
-				where = _MSSCore._EStorage2D
-			EntityTypeData.Dimension.V3:
-				where = _MSSCore._EStorage3D
+		where = _ChunkCalculator.dim_data[tdata.dimension].storage
 	for path in data:
 		Dispenser.set_resource(entity_instance, path, data[path], [shortcut, path])
 	where.add_child(entity_instance)
@@ -185,44 +176,43 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 	var position
 	if data.has('position'):
 		position = data.position
-	var chunk
+	var chunk_array : Array[Variant]
 	var preloader_scene_path : String
-	match type_data.dimension:
-		EntityTypeData.Dimension.V2:
-			if not position:
-				position = _ChunkCalculator.get_zero(type_data.dimension)
-			chunk = _ChunkCalculator.position2d_to_chunk(position)
-			preloader_scene_path = 'res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_2d.tscn'				
-		EntityTypeData.Dimension.V3:
-			if not position:
-				position = _ChunkCalculator.get_zero(type_data.dimension)
-			chunk = _ChunkCalculator.position3d_to_chunk(position)
-			preloader_scene_path = 'res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn'
-	while true:
-		var wait_time := 5
-		if not has_node(str(chunk)):
-			var preloader_scene : PackedScene = load(preloader_scene_path)
-			var preloader_instance = preloader_scene.instantiate()
-			preloader_instance.name = str(chunk)
-			if position:
-				preloader_instance.position = position
-			var timer_killer := TimerKiller.new()
-			timer_killer.name = 'T'
-			timer_killer.wait_time = wait_time
-			preloader_instance.add_child(timer_killer)
-			add_child(preloader_instance)
-		else:
-			var timer_killer : TimerKiller = get_node_or_null(str(chunk)+'/T')
-			if timer_killer:
-				timer_killer.start()
-			if is_instance_valid(timer_killer):
-				timer_killer.start()
-				break
-	if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
-		var chunk_idx := _EntityStorage._allocate_chunk(chunk)
-		_load_chunk(chunk_idx)
-	await get_node(str(chunk)+'/T').timeout
-	return spawn(entity_type, data)
+	var estorage := _ChunkCalculator.dim_data[type_data.dimension].storage
+	if not position:
+		position = _ChunkCalculator.get_zero(type_data.dimension)
+	for scale_level_idx in range(type_data.root_scale_level_idx):
+		chunk_array.append(
+			_ChunkCalculator.position_to_chunk(
+				position, 
+				_ChunkCalculator._scale_levels_by_size[scale_level_idx],
+				type_data.dimension),
+				)
+	preloader_scene_path = _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
+	for chunk in chunk_array:
+		while true:
+			var wait_time := 5
+			if not has_node(str(chunk)):
+				var preloader_scene : PackedScene = load(preloader_scene_path)
+				var preloader_instance = preloader_scene.instantiate()
+				preloader_instance.name = str(chunk)
+				if position:
+					preloader_instance.position = position
+				var timer_killer := TimerKiller.new()
+				timer_killer.name = 'T'
+				timer_killer.wait_time = wait_time
+				preloader_instance.add_child(timer_killer)
+				add_child(preloader_instance)
+			else:
+				var timer_killer : TimerKiller = get_node_or_null(str(chunk)+'/T')
+				if is_instance_valid(timer_killer):
+					timer_killer.start()
+					break
+		if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
+			var chunk_idx := _EntityStorage._allocate_chunk(chunk)
+			_load_chunk(chunk_idx)
+		await get_node(str(chunk)+'/T').timeout
+	return spawn(entity_type, data, estorage)
 		
 	
 func _load_chunk(chunk_idx : int) -> void:

@@ -21,7 +21,7 @@ func _process(delta: float) -> void:
 		camera.make_current()
 	
 	
-func _physics_process(delta: float) -> void:	
+func _physics_process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'guest':
 		return
 		
@@ -48,7 +48,7 @@ func _process_raycast() -> void:
 		
 
 var mouse_rotation = Vector2.ZERO
-func _on_player_input_peer_input(event: PlayerInputEvent) -> void:
+func _on_player_input_player_input(event: PlayerInputEvent) -> void:
 	if not UIManager.has_active_ui():
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:

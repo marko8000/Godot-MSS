@@ -5,10 +5,10 @@
 [ext_resource type="Script" uid="uid://ddvva2f8kyxnr" path="res://levels/MSSCore/logics/EntitySeed/entity_seed.gd" id="3_1wfgu"]
 [ext_resource type="Script" uid="uid://b643ood758qs2" path="res://nodes/FPSCamera3D/fps_camera_3d.gd" id="3_5spkx"]
 [ext_resource type="Script" uid="uid://banxtb88fe1lm" path="res://levels/MSSCore/logics/EntitySeed/EntityDataSource/NodeTrackers/node_tracker.gd" id="5_5spkx"]
-[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/MSSCore/logics/PlayerActionsLogic/player_input.gd" id="5_hrs1x"]
+[ext_resource type="Script" uid="uid://cxsg3x5vw3nlq" path="res://levels/MSSCore/logics/MultiplayerInput/player_input.gd" id="5_hrs1x"]
 [ext_resource type="Script" uid="uid://c15tlkp1l0u5o" path="res://levels/MSSCore/logics/EntitySeed/EntityDataSource/NodeTrackers/position3d_tracker.gd" id="6_ir1cf"]
 [ext_resource type="Script" uid="uid://b82ddk5wiqx0t" path="res://levels/MSSCore/logics/EntitySeed/EntityDataSource/NodeTrackers/rotation3d_tracker.gd" id="7_ir1cf"]
-[ext_resource type="PackedScene" uid="uid://dso5rpmw1mpg7" path="res://levels/MSSCore/logics/EntityFactory/ChunkLoaders/chunk_loader_3d.tscn" id="9_1wfgu"]
+[ext_resource type="PackedScene" uid="uid://dso5rpmw1mpg7" path="res://levels/MSSCore/logics/ChunkCalculator/v3/chunk_loader_3d.tscn" id="9_1wfgu"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7i4ls"]
 
@@ -70,7 +70,6 @@ metadata/_custom_type_script = "uid://b643ood758qs2"
 [node name="EntitySeed" type="Node" parent="." unique_id=1194583288]
 script = ExtResource("3_1wfgu")
 trackers = Array[ExtResource("5_5spkx")]([SubResource("Resource_1wfgu"), SubResource("Resource_t3uhe"), SubResource("Resource_4vhj7")])
-setup_on_ready = true
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
 [node name="PlayerInput" type="Node" parent="." unique_id=1438195250]
@@ -79,4 +78,4 @@ metadata/_custom_type_script = "uid://cxsg3x5vw3nlq"
 
 [node name="ChunkLoader3D" parent="." unique_id=667561586 instance=ExtResource("9_1wfgu")]
 
-[connection signal="peer_input" from="PlayerInput" to="." method="_on_player_input_peer_input"]
+[connection signal="player_input" from="PlayerInput" to="." method="_on_player_input_player_input"]

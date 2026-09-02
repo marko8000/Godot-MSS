@@ -4,7 +4,8 @@ extends Node
 class_name MSSCore
 
 
-static func get_from(from : Node) -> MSSCore: return ExecManager.get_current_exec(from).get_current_level(from)
+static func get_from(from : Node) -> MSSCore:
+	return ExecManager.get_current_exec(from).get_current_level(from)
 	
 @export var server_name : String = 'GMSSServer':
 	set(value):
@@ -26,17 +27,13 @@ static func get_from(from : Node) -> MSSCore: return ExecManager.get_current_exe
 @warning_ignore("unused_private_class_variable")
 @export var _EntityStorage : EntityStorage
 @warning_ignore("unused_private_class_variable")
-@export var _EStorage3D : Node3D
-@warning_ignore("unused_private_class_variable")
-@export var _EStorage2D : Node2D
-@warning_ignore("unused_private_class_variable")
 @export var _EStorageGlobal : Node
 @warning_ignore("unused_private_class_variable")
 @export var _EntityInterest : EntityInterest
 @warning_ignore("unused_private_class_variable")
 @export var _ChunkCalculator : ChunkCalculator
 @warning_ignore("unused_private_class_variable")
-@export var _PlayerActionsLogic : PlayerActionsLogic
+@export var _MultiplayerInput : MultiplayerInput
 @warning_ignore("unused_private_class_variable")
 @export var _InterpolationState : InterpolationState
 @warning_ignore("unused_private_class_variable")

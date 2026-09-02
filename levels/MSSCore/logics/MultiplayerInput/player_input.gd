@@ -4,7 +4,7 @@ class_name PlayerInput
 
 @onready var _ConnectionLogic := _MSSCore._ConnectionLogic
 @onready var _EntityInterest := _MSSCore._EntityInterest
-@onready var _PlayerActionsLogic := _MSSCore._PlayerActionsLogic
+@onready var _MultiplayerInput := _MSSCore._MultiplayerInput
 
 var peer_indices : PackedInt32Array
 func _process(delta: float) -> void:
@@ -14,14 +14,14 @@ func _process(delta: float) -> void:
 			var new_peer_indices := _EntityInterest._player_entity_data[_EntityInterest._player_sparse_array[entity_idx]].peer_indices
 			for peer_idx in peer_indices:
 				if not new_peer_indices.has(peer_idx):
-					_PlayerActionsLogic.get_PlayerInputEvent(peer_idx).peer_input.disconnect(_on_peer_input)
+					_MultiplayerInput.disconnect_from(_on_peer_input, peer_idx)
 			for peer_idx in new_peer_indices:
 				if not peer_indices.has(peer_idx):
 					peer_indices.append(peer_idx)
-					_PlayerActionsLogic.get_PlayerInputEvent(peer_idx).peer_input.connect(_on_peer_input)
+					_MultiplayerInput.connect_to(_on_peer_input, peer_idx)
 	
 	
-signal peer_input(event : PlayerInputEvent)
+signal player_input(event : PlayerInputEvent)
 		
 func _on_peer_input(event : PlayerInputEvent):
-	peer_input.emit(event)
+	player_input.emit(event)

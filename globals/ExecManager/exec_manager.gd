@@ -2,9 +2,15 @@
 extends Node
 
 
+var input_devices : PackedInt32Array
 var language : StringName = 'EN_us'
 
 
+func _input(event: InputEvent) -> void:
+	if not event.device in input_devices:
+		input_devices.append(event.device)
+	
+	
 func change_exec_to(exec_name : StringName, caller : Object):
 	var exec_dir = File2ool.path(['res://exec', exec_name])
 	var exec_scene_path = File2ool.path([exec_dir, exec_name + '.tscn'])

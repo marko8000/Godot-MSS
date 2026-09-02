@@ -7,7 +7,6 @@ class_name EntityStorage
 @onready var _EntityInterest := _MSSCore._EntityInterest
 @onready var _ChunkCalculator := _MSSCore._ChunkCalculator
 @onready var _InterpolationState := _MSSCore._InterpolationState
-@onready var _storage_list : Array[Node] = [_MSSCore._EStorageGlobal, _MSSCore._EStorage2D, _MSSCore._EStorage3D]
 
 var _entities_can_start_working : bool = false
 signal _entities_start_working
@@ -15,16 +14,21 @@ var main_tickrate : int = 30
 
 # Allocate
 var _data_sources : Array[EntityDataSource]
-var _entities : PackedInt64Array
+var _entity_indices : PackedInt32Array
+var _entity_ids : PackedInt64Array
 var _entity_types : PackedInt32Array
 var _nodes : Array[Node]
 var _entity_free_slots : PackedInt32Array
 
 # Activate
-var _activation_queue : Array[PackedInt32Array]
+var _activation_queue : Array[ActivationBatch]
+class ActivationBatch:
+	var type_batches : Array[PackedInt32Array]
 var _entity_parent : PackedInt32Array # -1 for root storage
 var _entity_root : PackedInt32Array # -1 for root storage
 var _root_chunk : PackedInt32Array
+var _entity_scale_level_idx : PackedByteArray
+var _entity_lod : PackedByteArray
 var _chunks : Array[Variant]
 var _chunk_scale_level : PackedByteArray
 var _chunk_free_slots : PackedInt32Array
@@ -69,13 +73,11 @@ func _ready() -> void:
 	
 
 func _connection_peer_changed(new_peer):
-	_entities_start_working.emit()
-	_entities_can_start_working = true
-	_EntityFactory._load_chunk(
-		_allocate_chunk(null)
-		)
+	if not _entities_can_start_working:
+		_entities_start_working.emit()
+		_entities_can_start_working = true
 	multiplayer.multiplayer_peer = new_peer
-	Debug.dprint('Connection Peer Setted', self.name)
+	Debug.dprint('Connection peer setted', self.name)
 		
 
 func _allocate_chunk(chunk : Variant) -> int:
@@ -96,34 +98,70 @@ func _allocate_chunk(chunk : Variant) -> int:
 func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array:
 	var entity_indices : PackedInt32Array
 	var type_data := _EntityFactory._entity_type_data[entity_type]
+	var last_parent : Node
+	var last_depth : int
+	var storage := _ChunkCalculator.dim_data[type_data.dimension].storage
 	for node in nodes:
 		var entity_id := _EntityFactory._get_new_entity_id()
 		var idx : int
-			
+		@warning_ignore("unassigned_variable")
+		if node.get_parent() != last_parent:
+			last_parent = node.get_parent()
+			last_depth = 0
+			var current_parent := node.get_parent()
+			while current_parent != self:
+				print(node, current_parent)
+				if current_parent == _MSSCore:
+					last_depth = -1
+					break
+				elif current_parent == storage:
+					break
+				last_depth += 1
+				current_parent = current_parent.get_parent()
+		if last_depth == -1:
+			continue
 		if not _entity_free_slots.is_empty():
 			idx = _entity_free_slots[-1]
 			_entity_free_slots.resize(_entity_free_slots.size()-1)
-			_entities[idx] = entity_id
+			_entity_ids[idx] = entity_id
 			_entity_types[idx] = entity_type
 			_nodes[idx] = node
+			_entity_scale_level_idx[idx] = -1
+			_entity_lod[idx] = -1
 		else:
-			idx = _entities.size()
-			_entities.append(entity_id)
+			idx = _entity_ids.size()
+			_entity_ids.append(entity_id)
 			_entity_types.append(entity_type)
 			_nodes.append(node)
 			_entity_parent.append(-1)
 			_entity_root.append(-1)
 			_root_chunk.append(0)
+			_entity_scale_level_idx.append(-1)
+			_entity_lod.append(-1)
+		
+		node.name = str(idx)
+		print(node.name)
 		entity_indices.append(idx)
+		node.get_node('EntitySeed').queue_free()
+		
+		if _activation_queue.size() < last_depth+1:
+			for _i in range(_activation_queue.size(), last_depth+1):
+				_activation_queue.append(ActivationBatch.new())
+		var ld_tb := _activation_queue[last_depth].type_batches
+		if ld_tb.size() < entity_type+1:
+			for _i in range(ld_tb.size(), entity_type+1):
+				ld_tb.append(PackedInt32Array())
+		ld_tb[entity_type].append(idx)
+				
 	for source_idx in range(_data_sources.size()):
 		var source_list_idx = type_data.source_indices.find(source_idx)
 		var source = _data_sources[source_idx]
-		source._sparse_array.resize(_entities.size())
+		source._sparse_array.resize(_entity_ids.size())
 		if not source_list_idx == -1:
 			source._allocate_batch(entity_indices, type_data, source_list_idx)
 	return entity_indices
 	
-
+	
 var current_frame : int = 1
 var frames_per_tick : int
 var workers : Array[EntityWorker]
@@ -133,11 +171,11 @@ func _process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
 		frames_per_tick = _InterpolationState.server_FPS / main_tickrate
 		if current_frame == 1:
-			_EntityInterest._request_chunks()
+			#_EntityInterest._request_chunks()
 			_process_activation_queue()
 			_process_move_queue()
 			_process_remove_queue()
-			var worker_count := ceili(float(_entities.size()) / worker_entity_limit)
+			var worker_count := ceili(float(_entity_ids.size()) / worker_entity_limit)
 			if worker_count > workers.size():
 				for _i in worker_count-workers.size():
 					workers.append(EntityWorker.new())
@@ -152,118 +190,92 @@ func _process(delta: float) -> void:
 	
 	
 func _process_activation_queue():
-	var root_path_type_batches_i : Dictionary[PackedInt32Array, Array] = {PackedInt32Array(): []}
-	var activation_queue_path_from_parent : Array[PackedStringArray]
-	for type in range(_activation_queue.size()):
-		activation_queue_path_from_parent.resize(type+1)
-		var entity_indices := _activation_queue[type]
-		for i in range(entity_indices.size()):
-			var entity_idx := entity_indices[i]
-			var parent_node := _nodes[entity_indices[i]].get_parent()
-			var parent_idx : int = -2
-			var current_entity_idx : int = -2
-			var root_path := PackedInt32Array([entity_idx])
-			var invalid := false
-			while true:
-				if str(parent_node.name).is_valid_int():
-					current_entity_idx = int(parent_node.name)
-					root_path.append(current_entity_idx)
-				if parent_idx == -2 and bool(current_entity_idx+1):
-					parent_idx = current_entity_idx
-					_entity_parent[entity_idx] = parent_idx
-					activation_queue_path_from_parent[type].append(parent_node.get_path_to(_nodes[entity_idx].get_parent()))
-				if parent_node in _storage_list:
-					_entity_root[entity_idx] = current_entity_idx
-					root_path.append(-1)
-					break
+	for s in range(_activation_queue.size()):
+		var invalid_entities_i : Array[PackedInt32Array]
+		for type in range(_activation_queue[s].type_batches.size()):
+			var eindices := _activation_queue[s].type_batches[type]
+			var type_data := _EntityFactory._entity_type_data[type]
+			var storage := _ChunkCalculator.dim_data[type_data.dimension].storage
+			if invalid_entities_i.size() < type+1:
+				for __ in range(invalid_entities_i.size(), type+1):
+					invalid_entities_i.append(PackedInt32Array())
+			for i in range(eindices.size()):
+				var entity_idx := eindices[i]
+				
+				var entity_node := _nodes[entity_idx]
+				var current_entity_idx := -1
+				var parent_node := entity_node.get_parent()
+				var parent_idx := -1
+				var root_idx := -1
+				var chunk_node := entity_node
+				var root_path := PackedInt32Array([entity_idx])
+				var scale_level_idx := type_data.root_scale_level_idx
+				var lod := 0
+				while true:
+					if str(parent_node.name).is_valid_int():
+						current_entity_idx = int(parent_node.name)
+						if scale_level_idx == _entity_scale_level_idx[
+							current_entity_idx]:
+							root_idx = current_entity_idx
+							chunk_node = parent_node
+						if not parent_idx+1:
+							parent_idx = current_entity_idx
+							lod = maxi(
+								0,
+								_entity_lod[current_entity_idx]-1)
+						root_path.append(current_entity_idx)
+					if parent_node == storage:
+						break
+					parent_node = parent_node.get_parent()
+				_entity_root[entity_idx] = root_idx
+				_entity_parent[entity_idx] = parent_idx
+				if lod == 0:
+					lod = type_data.root_lod
+				_entity_scale_level_idx[entity_idx] = scale_level_idx
+				_entity_lod[entity_idx] = lod
 					
-				if parent_node == get_tree().root:
-					root_path.clear()
-					invalid = true
-					break
-				
-				parent_node = parent_node.get_parent()
-				
-			if invalid:
-				if root_path_type_batches_i[PackedInt32Array()].size() < type+1:
-					for _t in range(root_path_type_batches_i[PackedInt32Array()].size(), type+1):
-						root_path_type_batches_i[PackedInt32Array()].append(PackedInt32Array())
-				root_path_type_batches_i[PackedInt32Array()][type].append(i)
-				continue
-				
-			if not root_path_type_batches_i.has(root_path):
-				root_path_type_batches_i[root_path] = []
-			if root_path_type_batches_i[root_path].size() < type+1:
-				for _t in range(root_path_type_batches_i[root_path].size(), type+1):
-					root_path_type_batches_i[root_path].append(PackedInt32Array())
-			root_path_type_batches_i[root_path][type].append(i)
-	var sorted_root_paths : Array[PackedInt32Array] = root_path_type_batches_i.keys()
-	sorted_root_paths.sort_custom(func(a, b): return a.size() < b.size())
-	for root_path in sorted_root_paths:
-		if root_path.size() == 0:
-			continue
-		for type in range(root_path_type_batches_i[root_path].size()):
-			if root_path_type_batches_i[root_path][type] == null:
-				continue
-			for i in root_path_type_batches_i[root_path][type]:
-				var entity_idx : int = _activation_queue[type][i]
-				var chunk_node := _nodes[root_path[-2]]
-				var chunk_node_type := _entity_types[root_path[-2]]
+				var chunk_node_type := _entity_types[root_idx]
 				var chunk_node_type_data := _EntityFactory._entity_type_data[chunk_node_type]
-				var chunk
-				match chunk_node_type_data.dimension:
-					EntityFactory.EntityTypeData.Dimension.GLOBAL:
-						chunk = null
-					EntityFactory.EntityTypeData.Dimension.V2:
-						chunk = _ChunkCalculator.position2d_to_chunk(chunk_node.position)
-					EntityFactory.EntityTypeData.Dimension.V3:
-						chunk = _ChunkCalculator.position3d_to_chunk(chunk_node.position)
+				var chunk = _ChunkCalculator.position_to_chunk(chunk_node.position, 
+				scale_level_idx, chunk_node_type_data.dimension)
 				var chunk_idx : int
 				if _chunk_idx_by_chunk.has(chunk):
+					invalid_entities_i[type].append(entity_idx)
 					chunk_idx = _chunk_idx_by_chunk[chunk]
 				else:
-					if root_path_type_batches_i[PackedInt32Array()].size() < type+1:
-						for _t in range(root_path_type_batches_i[PackedInt32Array()].size(), type+1):
-							root_path_type_batches_i[PackedInt32Array()].append(PackedInt32Array())
-					root_path_type_batches_i[PackedInt32Array()][type].append(i)
 					continue
 				_root_chunk[entity_idx] = chunk_idx
-				var chunk_data := _entity_tree[chunk_idx].type_batches
-				var index : int
-				var type_batch : ChunkData.TypeBatch
-				for j in range(root_path.size() - 2, -1, -1):
-					var parent_type := _entity_types[root_path[j]]
-					if chunk_data.size() < parent_type+1:
-						chunk_data.resize(parent_type+1)
-						for k in range(parent_type+1):
-							if chunk_data[k] == null:
-								chunk_data[k] = ChunkData.TypeBatch.new()
-					index = chunk_data[parent_type].entity_indices.find(root_path[j])
-					if index == -1:
-						type_batch = chunk_data[parent_type]
-						break
-					chunk_data = chunk_data[parent_type].children
+				var batches := _entity_tree[chunk_idx].type_batches
+				var parent_type : int
+				for j in range(root_path.size() - 1, -1, -1):
+					parent_type = _entity_types[root_path[j]]
+					if batches.size() < parent_type+1:
+						batches.resize(parent_type+1)
+						for _i in range(batches.size(), parent_type+1):
+							batches.append(ChunkData.TypeBatch.new())
+					batches = batches[parent_type].children
+				var type_batch := batches[parent_type]
 				type_batch.entity_indices.append(entity_idx)
 				type_batch.children.append(ChunkData.TypeBatch.new())
 				type_batch.flags.append(0)
 	
-	# remove invalid entities
-	for type in range(root_path_type_batches_i[PackedInt32Array()].size()):
-		var remove_indices : PackedInt32Array
-		for i in root_path_type_batches_i[PackedInt32Array()][type]:
-			var entity_idx := _activation_queue[type][i]
-			_nodes[entity_idx].queue_free()
-			_entity_free_slots.append(entity_idx)
-			remove_indices.append(entity_idx)
-		var type_data := _EntityFactory._entity_type_data[type]
-		for source_idx in range(_data_sources.size()):
-			var source_list_idx = type_data.source_indices.find(source_idx)
-			var source = _data_sources[source_idx]
-			if not source_list_idx == -1:
-				source._remove_batch(remove_indices, type_data, source_list_idx)
-				
-	for type in range(_activation_queue.size()):
-		_activation_queue[type].clear()
+		# remove invalid entities
+		for type in range(invalid_entities_i.size()):
+			var remove_indices : PackedInt32Array
+			for i in invalid_entities_i[type]:
+				var entity_idx := _activation_queue[s].type_batches[type][i]
+				_nodes[entity_idx].queue_free()
+				_entity_free_slots.append(entity_idx)
+				remove_indices.append(entity_idx)
+			var type_data := _EntityFactory._entity_type_data[type]
+			for source_idx in range(_data_sources.size()):
+				var source_list_idx = type_data.source_indices.find(source_idx)
+				var source = _data_sources[source_idx]
+				if not source_list_idx == -1:
+					source._remove_batch(remove_indices, 
+					type_data, source_list_idx)
+					
+			_activation_queue[s].type_batches[type].clear()
 
 
 func _process_move_queue():

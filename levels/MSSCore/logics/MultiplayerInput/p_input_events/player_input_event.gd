@@ -1,16 +1,18 @@
-extends RefCounted
+@abstract
+extends Resource
 class_name PlayerInputEvent
 
 
 var actions : Dictionary[String, Array]
-var sleep : bool = false
 signal peer_input(event : PlayerInputEvent)
 
 
+func _input(event : InputEvent, action : MultiplayerAction, input_buffer : StreamPeerBuffer):
+	pass
+	
+	
 func _update(new_actions : Dictionary[String, Array]) -> void:
-	if new_actions != {}:
-		actions = new_actions
-		peer_input.emit(self)
+	peer_input.emit(self)
 	
 	
 func is_action_just_pressed(action : String):
