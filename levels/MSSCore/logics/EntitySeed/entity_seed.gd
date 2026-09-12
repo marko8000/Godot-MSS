@@ -15,7 +15,7 @@ var _ConnectionLogic : ConnectionLogic
 @export_group('Advanced settings')
 @export var root_scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
 	set(value):
-		root_scale_level = clampi(value, 0, 254)
+		root_scale_level = clampi(value, 0, 254) as ChunkCalculator.ScaleLevelLabel
 @export var root_lod : int = 0 : 
 	set(value):
 		root_lod = clampi(value, 0, 254)

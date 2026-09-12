@@ -11,7 +11,7 @@ var peer_role : String
 @export_category('Connection Settings')
 @export var connection_mode : ConnectionMode :
 	set(value):
-		_peer_indices.clear()
+		_peer_indices = [0]
 		_free_slots.clear()
 		connection_mode = value
 
@@ -71,6 +71,7 @@ func _peer_connected(peer_id : int):
 		_peer_indices.append(peer_id)
 	_peer_to_idx[peer_id] = peer_idx
 	peer_connected.emit(peer_id)
+	rpc_id(peer_id, 'get_peer_idx', peer_idx)
 	Debug.dprint('Peer Connected ' + str(peer_id), peer_role)
 
 
@@ -82,8 +83,13 @@ func _peer_disconnected(peer_id : int):
 	Debug.dprint('Peer Disconnected ' + str(peer_id), peer_role)
 
 
+@rpc('authority', 'call_local')
+func get_peer_idx(peer_idx : int):
+	print('current', peer_idx)
+	current_peer_idx = peer_idx
+	
+	
 func _connected_to_server():
-	current_peer_idx = multiplayer.get_unique_id()
 	Debug.dprint('Connected to Server', peer_role)
 
 
@@ -92,6 +98,7 @@ func _connection_failed():
 
 
 func _server_disconnected():
+	current_peer_idx = 0
 	Debug.dprint('Server Disconnected', peer_role)
 	
 	

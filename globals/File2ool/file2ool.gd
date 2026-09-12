@@ -12,7 +12,7 @@ func _ready() -> void:
 	pass
 
 
-func path(components : Array, to_make_dir : bool = false):
+func path(components : Array, to_make_dir : bool = false) -> String:
 	var _path : String
 	for component in components:
 		_path += component + '/'

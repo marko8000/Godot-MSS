@@ -1,7 +1,5 @@
-extends AbstractExec
+extends Exec
 
-
-var is_exec
 
 signal level_loaded
 
@@ -21,33 +19,36 @@ func _process(delta: float) -> void:
 	manage_level_loading()
 
 
-var loading_level_process_data = {'level_path': null, 'progress': [], 'status': 0}
+var loading_level_path : String
+var loading_progress : Array[float]
+var loading_status := ResourceLoader.ThreadLoadStatus.THREAD_LOAD_FAILED
 func load_level(level_name):
 	assert(FileAccess.file_exists(File2ool.path(['res://levels', level_name, level_name+'.tscn'])), 'Failed to load level '+'"'+level_name+'"')
 	var _level_scene_path = File2ool.path(['res://levels/', level_name, level_name+'.tscn'])
-	loading_level_process_data['level_path'] = _level_scene_path
-	loading_level_process_data['progress'] = []
-	loading_level_process_data['status'] = 0
+	loading_level_path = _level_scene_path
+	loading_progress.clear()
+	loading_status = ResourceLoader.ThreadLoadStatus.THREAD_LOAD_FAILED
 	ResourceLoader.load_threaded_request(_level_scene_path)
 	return
 	
 	
 func manage_level_loading():
-	if loading_level_process_data['level_path'] != null:
-		loading_level_process_data['status'] = ResourceLoader.load_threaded_get_status(loading_level_process_data['level_path'], loading_level_process_data['progress'])
+	if loading_level_path:
+		loading_status = ResourceLoader.load_threaded_get_status(loading_level_path, loading_progress)
 		#print(str(loading_level_process_data['progress'][0]*100) + '%')
-		if loading_level_process_data['status'] == ResourceLoader.THREAD_LOAD_LOADED:
+		if loading_status == ResourceLoader.THREAD_LOAD_LOADED:
 			remove_current_level()
 			#adding new level
-			var _new_level = ResourceLoader.load_threaded_get(loading_level_process_data['level_path']).instantiate()
+			var _new_level_resource : PackedScene = ResourceLoader.load_threaded_get(loading_level_path)
+			var _new_level_instance = _new_level_resource.instantiate()
 			await get_tree().process_frame
-			add_child(_new_level)
+			add_child(_new_level_instance)
 			level_loaded.emit()
 			
-			Debug.dprint('Successfully loaded level: ' + loading_level_process_data['level_path'], self.name)
-			loading_level_process_data['level_path'] = null
-			loading_level_process_data['progress'] = []
-			loading_level_process_data['status'] = 0
+			Debug.dprint('Successfully loaded level: ' + loading_level_path, self.name)
+			loading_level_path = ''
+			loading_progress.clear()
+			loading_status = ResourceLoader.THREAD_LOAD_FAILED
 
 
 func remove_current_level():
@@ -56,6 +57,9 @@ func remove_current_level():
 
 
 func _input(event: InputEvent) -> void:
+	if not event.device in input_devices:
+		input_devices.append(event.device)
+	
 	if Input.is_action_pressed('Shift') and Input.is_action_just_pressed('Esc'):
 		Debug.dprint('Quiting game', self.name)
 		await get_tree().create_timer(0.5).timeout

@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Godot MSS"
 config/description="Godot Multiplayer Synchronization System created by vvin17"
-run/main_scene="res://exec/mss_start_exec/mss_start_exec.tscn"
+run/main_scene="uid://c632888kejl2"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/image="uid://cfnp35txqd42n"
@@ -29,7 +29,6 @@ driver/enable_input=true
 [autoload]
 
 File2ool="*res://globals/File2ool/file2ool.gd"
-ExecManager="*res://globals/ExecManager/exec_manager.gd"
 Debug="*res://globals/Debug/debug.gd"
 ZipArchiver="*res://globals/File2ool/ZipArchiver/zip_archiver.gd"
 R="*res://globals/ExecManager/randomizer.gd"

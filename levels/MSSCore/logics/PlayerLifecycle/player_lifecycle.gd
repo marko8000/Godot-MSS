@@ -2,7 +2,7 @@ extends MSSLogic
 ## MultiplayerLogic is used to manage players statuses
 class_name PlayerLifecycle
 
-
+@onready var _Exec := ExecManager.get_current_exec(self)
 @onready var _ConnectionLogic := _MSSCore._ConnectionLogic
 @onready var _EntityFactory := _MSSCore._EntityFactory
 @onready var _EntityInterest := _MSSCore._EntityInterest
@@ -72,7 +72,7 @@ func _peer_disconnected(peer_idx : int):
 		
 		
 func _connected_to_server():
-	rpc_id(1, "set_language", ExecManager.language)
+	rpc_id(1, "set_language", _Exec.language)
 			
 
 func uid_to_peer_idx(uid):

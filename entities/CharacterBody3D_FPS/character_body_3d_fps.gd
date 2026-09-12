@@ -71,16 +71,14 @@ func _on_player_input_player_input(event: PlayerInputEvent) -> void:
 	direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Handle mouse rotation
-	if event.actions.has('mouse_relative'):
-		var mouse_relative = event.actions.mouse_relative[0]
-		mouse_rotation.y -= mouse_relative.x * ROTATION_SPEED
-		mouse_rotation.x -= mouse_relative.y * ROTATION_SPEED
-		if mouse_rotation.x < -1.4: mouse_rotation.x = -1.4
-		elif mouse_rotation.x > 1.4: mouse_rotation.x = 1.4
-		transform.basis = Basis(Vector3.UP, mouse_rotation.y)
-		$cam.transform.basis = Basis(Vector3.RIGHT, mouse_rotation.x)
-		
-	if event.is_action_pressed("break"):
-		pass
-	if event.is_action_just_pressed('place'):
-		pass 
+	mouse_rotation.y -= event.get_value('rotate_x') * ROTATION_SPEED
+	mouse_rotation.x -= event.get_value('rotate_y') * ROTATION_SPEED
+	if mouse_rotation.x < -1.4: mouse_rotation.x = -1.4
+	elif mouse_rotation.x > 1.4: mouse_rotation.x = 1.4
+	transform.basis = Basis(Vector3.UP, mouse_rotation.y)
+	$cam.transform.basis = Basis(Vector3.RIGHT, mouse_rotation.x)
+	
+	#if event.is_action_pressed("break"):
+		#pass
+	#if event.is_action_just_pressed('place'):
+		#pass

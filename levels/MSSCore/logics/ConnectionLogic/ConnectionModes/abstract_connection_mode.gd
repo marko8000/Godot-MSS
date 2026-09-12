@@ -4,8 +4,8 @@ extends Resource
 class_name ConnectionMode
 
 
-var max_clients_count : int
-var clients_count : int
+var max_client_count : int
+var client_count : int
 
 
 func create_server() -> MultiplayerPeer:

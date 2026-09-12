@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://spgwe2ooiv28"]
+
+[ext_resource type="Script" uid="uid://c6uegurw67chh" path="res://exec/mssvin17_exec/mssvin17_exec.gd" id="1_tqx21"]
+[ext_resource type="Script" uid="uid://dqj36fslwkrf1" path="res://exec/mssvin17_exec/debug_control/debug_control.gd" id="3_1fpld"]
+[ext_resource type="Script" uid="uid://vcw23ke10nsk" path="res://exec/mssvin17_exec/command_line/command_line.gd" id="4_5ycpr"]
+[ext_resource type="Script" uid="uid://dpk0gjtcg42bl" path="res://exec/mssvin17_exec/command_line/standard_module.gd" id="6_1fpld"]
+
+[sub_resource type="Resource" id="Resource_tqx21"]
+script = ExtResource("6_1fpld")
+metadata/_custom_type_script = "uid://dpk0gjtcg42bl"
+
+[node name="MSSVin17Exec" type="Node" unique_id=119245812]
+script = ExtResource("1_tqx21")
+metadata/_custom_type_script = "uid://bsnaioysv64bv"
+
+[node name="DebugPanel" type="HBoxContainer" parent="." unique_id=441591217]
+unique_name_in_owner = true
+visible = false
+z_index = 4096
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 42.0
+grow_horizontal = 2
+script = ExtResource("3_1fpld")
+
+[node name="exec_and_level_debug" type="VBoxContainer" parent="DebugPanel" unique_id=2047574449]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="name" type="Label" parent="DebugPanel/exec_and_level_debug" unique_id=637375057]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 30
+text = "Exec and Level Debug"
+
+[node name="Panel" type="Panel" parent="DebugPanel/exec_and_level_debug/name" unique_id=1249628426]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="device_and_engine_debug" type="VBoxContainer" parent="DebugPanel" unique_id=1662039255]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="name" type="Label" parent="DebugPanel/device_and_engine_debug" unique_id=1999904782]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 30
+text = "Device and Engine Debug"
+
+[node name="Panel" type="Panel" parent="DebugPanel/device_and_engine_debug/name" unique_id=858120436]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=305066260]
+
+[node name="CommandLine" type="VBoxContainer" parent="CanvasLayer" unique_id=768870774]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -135.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("4_5ycpr")
+modules = [SubResource("Resource_tqx21")]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/CommandLine" unique_id=1508732083]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+bbcode_enabled = true
+scroll_following = true
+
+[node name="Panel" type="Panel" parent="CanvasLayer/CommandLine/RichTextLabel" unique_id=1495277404]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/CommandLine" unique_id=2022384770]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "command"
+keep_editing_on_text_submit = true
