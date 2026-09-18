@@ -13,12 +13,12 @@ var _ConnectionLogic : ConnectionLogic
 @export var trackers : Array[NodeTracker]
 @export var components : Array[Component]
 @export_group('Advanced settings')
-@export var root_scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
+@export var scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
 	set(value):
-		root_scale_level = clampi(value, 0, 254) as ChunkCalculator.ScaleLevelLabel
-@export var root_lod : int = 0 : 
+		scale_level = clampi(value, 0, ChunkCalculator.MAX_SCALE_LEVEL) as ChunkCalculator.ScaleLevelLabel
+@export var lod : int = 0 : 
 	set(value):
-		root_lod = clampi(value, 0, 254)
+		lod = clampi(value, 0, ChunkCalculator.MAX_LOD)
 @export var tickrate : int = 0
 
 	

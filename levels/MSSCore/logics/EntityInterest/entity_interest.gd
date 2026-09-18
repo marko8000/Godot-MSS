@@ -8,7 +8,12 @@ var _EntityStorage : EntityStorage
 var _EntityFactory : EntityFactory
 
 var _chunk_requested : PackedByteArray
+var _previous_chunk_requested : PackedByteArray
 var _player_data : Array[PlayerData]
+var _chunk_cache : Array[ChunkCache]
+class ChunkCache:
+	var lod_rings : Array[PackedInt32Array]
+var _pending_chunk_cache : Array[ChunkCache]
 			
 
 func _ready() -> void:
@@ -30,40 +35,38 @@ func _player_state_changed(peer_idx : int, player_state : PlayerLifecycle.Player
 					p_data.new_chunks.append(0)
 					_player_data.append(p_data)
 	
-
-var _chunk_cache : Array[ChunkCache]
-class ChunkCache:
-	var lod_levels : Array[PackedInt32Array]
-var _chunks_to_load_count : int
-var _pending_chunk_cache : Array[ChunkCache]
-#func _request_chunks() -> void:
-	#var size := _chunk_requested.size()
-	#_chunk_requested.clear()
-	#_chunk_requested.resize(size)
-	#
-	#if not _pending_chunk_cache.is_empty():
-		#for chunk_idx in range(_pending_chunk_cache.size()):
-			#var pcache := _pending_chunk_cache[chunk_idx]
-			#if not pcache:
-				#continue
-			#for ring_num in range(pcache.rings.size()):
-				#_chunk_cache[chunk_idx].rings[ring_num].append_array(pcache.rings[ring_num])
-				#
-	#for peer_idx : int in range(_player_data.size()):
-		#var p_data := _player_data[peer_idx]
-		#for i in range(p_data.player_entities.size()):
-			#var entity_idx := p_data.player_entities[i]
-			#var chunk_idx := _EntityStorage._root_chunk[entity_idx]
-			#p_data.p_last_chunk_indices[i] = chunk_idx
-			#if _chunk_cache.size() < chunk_idx+1:
-				#_chunk_cache.resize(
-					#max(_chunk_cache.size(), chunk_idx+1)
-				#)
-				#_pending_chunk_cache.resize(
-					#max(_chunk_cache.size(), chunk_idx+1)
-				#)
-			#var cache := _chunk_cache[chunk_idx]
-			#var pcache := _pending_chunk_cache[chunk_idx]
+	
+func _request_chunks() -> void:
+	for chunk_idx in range(_chunk_requested.size()):
+		_chunk_requested[chunk_idx] = _ChunkCalculator.UNUSED_LOD
+		var required_size := chunk_idx+1
+		var old_size := _chunk_cache.size()
+		if old_size < required_size:
+			_chunk_cache.resize(required_size)
+			_pending_chunk_cache.resize(required_size)
+			for i in range(old_size, required_size):
+				_chunk_cache[i] = ChunkCache.new()
+				_pending_chunk_cache[i] = ChunkCache.new()
+		var pcache := _pending_chunk_cache[chunk_idx]
+		for ring_num in range(pcache.lod_rings.size()):
+			_chunk_cache[chunk_idx].lod_rings[ring_num].append_array(pcache.lod_rings[ring_num])
+				
+	for peer_idx : int in range(_player_data.size()):
+		var p_data := _player_data[peer_idx]
+		for i in range(p_data.observer_entities.size()):
+			var entity_idx := p_data.observer_entities[i]
+			var chunk_idx := _EntityStorage._root_chunk[entity_idx]
+			p_data.last_chunk_indices[i] = chunk_idx
+			
+			var cache := _chunk_cache[chunk_idx]
+			var pcache := _pending_chunk_cache[chunk_idx]
+			
+			if p_data.chunk_indices[i] != chunk_idx:
+				if cache.lod_rings.is_empty():
+					pass
+				elif not pcache.lod_rings.is_empty():
+					pass
+				p_data.chunk_indices[i] = chunk_idx
 				#
 			#if cache == null:
 				#cache = ChunkCache.new()
@@ -102,31 +105,20 @@ var _pending_chunk_cache : Array[ChunkCache]
 					#_chunk_requested[chunk_idx] = 2
 				#else:
 					#pass
-					#
-		#for chunk_idx in range(_chunk_requested.size()):
-			#if _chunk_requested[chunk_idx] == 2:
-				#_pending_chunk_cache[chunk_idx] = null
 		
 		
 func send_chunks():
 	pass
 		
 	
-var _observer_sparse_array : PackedInt32Array
-var _observer_entity_data : Array[ObservedEntityData] = [ObservedEntityData.new()]
-var _observer_free_slots : PackedInt32Array
-
 var _player_sparse_array : PackedInt32Array
 var _player_entity_data : Array[ObservedEntityData] = [ObservedEntityData.new()]
 var _player_free_slots : PackedInt32Array
 
 class PlayerData:
-	var new_chunks : PackedInt32Array
-	var loaded_chunks : PackedInt32Array
-	var player_entities : PackedInt32Array
-	var p_last_chunk_indices : PackedInt32Array
 	var observer_entities : PackedInt32Array
-	var o_last_chunk_indices : PackedInt32Array
+	var player_entities : PackedByteArray
+	var chunk_indices : PackedInt32Array
 
 class ObservedEntityData:
 	var peer_indices : PackedInt32Array
@@ -134,35 +126,17 @@ class ObservedEntityData:
 
 
 func register_observer(entity_idx : int, peer_idx : int) -> void:
-	_observer_sparse_array.resize(max(entity_idx+1, _observer_sparse_array.size()))
-	var oe_data : ObservedEntityData
-	if not _observer_sparse_array[entity_idx]:
-		var observer_data_index : int
-		oe_data = ObservedEntityData.new()
-		if not _observer_free_slots.is_empty():
-			observer_data_index = _observer_free_slots[-1]
-			_observer_free_slots.resize(_observer_free_slots.size()-1)
-			_observer_entity_data[observer_data_index] = oe_data
-		else:
-			observer_data_index = _observer_entity_data.size()
-			_observer_entity_data.append(oe_data)
-		_observer_sparse_array[entity_idx] = observer_data_index
-	else:
-		oe_data = _observer_entity_data[_observer_sparse_array[entity_idx]]
-	
-	if not oe_data.free_slots.is_empty():
-		oe_data.peer_indices[oe_data.free_slots[-1]] = peer_idx
-		oe_data.free_slots.resize(oe_data.free_slots.size()-1)
-	else:
-		oe_data.peer_indices.append(peer_idx)
-	
 	var p_data := _player_data[peer_idx]
 	if not p_data.observer_entities.has(entity_idx):
 		p_data.observer_entities.append(entity_idx)
-		p_data.o_last_chunk_indices.append(-2)
+		p_data.player_entities.append(false)
+		p_data.chunk_indices.append(-1)
 	
 	
 func register_player(entity_idx : int, peer_idx : int) -> void:
+	var p_data := _player_data[peer_idx]
+	register_observer(entity_idx, peer_idx)
+	p_data.player_entities[-1] = true
 	_player_sparse_array.resize(max(entity_idx+1, _player_sparse_array.size()))
 	var oe_data : ObservedEntityData
 	if not _player_sparse_array[entity_idx]:
@@ -185,7 +159,5 @@ func register_player(entity_idx : int, peer_idx : int) -> void:
 	else:
 		oe_data.peer_indices.append(peer_idx)
 	
-	var p_data := _player_data[peer_idx]
-	if not p_data.player_entities.has(entity_idx):
-		p_data.player_entities.append(entity_idx)
-		p_data.p_last_chunk_indices.append(-2)
+	
+	

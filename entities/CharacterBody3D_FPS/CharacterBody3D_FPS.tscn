@@ -70,6 +70,8 @@ metadata/_custom_type_script = "uid://b643ood758qs2"
 [node name="EntitySeed" type="Node" parent="." unique_id=1194583288]
 script = ExtResource("3_1wfgu")
 trackers = Array[ExtResource("5_5spkx")]([SubResource("Resource_1wfgu"), SubResource("Resource_t3uhe"), SubResource("Resource_4vhj7")])
+scale_level = null
+lod = null
 metadata/_custom_type_script = "uid://ddvva2f8kyxnr"
 
 [node name="PlayerInput" type="Node" parent="." unique_id=1438195250]

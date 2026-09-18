@@ -29,27 +29,26 @@ var _entity_root : PackedInt32Array # -1 for root storage
 var _root_chunk : PackedInt32Array
 var _entity_scale_level_idx : PackedByteArray
 var _entity_lod : PackedByteArray
-var _chunks : Array[Variant]
-var _chunk_scale_level : PackedByteArray
+var _chunks : Array[PackedInt64Array]
 var _chunk_free_slots : PackedInt32Array
-var _chunk_idx_by_chunk : Dictionary[Variant, int]
-var _move_queue : Array[PackedInt32Array]
-var _remove_queue : Array[PackedInt32Array]
+var _chunk_idx_by_chunk : Dictionary[PackedInt64Array, int]
+#var _move_queue : Array[PackedInt32Array]
+#var _remove_queue : Array[PackedInt32Array]
 var _entity_tree : Array[ChunkData]
 class ChunkData:
 	var type_batches : Array[TypeBatch]
-	class TypeBatch:
-		var entity_indices : PackedInt32Array
-		var children : Array[TypeBatch]
-		## 0 - create flag [br]
-		## 1 - update flag [br]
-		## 2 - remove flag [br]
-		## 3 - moved to chunk (lod_level, chunk_type, chunk_data) [br]
-		## 4 - moved from chunk (lod_level, chunk_type, chunk_data) [br]
-		var flags : PackedInt32Array
-		var tickrate_data : Vector2i
-		func _to_string() -> String:
-			return str(entity_indices, children, flags)
+class TypeBatch:
+	extends ChunkData
+	var entity_indices : PackedInt32Array
+	# 0 - create flag
+	# 1 - update flag
+	# 2 - remove flag
+	# 3 - moved to chunk (lod_level, chunk_type, chunk_data)
+	# 4 - moved from chunk (lod_level, chunk_type, chunk_data)
+	var flags : PackedInt32Array
+	var tickrate_data : Vector2i
+	func _to_string() -> String:
+		return str(entity_indices, type_batches, flags)
 
 var _chunk_buffers : Array[ChunkBuffer]
 class ChunkBuffer:
@@ -80,19 +79,35 @@ func _connection_peer_changed(new_peer):
 	Debug.dprint('Connection peer setted', self.name)
 		
 
-func _allocate_chunk(chunk : Variant) -> int:
+func _allocate_chunk(chunk : PackedInt64Array) -> int:
 	var chunk_idx : int
 	if not _chunk_free_slots.is_empty():
 		chunk_idx = _chunk_free_slots[-1]
 		_chunk_free_slots.resize(_chunk_free_slots.size()-1)
 		_chunks[chunk_idx] = chunk
-		_chunk_scale_level[chunk_idx] = chunk[-1]
 	else:
 		chunk_idx = _chunks.size()
 		_chunks.append(chunk)
-		_chunk_scale_level.append(chunk[-1])
 	_chunk_idx_by_chunk[chunk] = chunk_idx
 	return chunk_idx
+	
+	
+func _allocate_chunk_lod(chunk_idx : int, chunk_lod : int) -> void:
+	var required_size: int = chunk_idx + 1
+	if _entity_tree.size() < required_size:
+		var old_size: int = _entity_tree.size()
+		_entity_tree.resize(required_size)
+		_EntityInterest._chunk_requested.resize(required_size)
+		_EntityInterest._previous_chunk_requested.resize(required_size)
+		for i in range(old_size, required_size):
+			_entity_tree[i] = ChunkData.new()
+			_EntityInterest._chunk_requested[i] = \
+			ChunkCalculator.UNUSED_LOD
+			_EntityInterest._previous_chunk_requested[i] = \
+			ChunkCalculator.UNUSED_LOD
+	_EntityInterest._previous_chunk_requested[chunk_idx] = \
+	_EntityInterest._chunk_requested[chunk_idx]
+	_EntityInterest._chunk_requested[chunk_idx] = chunk_lod
 	
 	
 func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array:
@@ -110,7 +125,6 @@ func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array
 			last_depth = 0
 			var current_parent := node.get_parent()
 			while current_parent != self:
-				print(node, current_parent)
 				if current_parent == _MSSCore:
 					last_depth = -1
 					break
@@ -120,6 +134,7 @@ func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array
 				current_parent = current_parent.get_parent()
 		if last_depth == -1:
 			continue
+		_entity_indices.append(idx)
 		if not _entity_free_slots.is_empty():
 			idx = _entity_free_slots[-1]
 			_entity_free_slots.resize(_entity_free_slots.size()-1)
@@ -140,7 +155,6 @@ func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array
 			_entity_lod.append(-1)
 		
 		node.name = str(idx)
-		print(node.name)
 		entity_indices.append(idx)
 		node.get_node('EntitySeed').queue_free()
 		
@@ -171,7 +185,7 @@ func _process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
 		frames_per_tick = _InterpolationState.server_FPS / main_tickrate
 		if current_frame == 1:
-			#_EntityInterest._request_chunks()
+			_EntityInterest._request_chunks()
 			_process_activation_queue()
 			_process_move_queue()
 			_process_remove_queue()
@@ -206,57 +220,68 @@ func _process_activation_queue():
 				var current_entity_idx := -1
 				var parent_node := entity_node.get_parent()
 				var parent_idx := -1
-				var root_idx := -1
+				var root_idx := entity_idx
+				var root_parent_idx := -1
 				var chunk_node := entity_node
 				var root_path := PackedInt32Array([entity_idx])
-				var scale_level_idx := type_data.root_scale_level_idx
-				var lod := 0
+				var scale_level_idx := type_data.scale_level_idx
+				var lod := type_data.lod
 				while true:
 					if str(parent_node.name).is_valid_int():
 						current_entity_idx = int(parent_node.name)
+						if parent_idx == -1:
+							parent_idx = current_entity_idx
+							lod = maxi(
+								type_data.lod,
+								_entity_lod[current_entity_idx])
+							scale_level_idx = maxi(
+								type_data.scale_level_idx,
+								_entity_scale_level_idx[current_entity_idx])
 						if scale_level_idx == _entity_scale_level_idx[
 							current_entity_idx]:
 							root_idx = current_entity_idx
 							chunk_node = parent_node
-						if not parent_idx+1:
-							parent_idx = current_entity_idx
-							lod = maxi(
-								0,
-								_entity_lod[current_entity_idx]-1)
+						else:
+							root_parent_idx = current_entity_idx
+							break
 						root_path.append(current_entity_idx)
 					if parent_node == storage:
 						break
 					parent_node = parent_node.get_parent()
+				
 				_entity_root[entity_idx] = root_idx
 				_entity_parent[entity_idx] = parent_idx
-				if lod == 0:
-					lod = type_data.root_lod
 				_entity_scale_level_idx[entity_idx] = scale_level_idx
 				_entity_lod[entity_idx] = lod
-					
+				
 				var chunk_node_type := _entity_types[root_idx]
 				var chunk_node_type_data := _EntityFactory._entity_type_data[chunk_node_type]
-				var chunk = _ChunkCalculator.position_to_chunk(chunk_node.position, 
-				scale_level_idx, chunk_node_type_data.dimension)
+				var chunk = _ChunkCalculator.position_to_chunk(
+					root_parent_idx,
+					_ChunkCalculator._scale_levels_by_size[scale_level_idx],
+					chunk_node.position,
+					chunk_node_type_data.dimension)
 				var chunk_idx : int
-				if _chunk_idx_by_chunk.has(chunk):
-					invalid_entities_i[type].append(entity_idx)
-					chunk_idx = _chunk_idx_by_chunk[chunk]
-				else:
+				if not _chunk_idx_by_chunk.has(chunk):
+					invalid_entities_i[type].append(i)
 					continue
-				_root_chunk[entity_idx] = chunk_idx
-				var batches := _entity_tree[chunk_idx].type_batches
+				else:
+					chunk_idx = _chunk_idx_by_chunk[chunk]
+				_root_chunk[root_idx] = chunk_idx
+				var chunk_data := _entity_tree[chunk_idx]
+				var batches : Array[TypeBatch]
 				var parent_type : int
 				for j in range(root_path.size() - 1, -1, -1):
+					batches = chunk_data.type_batches
 					parent_type = _entity_types[root_path[j]]
-					if batches.size() < parent_type+1:
-						batches.resize(parent_type+1)
-						for _i in range(batches.size(), parent_type+1):
-							batches.append(ChunkData.TypeBatch.new())
-					batches = batches[parent_type].children
-				var type_batch := batches[parent_type]
+					if batches.size() < parent_type + 1:
+						var old_size = batches.size()
+						batches.resize(parent_type + 1)
+						for _i in range(old_size, batches.size()):
+							batches[_i] = TypeBatch.new()
+					chunk_data = batches[parent_type]
+				var type_batch : TypeBatch = chunk_data
 				type_batch.entity_indices.append(entity_idx)
-				type_batch.children.append(ChunkData.TypeBatch.new())
 				type_batch.flags.append(0)
 	
 		# remove invalid entities
@@ -264,6 +289,7 @@ func _process_activation_queue():
 			var remove_indices : PackedInt32Array
 			for i in invalid_entities_i[type]:
 				var entity_idx := _activation_queue[s].type_batches[type][i]
+				_entity_indices[_entity_ids[entity_idx]] = -1
 				_nodes[entity_idx].queue_free()
 				_entity_free_slots.append(entity_idx)
 				remove_indices.append(entity_idx)

@@ -1,3 +1,4 @@
+@icon('res://levels/MSSCore/godot_icons/InputEventKey.svg')
 extends DeviceInputEvent
 class_name DeviceInputEventKey
 

@@ -85,7 +85,6 @@ func _peer_disconnected(peer_id : int):
 
 @rpc('authority', 'call_local')
 func get_peer_idx(peer_idx : int):
-	print('current', peer_idx)
 	current_peer_idx = peer_idx
 	
 	
@@ -105,7 +104,8 @@ func _server_disconnected():
 func is_player(node : Node) -> bool:
 	if node.name.is_valid_int():
 		var entity_idx := int(node.name)
-		if _EntityInterest._player_data[current_peer_idx].player_entities.has(entity_idx):
+		var i := _EntityInterest._player_data[current_peer_idx].observer_entities.find(entity_idx)
+		if bool(i+1) and _EntityInterest._player_data[i]:
 			return true
 	return false
 	
@@ -113,6 +113,6 @@ func is_player(node : Node) -> bool:
 func is_observer(node : Node) -> bool:
 	if node.name.is_valid_int():
 		var entity_idx := int(node.name)
-		if _EntityInterest._observer_entities_by_peer_idx[current_peer_idx].has(entity_idx):
+		if _EntityInterest._player_data[current_peer_idx].observer_entities.has(entity_idx):
 			return true
 	return false

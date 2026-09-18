@@ -2,25 +2,35 @@ extends MSSLogic
 class_name ChunkCalculator
 
 
+const MAX_SCALE_LEVEL := 254
+const UNUSED_SCALE_LEVEL := MAX_SCALE_LEVEL+1
+const MAX_LOD := 254
+const UNUSED_LOD := MAX_LOD+1
 enum ScaleLevelLabel {
 	NORMAL
 	}
 var scale_levels : Dictionary[ScaleLevelLabel, ScaleLevel] = {
 	ScaleLevelLabel.NORMAL: ScaleLevel.new(16, [1, 2, 3])
 	}
-var scale_level_order : Array[ScaleLevelLabel] = [
+var scale_level_order : Array[int] = [
 	ScaleLevelLabel.NORMAL
 	]
-var _scale_levels_by_size : Array[ScaleLevelLabel]
+@warning_ignore("unused_private_class_variable")
+@onready var _scale_levels_by_size := _sort_levels_by_size()
 
-enum Dimension {INVALID, V2, V3}
+enum Dimension {D0, D1, D2, D3}
 
 @export var dim_data : Dictionary[Dimension, DimData]
 
 
+func _sort_levels_by_size() -> Array[int]:
+	var sorted : Array[int]
+	for label : int in scale_level_order:
+		sorted.append(label)
+	return sorted
+	
+	
 func _ready() -> void:
-	for label : ScaleLevelLabel in scale_level_order:
-		_scale_levels_by_size.append(label)
 	for data : DimData in dim_data.values():
 		data.storage = get_node(data.storage_path)
 	assert(Dimension.size() == dim_data.size(), 'Invalid dim_data')
@@ -29,36 +39,34 @@ func _ready() -> void:
 
 func get_dim_from(node : Node) -> Dimension:
 	if node is Node2D:
-		return Dimension.V2
+		return Dimension.D2
 	elif node is Node3D:
-		return Dimension.V3
-	return Dimension.INVALID
+		return Dimension.D3
+	return Dimension.D0
+	
+	
 func get_zero(dimension : Dimension):
 	match dimension:
-		Dimension.V2:
+		Dimension.D0:
+			return 0
+		Dimension.D1:
+			return 0
+		Dimension.D2:
 			return Vector2.ZERO
-		Dimension.V3:
+		Dimension.D3:
 			return Vector3.ZERO
 	
 	
-func position_to_chunk(position : Variant, scale_level_idx : int, dimension : Dimension):
-	match dimension:
-		Dimension.V2:
-			return position2d_to_chunk(position, scale_level_idx)
-		Dimension.V3:
-			return position3d_to_chunk(position, scale_level_idx)
-			
-			
-func position2d_to_chunk(position : Vector2, scale_level_idx : int) -> Vector3i:
+func position_to_chunk(root_parent_idx : int, scale_level_idx : int, root_position : Variant, dimension : int) -> PackedInt64Array:
 	var scale_level := scale_level_order[scale_level_idx]
 	var chunk_size := scale_levels[scale_level].chunk_size
-	return Vector3i(floori(position.x / chunk_size), floori(position.y / chunk_size), scale_level)
-	
-	
-func position3d_to_chunk(position : Vector3, scale_level_idx : int) -> Vector4i:
-	var scale_level := scale_level_order[scale_level_idx]
-	var chunk_size := scale_levels[scale_level].chunk_size
-	return Vector4i(floori(position.x / chunk_size), floori(position.y / chunk_size), floori(position.z / chunk_size), scale_level)
+	var chunk : PackedInt64Array
+	chunk.resize(2+dimension)
+	chunk[0] = root_parent_idx
+	chunk[1] = scale_level_idx
+	for i in range(2, dimension+2):
+		chunk[i] = floori(root_position[i-2]/chunk_size)
+	return chunk
 		
 
 func rotation_to_direction(rotation):
@@ -66,36 +74,39 @@ func rotation_to_direction(rotation):
 		return (Basis.from_euler(rotation) * Vector3.FORWARD).normalized()
 	elif rotation is int:
 		pass
-	
 
-func get_chunks_around(chunk : Variant) -> Array:
-	if chunk is Vector4i:
-		return get_3dchunks_around(chunk)
-	elif chunk is Vector3i:
-		return get_2dchunks_around(chunk)
+
+func get_chunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
+	var draw_distance := scale_levels[_scale_levels_by_size[chunk[0]]].chunk_size
+	var negative : PackedInt64Array
+	var positive : PackedInt64Array
+	for i in range(2, chunk.size()):
+		negative[i] = chunk[i] - draw_distance
+		positive[i] = chunk[i] + draw_distance+1
+		
 	return []
 	
 	
 func get_3dchunks_around(chunk : Vector4i) -> Array[Vector4i]:
-	var draw_distance := scale_levels[chunk[-1]].chunk_size
-	var negative_chunk = chunk - Vector4i(draw_distance, draw_distance, draw_distance, 0)
-	var positive_chunk = chunk + Vector4i(draw_distance+1, draw_distance+1, draw_distance+1, 0)
+	var draw_distance := scale_levels[chunk.x].chunk_size
+	var negative_chunk = chunk - Vector4i(0, draw_distance, draw_distance, draw_distance)
+	var positive_chunk = chunk + Vector4i(0, draw_distance+1, draw_distance+1, draw_distance+1)
 	var chunks : Array[Vector4i]
-	for x in range(negative_chunk.x, positive_chunk.x):
-		for y in range(negative_chunk.y, positive_chunk.y):
-			for z in range(negative_chunk.z, positive_chunk.z):
-				chunks.append(Vector4i(x, y, z, chunk[-1]))
+	for x in range(negative_chunk.y, positive_chunk.y):
+		for y in range(negative_chunk.z, positive_chunk.z):
+			for z in range(negative_chunk.w, positive_chunk.w):
+				chunks.append(Vector4i(chunk.x, x, y, z))
 	return chunks
 	
 	
 func get_2dchunks_around(chunk : Vector3i) -> Array[Vector3i]:
-	var draw_distance := scale_levels[chunk[-1]].chunk_size
-	var negative_chunk = chunk - Vector3i(draw_distance, draw_distance, 0)
-	var positive_chunk = chunk + Vector3i(draw_distance+1, draw_distance+1, 0)
+	var draw_distance := scale_levels[chunk.x].chunk_size
+	var negative_chunk = chunk - Vector3i(0, draw_distance, draw_distance)
+	var positive_chunk = chunk + Vector3i(0, draw_distance+1, draw_distance+1)
 	var chunks : Array[Vector3i]
-	for x in range(negative_chunk.x, positive_chunk.x):
-		for y in range(negative_chunk.y, positive_chunk.y):
-			chunks.append(Vector3i(x, y, chunk[-1]))
+	for x in range(negative_chunk.y, positive_chunk.y):
+		for y in range(negative_chunk.z, positive_chunk.z):
+			chunks.append(Vector3i(chunk.x, x, y))
 	return chunks
 	
 	
@@ -120,9 +131,9 @@ func visualize3d(chunk: Vector4i, color : String = '#ffffff'):
 	if has_node('3d'+str(chunk)): return
 	chunk_material.albedo_color = Color.html(color)
 	var mesh_instance := MeshInstance3D.new()
-	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * scale_levels[chunk[-1]].chunk_size)
+	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * scale_levels[chunk.x].chunk_size)
 	mesh_instance.material_override = chunk_material
-	mesh_instance.position = Vector3i(chunk.x, chunk.y, chunk.z) * scale_levels[chunk[-1]].chunk_size
+	mesh_instance.position = Vector3i(chunk.y, chunk.z, chunk.w) * scale_levels[chunk.x].chunk_size
 	mesh_instance.name = '3d'+str(chunk)
 	
 	add_child(mesh_instance)

@@ -14,8 +14,8 @@ class_name EntityFactory
 @onready var _entities_meta : Dictionary = _load_entities_meta()
 @onready var _entity_type_shortcuts : Dictionary[String, int] = _get_entity_type_shortcuts()
 @onready var _shortcuts_entity_type : PackedStringArray = _get_shortcuts_entity_type()
-@onready var _last_used_entity_id : int = -1 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
-@onready var _entity_type_data : Array[EntityTypeData] = _load_entity_resources()
+@onready var _last_used_entity_id : int = 0 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
+@onready var _entity_type_data : Array[EntityTypeData] = await _load_entity_resources()
 var _source_names : PackedStringArray
 class EntityTypeData:
 	var resource : PackedScene 
@@ -25,8 +25,8 @@ class EntityTypeData:
 	var property_paths : Array[PackedStringArray]
 	var node_paths : Array[PackedStringArray]
 	var update_mask_size : int = 0
-	var root_scale_level_idx : int
-	var root_lod : int
+	var scale_level_idx : int
+	var lod : int
 	func _to_string() -> String:
 		return str([resource, dimension, source_indices, cell_size, property_paths, node_paths, update_mask_size])
 
@@ -68,6 +68,7 @@ func _get_shortcuts_entity_type():
 		
 
 func _load_entity_resources() -> Array[EntityTypeData]:
+	await get_tree().process_frame
 	var type_data : Array[EntityTypeData]
 	var entities_file_excepted : PackedStringArray
 	var entities_without_EntitySeed : PackedStringArray
@@ -97,9 +98,9 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 				continue
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
 			
-			data.root_lod = ESeed.root_lod
-			data.root_scale_level_idx = _ChunkCalculator._scale_levels_by_size.find(
-				ESeed.root_scale_level)
+			data.lod = ESeed.lod
+			data.scale_level_idx = _ChunkCalculator._scale_levels_by_size.find(
+				ESeed.scale_level)
 			
 			var data_sources : Array[EntityDataSource]
 			data_sources.append_array(ESeed.trackers)
@@ -176,19 +177,19 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 	var position
 	if data.has('position'):
 		position = data.position
-	var chunk_array : Array[Variant]
-	var preloader_scene_path : String
+	var chunk_array : Array[PackedInt64Array]
 	var estorage := _ChunkCalculator.dim_data[type_data.dimension].storage
 	if not position:
 		position = _ChunkCalculator.get_zero(type_data.dimension)
-	for scale_level_idx in range(type_data.root_scale_level_idx):
+	for scale_level_idx in range(type_data.scale_level_idx+1):
 		chunk_array.append(
 			_ChunkCalculator.position_to_chunk(
-				position, 
+				-1, 
 				_ChunkCalculator._scale_levels_by_size[scale_level_idx],
+				position,
 				type_data.dimension),
 				)
-	preloader_scene_path = _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
+	var preloader_scene_path := _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
 	for chunk in chunk_array:
 		while true:
 			var wait_time := 5
@@ -210,17 +211,11 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 					break
 		if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
 			var chunk_idx := _EntityStorage._allocate_chunk(chunk)
-			_load_chunk(chunk_idx)
+			_EntityStorage._allocate_chunk_lod(chunk_idx, 0)
+			_load_chunk(chunk_idx, 0)
 		await get_node(str(chunk)+'/T').timeout
 	return spawn(entity_type, data, estorage)
 		
 	
-func _load_chunk(chunk_idx : int) -> void:
-	var required_size: int = chunk_idx + 1
-	if _EntityStorage._entity_tree.size() < required_size:
-		var old_size: int = _EntityStorage._entity_tree.size()
-		_EntityStorage._entity_tree.resize(required_size)
-		for _i in range(old_size, required_size):
-			_EntityStorage._entity_tree[_i] = _EntityStorage.ChunkData.new()
-	_EntityInterest._chunk_requested.resize(max(chunk_idx+1, _EntityInterest._chunk_requested.size()))
-	_EntityInterest._chunk_requested[chunk_idx] = 0
+func _load_chunk(chunk_idx : int, chunk_lod : int) -> void:
+	pass
