@@ -4,13 +4,11 @@ class_name ChunkCalculator
 
 const MAX_SCALE_LEVEL := 254
 const UNUSED_SCALE_LEVEL := MAX_SCALE_LEVEL+1
-const MAX_LOD := 254
-const UNUSED_LOD := MAX_LOD+1
 enum ScaleLevelLabel {
 	NORMAL
 	}
 var scale_levels : Dictionary[ScaleLevelLabel, ScaleLevel] = {
-	ScaleLevelLabel.NORMAL: ScaleLevel.new(16, [1, 2, 3])
+	ScaleLevelLabel.NORMAL: ScaleLevel.new(16)
 	}
 var scale_level_order : Array[int] = [
 	ScaleLevelLabel.NORMAL
@@ -64,7 +62,7 @@ func position_to_chunk(root_parent_idx : int, scale_level_idx : int, root_positi
 	chunk.resize(2+dimension)
 	chunk[0] = root_parent_idx
 	chunk[1] = scale_level_idx
-	for i in range(2, dimension+2):
+	for i : int in range(2, dimension+2):
 		chunk[i] = floori(root_position[i-2]/chunk_size)
 	return chunk
 		
@@ -80,7 +78,7 @@ func get_chunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
 	var draw_distance := scale_levels[_scale_levels_by_size[chunk[0]]].chunk_size
 	var negative : PackedInt64Array
 	var positive : PackedInt64Array
-	for i in range(2, chunk.size()):
+	for i : int in range(2, chunk.size()):
 		negative[i] = chunk[i] - draw_distance
 		positive[i] = chunk[i] + draw_distance+1
 		
@@ -92,9 +90,9 @@ func get_3dchunks_around(chunk : Vector4i) -> Array[Vector4i]:
 	var negative_chunk = chunk - Vector4i(0, draw_distance, draw_distance, draw_distance)
 	var positive_chunk = chunk + Vector4i(0, draw_distance+1, draw_distance+1, draw_distance+1)
 	var chunks : Array[Vector4i]
-	for x in range(negative_chunk.y, positive_chunk.y):
-		for y in range(negative_chunk.z, positive_chunk.z):
-			for z in range(negative_chunk.w, positive_chunk.w):
+	for x : int in range(negative_chunk.y, positive_chunk.y):
+		for y : int in range(negative_chunk.z, positive_chunk.z):
+			for z : int in range(negative_chunk.w, positive_chunk.w):
 				chunks.append(Vector4i(chunk.x, x, y, z))
 	return chunks
 	
@@ -104,8 +102,8 @@ func get_2dchunks_around(chunk : Vector3i) -> Array[Vector3i]:
 	var negative_chunk = chunk - Vector3i(0, draw_distance, draw_distance)
 	var positive_chunk = chunk + Vector3i(0, draw_distance+1, draw_distance+1)
 	var chunks : Array[Vector3i]
-	for x in range(negative_chunk.y, positive_chunk.y):
-		for y in range(negative_chunk.z, positive_chunk.z):
+	for x : int in range(negative_chunk.y, positive_chunk.y):
+		for y : int in range(negative_chunk.z, positive_chunk.z):
 			chunks.append(Vector3i(chunk.x, x, y))
 	return chunks
 	

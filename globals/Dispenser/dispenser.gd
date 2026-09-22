@@ -24,7 +24,7 @@ func get_resource(from : Node, resource_path : String, cache_key=null, _cache : 
 		else:
 			var resource = from
 			_cache.append('')
-			for property in resource_path.split('.'):
+			for property : String in resource_path.split('.'):
 				if not '/' in property:
 					if property in resource:
 						if not len(resource_path.split('.')) == 1:
@@ -45,7 +45,7 @@ func get_resource(from : Node, resource_path : String, cache_key=null, _cache : 
 					else:
 						var all_possible_method_names = permutation_sep(property.split('/')[0].split('_'), '_')
 						var has = false
-						for method_name in all_possible_method_names:
+						for method_name : String in all_possible_method_names:
 							if resource.has_method('get_'+method_name):
 								has = true
 								resource = resource.call('get_'+method_name, int(property.split('/')[1]))
@@ -79,7 +79,7 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 		else:
 			var resource = from
 			_cache.append('')
-			for property in resource_path.split('.'):
+			for property : String in resource_path.split('.'):
 				if not '/' in property:
 					if not property in resource:
 						return ERR_DOES_NOT_EXIST
@@ -103,7 +103,7 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 						else:
 							var all_possible_method_names = permutation_sep(property.split('/')[0].split('_'), '_')
 							var has = false
-							for method_name in all_possible_method_names:
+							for method_name : String in all_possible_method_names:
 								if resource.has_method('get_'+method_name):
 									has = true
 									resource = resource.call('get_'+method_name, int(property.split('/')[1]))
@@ -121,7 +121,7 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 						else:
 							var all_possible_method_names = permutation_sep(property.split('/')[0].split('_'), '_')
 							var has = false
-							for method_name in all_possible_method_names:
+							for method_name : String in all_possible_method_names:
 								if resource.has_method('set_'+method_name):
 									resource = resource.call('set_'+method_name, int(property.split('/')[1]), value)
 									_cache[-1][0] = 'set_'+property.split('/')[0]
@@ -131,7 +131,7 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 		return FAILED
 	else:
 		var resource = from
-		for element_num in range(len(setter_cache[cache_key])):
+		for element_num : int in range(len(setter_cache[cache_key])):
 			if setter_cache[cache_key][element_num] is NodePath:
 				resource = resource.get_node(setter_cache[cache_key][element_num])
 			elif setter_cache[cache_key][element_num] is String:
@@ -153,9 +153,9 @@ func set_resource(from : Node, resource_path : String, value : Variant, cache_ke
 func permutation_sep(words_list : PackedStringArray, separator='', _cache=0) -> PackedStringArray:
 	var permutated_array = permutation(words_list)
 	var result : PackedStringArray
-	for array_num in range(len(permutated_array)):
+	for array_num : int in range(len(permutated_array)):
 		result.append('')
-		for word_num in range(len(permutated_array[array_num])):
+		for word_num : int in range(len(permutated_array[array_num])):
 			result[array_num] += permutated_array[array_num][word_num]
 			if word_num+1 != len(permutated_array[array_num]):
 				result[array_num] += separator
@@ -171,7 +171,7 @@ func permutation(words_list: Array) -> Array:
 	if words_list.size() == 1:
 		return [[words_list[0]]]
 	var result = []
-	for i in range(words_list.size()):
+	for i : int in range(words_list.size()):
 		# Get current word
 		var current_word = words_list[i]
 		# Create a new list without the current word

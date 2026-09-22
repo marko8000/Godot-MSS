@@ -8,11 +8,10 @@ var _EntityStorage : EntityStorage
 var _EntityFactory : EntityFactory
 
 var _chunk_requested : PackedByteArray
-var _previous_chunk_requested : PackedByteArray
 var _player_data : Array[PlayerData]
 var _chunk_cache : Array[ChunkCache]
 class ChunkCache:
-	var lod_rings : Array[PackedInt32Array]
+	var chunk_indices : PackedInt32Array
 var _pending_chunk_cache : Array[ChunkCache]
 			
 
@@ -30,41 +29,38 @@ func _player_state_changed(peer_idx : int, player_state : PlayerLifecycle.Player
 		PlayerLifecycle.PlayerState.preparing:
 			var _player_data_size := _player_data.size()
 			if _player_data_size < peer_idx+1:
-				for _i in range(_player_data_size, peer_idx+1):
+				for _i : int in range(_player_data_size, peer_idx+1):
 					var p_data := PlayerData.new()
-					p_data.new_chunks.append(0)
 					_player_data.append(p_data)
 	
 	
 func _request_chunks() -> void:
-	for chunk_idx in range(_chunk_requested.size()):
-		_chunk_requested[chunk_idx] = _ChunkCalculator.UNUSED_LOD
+	for chunk_idx : int in range(_chunk_requested.size()):
+		_chunk_requested[chunk_idx] = false
 		var required_size := chunk_idx+1
 		var old_size := _chunk_cache.size()
 		if old_size < required_size:
 			_chunk_cache.resize(required_size)
 			_pending_chunk_cache.resize(required_size)
-			for i in range(old_size, required_size):
+			for i : int in range(old_size, required_size):
 				_chunk_cache[i] = ChunkCache.new()
 				_pending_chunk_cache[i] = ChunkCache.new()
 		var pcache := _pending_chunk_cache[chunk_idx]
-		for ring_num in range(pcache.lod_rings.size()):
-			_chunk_cache[chunk_idx].lod_rings[ring_num].append_array(pcache.lod_rings[ring_num])
+		_chunk_cache[chunk_idx].chunk_indices.append_array(pcache.chunk_indices)
 				
 	for peer_idx : int in range(_player_data.size()):
 		var p_data := _player_data[peer_idx]
-		for i in range(p_data.observer_entities.size()):
+		for i : int in range(p_data.observer_entities.size()):
 			var entity_idx := p_data.observer_entities[i]
 			var chunk_idx := _EntityStorage._root_chunk[entity_idx]
-			p_data.last_chunk_indices[i] = chunk_idx
 			
 			var cache := _chunk_cache[chunk_idx]
 			var pcache := _pending_chunk_cache[chunk_idx]
 			
 			if p_data.chunk_indices[i] != chunk_idx:
-				if cache.lod_rings.is_empty():
+				if cache.chunk_indices.is_empty():
 					pass
-				elif not pcache.lod_rings.is_empty():
+				elif not pcache.chunk_indices.is_empty():
 					pass
 				p_data.chunk_indices[i] = chunk_idx
 				#

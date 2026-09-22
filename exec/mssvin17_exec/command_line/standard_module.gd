@@ -98,7 +98,7 @@ func guest(args : Array):
 		
 func clear_entities_storage():
 	var entities_storage = _current_level.giveo('entities_storage')
-	for child in entities_storage.get_children():
+	for child : Node in entities_storage.get_children():
 		child.queue_free()
 
 

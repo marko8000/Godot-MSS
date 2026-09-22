@@ -7,13 +7,14 @@ class_name DeviceInputEventMouseMotion
 enum Axis {x, y}
 
 
+
 func _input(event : InputEvent):
 	if event is InputEventMouseMotion:
-		if action is FloatAction:
+		if action is ActionAxis:
 			action.set_value(event.relative[axis])
-		elif action is StrengthAction:
+		elif action is ActionStrength:
 			pass
 			
 			
-func _is_not_update():
+func _not_update():
 	action.set_value(0)

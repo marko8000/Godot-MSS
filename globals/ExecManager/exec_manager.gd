@@ -41,7 +41,7 @@ func set_splitscreen_grid_separation(h : int, v : int):
 static func change_exec_to(exec_name : StringName, caller : Object) -> Exec:
 	var exec := get_current_exec(caller)
 	var viewport : SubViewport = exec.get_parent()
-	for child in viewport.get_children():
+	for child : Node in viewport.get_children():
 		child.queue_free()
 		
 	var exec_dir := File2ool.path(['res://exec', exec_name])

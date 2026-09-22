@@ -16,9 +16,6 @@ var _ConnectionLogic : ConnectionLogic
 @export var scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
 	set(value):
 		scale_level = clampi(value, 0, ChunkCalculator.MAX_SCALE_LEVEL) as ChunkCalculator.ScaleLevelLabel
-@export var lod : int = 0 : 
-	set(value):
-		lod = clampi(value, 0, ChunkCalculator.MAX_LOD)
 @export var tickrate : int = 0
 
 	
@@ -43,7 +40,6 @@ func entity_prepare():
 		get_parent().queue_free()
 	elif _ConnectionLogic.peer_role == 'host':
 		var entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
-		_presets()
 		_EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
 
 		
@@ -79,7 +75,7 @@ If many instances of this entity are active, centralized processing through Enti
 Create a new EntityBehavior node and extend the script to create centralized logic.''')
 	
 	return warnings
-	
+
 	
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -102,11 +98,3 @@ func _entity_node_renamed():
 	warning_window.get_node('PageContainer').change_page('NodeRenamed')
 	
 	base_control.add_child(warning_window)
-		
-		
-func _presets():
-	for child in get_parent().get_children():
-		if child.has_method('presets') and child != self:
-			child.presets()
-	if not is_instance_valid(_ConnectionLogic):
-		return

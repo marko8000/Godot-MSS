@@ -11,7 +11,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	output('Command Line Log')
 	Debug.on_doutput.connect(_debug_output)
-	for module in modules:
+	for module : CLIModule in modules:
 		module._MSSExec = _MSSExec
 		module._current_level = _MSSExec.get_current_level(self)
 		module._commandline = self
@@ -25,7 +25,7 @@ func _process(delta: float) -> void:
 	if len(%LineEdit.text) > 0:
 		if %LineEdit.text[0] == '/':
 			%LineEdit.text = %LineEdit.text.substr(1)
-	for module in modules:
+	for module : CLIModule in modules:
 		module._current_level = _current_level
 		module._process(delta)
 		

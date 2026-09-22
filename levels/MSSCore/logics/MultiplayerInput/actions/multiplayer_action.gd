@@ -3,14 +3,27 @@ extends Resource
 class_name MultiplayerAction
 
 
-@export var action_name : String
-@export var events : Array[DeviceInputEvent]
-
+var _update_mask_size : int
 var _is_update : bool
-var _old_value : float
-var _value : float
-func set_value(v : float):
-	if v != _value:
-		_is_update = true
-	_old_value = _value
-	_value = v
+var _is_zero : bool
+
+func _ready() -> void:
+	pass
+	
+func _local_ready() -> void:
+	pass
+	
+func _not_update() -> void:
+	pass
+	
+func _write_buffer(input_buffer : StreamPeerBuffer, update_mask_pos : int):
+	pass
+
+func _read_buffer(input_buffer : StreamPeerBuffer, update_mask_pos : int) -> void:
+	pass
+	
+func _copy() -> MultiplayerAction:
+	return
+	
+func _input(event : InputEvent):
+	pass

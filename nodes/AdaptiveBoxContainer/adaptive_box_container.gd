@@ -17,7 +17,7 @@ func _update() -> void:
 	var _psize = size - Vector2(get_theme_constant("separation"), get_theme_constant("separation"))
 	var _min := Vector2.ZERO  
 	  
-	for child in get_children():
+	for child : Node in get_children():
 		_min += child.get_combined_minimum_size()
   
 	var new_vertical: bool
@@ -35,7 +35,7 @@ func _update() -> void:
 func _get_configuration_warnings() -> PackedStringArray:
 	var _warnings : PackedStringArray
 	
-	for child in get_children():
+	for child : Node in get_children():
 		var warning = 'Child node "{0}" has combined minimum size {1}'.format([child.name, child.get_combined_minimum_size()])
 		if child.get_combined_minimum_size()[child.get_combined_minimum_size().min_axis_index()] == 0:
 			_warnings.append(warning)

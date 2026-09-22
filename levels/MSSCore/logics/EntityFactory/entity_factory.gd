@@ -26,7 +26,6 @@ class EntityTypeData:
 	var node_paths : Array[PackedStringArray]
 	var update_mask_size : int = 0
 	var scale_level_idx : int
-	var lod : int
 	func _to_string() -> String:
 		return str([resource, dimension, source_indices, cell_size, property_paths, node_paths, update_mask_size])
 
@@ -61,7 +60,7 @@ func _get_entity_type_shortcuts():
 func _get_shortcuts_entity_type():
 	var _shortcuts : Array
 	if _entities_meta.has('entity_type_shortcuts'):
-		for entity_type in _entities_meta.entity_type_shortcuts.keys():
+		for entity_type : String in _entities_meta.entity_type_shortcuts.keys():
 			var shortcut = _entities_meta.entity_type_shortcuts[entity_type]
 			_shortcuts_entity_type[shortcut] = entity_type
 	return _shortcuts
@@ -98,7 +97,6 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 				continue
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
 			
-			data.lod = ESeed.lod
 			data.scale_level_idx = _ChunkCalculator._scale_levels_by_size.find(
 				ESeed.scale_level)
 			
@@ -181,7 +179,7 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 	var estorage := _ChunkCalculator.dim_data[type_data.dimension].storage
 	if not position:
 		position = _ChunkCalculator.get_zero(type_data.dimension)
-	for scale_level_idx in range(type_data.scale_level_idx+1):
+	for scale_level_idx : int in range(type_data.scale_level_idx+1):
 		chunk_array.append(
 			_ChunkCalculator.position_to_chunk(
 				-1, 
@@ -190,7 +188,7 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 				type_data.dimension),
 				)
 	var preloader_scene_path := _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
-	for chunk in chunk_array:
+	for chunk : PackedInt64Array in chunk_array:
 		while true:
 			var wait_time := 5
 			if not has_node(str(chunk)):
@@ -211,11 +209,10 @@ func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
 					break
 		if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
 			var chunk_idx := _EntityStorage._allocate_chunk(chunk)
-			_EntityStorage._allocate_chunk_lod(chunk_idx, 0)
-			_load_chunk(chunk_idx, 0)
+			_load_chunk(chunk_idx)
 		await get_node(str(chunk)+'/T').timeout
 	return spawn(entity_type, data, estorage)
 		
 	
-func _load_chunk(chunk_idx : int, chunk_lod : int) -> void:
+func _load_chunk(chunk_idx : int) -> void:
 	pass

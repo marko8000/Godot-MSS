@@ -12,7 +12,7 @@ func load_level(level_name):
 	
 func get_current_level(caller : Object) -> Node:
 	var children = get_children()
-	for child in children:
+	for child : Node in children:
 		if child.scene_file_path.get_slice('/', 2) == 'levels':
 			return child
 	return

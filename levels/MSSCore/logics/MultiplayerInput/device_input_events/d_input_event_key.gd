@@ -4,14 +4,23 @@ class_name DeviceInputEventKey
 
 
 @export var key : Key
+@export var float_sens : float = 100 :
+	set(v):
+		float_sens = max(v, 0)
 
 
 func _input(event : InputEvent):
-	if event is InputEventKey and event.keycode == key:
-		if action is FloatAction:
-			pass
-		elif action is StrengthAction:
-			if event.is_pressed():
-				action.set_value(1)
-			elif event.is_released():
-				action.set_value(0)
+	var is_released := false
+	var is_pressed := Input.is_key_pressed(key)
+	if event is InputEventKey and event.keycode == key and event.is_released():
+		is_released = true
+	if is_pressed:
+		_is_active = true
+	elif is_released:
+		_is_active = false
+	
+	if action is ActionMagnitude:
+		if is_pressed:
+			action.add_value(float_sens)
+		elif is_released:
+			action.set_value(0)

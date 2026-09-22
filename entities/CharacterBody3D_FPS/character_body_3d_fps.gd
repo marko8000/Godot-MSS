@@ -47,7 +47,7 @@ func _process_raycast() -> void:
 	raycast_body = raycast.get_collider()
 		
 
-var mouse_rotation = Vector2.ZERO
+var input_rotation = Vector2.ZERO
 func _on_player_input_player_input(event: PlayerInputEvent) -> void:
 	if not UIManager.has_active_ui():
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -67,16 +67,16 @@ func _on_player_input_player_input(event: PlayerInputEvent) -> void:
 	
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
-	var input_dir = event.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var input_dir = event.get_vector2("move")
 	direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Handle mouse rotation
-	mouse_rotation.y -= event.get_value('rotate_x') * ROTATION_SPEED
-	mouse_rotation.x -= event.get_value('rotate_y') * ROTATION_SPEED
-	if mouse_rotation.x < -1.4: mouse_rotation.x = -1.4
-	elif mouse_rotation.x > 1.4: mouse_rotation.x = 1.4
-	transform.basis = Basis(Vector3.UP, mouse_rotation.y)
-	$cam.transform.basis = Basis(Vector3.RIGHT, mouse_rotation.x)
+	var event_rotation = event.get_vector2('rotate')
+	input_rotation.y -= event_rotation.x * ROTATION_SPEED
+	input_rotation.x -= event_rotation.y * ROTATION_SPEED
+	input_rotation.x = clampf(input_rotation.x, -1.4, 1.4)
+	transform.basis = Basis(Vector3.UP, input_rotation.y)
+	$cam.transform.basis = Basis(Vector3.RIGHT, input_rotation.x)
 	
 	#if event.is_action_pressed("break"):
 		#pass

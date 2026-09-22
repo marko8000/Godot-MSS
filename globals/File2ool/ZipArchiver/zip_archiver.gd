@@ -14,7 +14,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	for i in range(operations_per_frame):
+	for i : int in range(operations_per_frame):
 		for id in operations:
 			var _operation_type = operations[id].operation_type
 			
