@@ -3,8 +3,6 @@ extends MSSLogic
 class_name ConnectionLogic
 
 
-@onready var _EntityInterest := _MSSCore._EntityInterest
-
 ## host or guest
 var peer_role : String
 
@@ -104,6 +102,7 @@ func _server_disconnected():
 func is_player(node : Node) -> bool:
 	if node.name.is_valid_int():
 		var entity_idx := int(node.name)
+		var _EntityInterest := EntityStorageLogic.get_from(node)._EntityInterest
 		var i := _EntityInterest._player_data[current_peer_idx].observer_entities.find(entity_idx)
 		if bool(i+1) and _EntityInterest._player_data[i]:
 			return true
@@ -113,6 +112,7 @@ func is_player(node : Node) -> bool:
 func is_observer(node : Node) -> bool:
 	if node.name.is_valid_int():
 		var entity_idx := int(node.name)
+		var _EntityInterest := EntityStorageLogic.get_from(node)._EntityInterest
 		if _EntityInterest._player_data[current_peer_idx].observer_entities.has(entity_idx):
 			return true
 	return false

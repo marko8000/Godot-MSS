@@ -62,8 +62,8 @@ func _process(delta: float) -> void:
 			action._write_buffer(input_buffer, update_mask_pos)
 			update_mask_pos += action._update_mask_size-1
 			if action._is_update:
-				action._is_update = false
-			elif not action._is_zero:
+				action._reset_update()
+			else:
 				action._not_update()
 		rpc_id(MultiplayerPeer.TARGET_PEER_SERVER,
 		'_host_get_player_input', input_buffer.data_array, _ConnectionLogic.current_peer_idx)
@@ -91,7 +91,8 @@ func _host_get_player_input(buffer : PackedByteArray, peer_idx : int):
 	var update_mask_pos : int = -1
 	for action_idx : int in range(input_event.actions_array.size()):
 		var action := input_event.actions_array[action_idx]
-		update_mask_pos += action._update_mask_size
+		update_mask_pos += 1
 		action._read_buffer(input_buffer, update_mask_pos)
+		update_mask_pos += action._update_mask_size-1
 	input_event.player_input.emit(input_event)
 			

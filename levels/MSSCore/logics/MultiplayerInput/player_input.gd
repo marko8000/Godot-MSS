@@ -3,7 +3,7 @@ class_name PlayerInput
 
 
 @onready var _ConnectionLogic := _MSSCore._ConnectionLogic
-@onready var _EntityInterest := _MSSCore._EntityInterest
+@onready var _EntityInterest := EntityStorageLogic.get_from(self)._EntityInterest
 @onready var _MultiplayerInput := _MSSCore._MultiplayerInput
 
 var peer_indices : PackedInt32Array

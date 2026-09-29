@@ -24,17 +24,17 @@ func is_action_pressed(action : String) -> bool:
 	
 	
 func is_action_just_pressed(action : String) -> bool:
-	var _action : ActionFloat = actions_array[action_name_to_action_idx[action]]
+	var _action : ActionStrength = actions_array[action_name_to_action_idx[action]]
 	if _action._is_update:
-		return _action._value > _action._old_value
+		return _action._value > _action._old_value and _action._value == 1
 	else:
 		return false
 	
 	
 func is_action_released(action : String) -> bool:
-	var _action : ActionFloat = actions_array[action_name_to_action_idx[action]]
+	var _action : ActionStrength = actions_array[action_name_to_action_idx[action]]
 	if _action._is_update:
-		return _action._old_value > _action._value
+		return _action._old_value > _action._value and _action._value == 0
 	else:
 		return false
 

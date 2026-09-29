@@ -6,16 +6,12 @@ class_name EntitySeed
 
 
 var _MSSCore : MSSCore
-var _EntityStorage : EntityStorage
+var _EntityStorageLogic : EntityStorageLogic
 var _EntityFactory : EntityFactory
 var _ConnectionLogic : ConnectionLogic
 
-@export var trackers : Array[NodeTracker]
-@export var components : Array[Component]
+@export var data_sources : Array[EntityDataSource]
 @export_group('Advanced settings')
-@export var scale_level : ChunkCalculator.ScaleLevelLabel = ChunkCalculator.ScaleLevelLabel.NORMAL :
-	set(value):
-		scale_level = clampi(value, 0, ChunkCalculator.MAX_SCALE_LEVEL) as ChunkCalculator.ScaleLevelLabel
 @export var tickrate : int = 0
 
 	
@@ -30,18 +26,18 @@ func _ready():
 func entity_prepare():
 	_MSSCore = MSSCore.get_from(self)
 	_EntityFactory = _MSSCore._EntityFactory
-	_EntityStorage = _MSSCore._EntityStorage
+	_EntityStorageLogic = EntityStorageLogic.get_from(self)
 	_ConnectionLogic = _MSSCore._ConnectionLogic
 
-	if not _EntityStorage._entities_can_start_working:
-		await _EntityStorage._entities_start_working
+	if not _EntityStorageLogic._entities_can_start_working:
+		await _EntityStorageLogic._entities_start_working
 	
 	if _ConnectionLogic.peer_role == 'guest':
 		get_parent().queue_free()
 	elif _ConnectionLogic.peer_role == 'host':
 		var entity_type = _EntityFactory._entity_type_shortcuts[get_parent().get_scene_file_path().get_slice('/', 3)]
-		_EntityStorage._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
-
+		_EntityStorageLogic._allocate_batch(entity_type, Array([get_parent()], TYPE_OBJECT, "Node", null))
+		
 		
 func _get_configuration_warnings():
 	var warnings = []

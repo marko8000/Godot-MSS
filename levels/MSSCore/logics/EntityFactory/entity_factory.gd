@@ -3,9 +3,6 @@ class_name EntityFactory
 
 
 @onready var _PathRegistry := _MSSCore._PathRegistry
-@onready var _EntityStorage := _MSSCore._EntityStorage
-@onready var _EntityInterest := _MSSCore._EntityInterest
-@onready var _ChunkCalculator := _MSSCore._ChunkCalculator
 
 @onready var _entities_dir = _PathRegistry.path('entities_dir')
 @onready var _entities_data_dir = _PathRegistry.path('entities_data_dir')
@@ -17,6 +14,7 @@ class_name EntityFactory
 @onready var _last_used_entity_id : int = 0 if !_entities_meta.has('last_used_entity_id') else _entities_meta.last_used_entity_id
 @onready var _entity_type_data : Array[EntityTypeData] = await _load_entity_resources()
 var _source_names : PackedStringArray
+var _data_sources : Array[EntityDataSource]
 class EntityTypeData:
 	var resource : PackedScene 
 	var dimension : ChunkCalculator.Dimension
@@ -25,7 +23,6 @@ class EntityTypeData:
 	var property_paths : Array[PackedStringArray]
 	var node_paths : Array[PackedStringArray]
 	var update_mask_size : int = 0
-	var scale_level_idx : int
 	func _to_string() -> String:
 		return str([resource, dimension, source_indices, cell_size, property_paths, node_paths, update_mask_size])
 
@@ -97,21 +94,15 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 				continue
 			var ESeed : EntitySeed = entity_instance.get_node('EntitySeed')
 			
-			data.scale_level_idx = _ChunkCalculator._scale_levels_by_size.find(
-				ESeed.scale_level)
-			
-			var data_sources : Array[EntityDataSource]
-			data_sources.append_array(ESeed.trackers)
-			data_sources.append_array(ESeed.components)
-			for property_num in range(ESeed.trackers.size()):
+			var data_sources := ESeed.data_sources
+			for property_num in range(data_sources.size()):
 				var source := data_sources[property_num]
 				if source is AAutoSelectTracker:
 					continue
 				var source_name : String = source.get_script().get_global_name()
 				if not _source_names.has(source_name):
 					_source_names.append(source_name)
-					source._EntityStorage = _EntityStorage
-					_EntityStorage._data_sources.append(source)
+					_data_sources.append(source)
 				var source_idx = _source_names.find(source_name)
 				
 				var node_path : String 
@@ -139,8 +130,8 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 					data.node_paths[list_idx].append(node_path)
 					if property_path:
 						data.property_paths[list_idx].append(property_path)
-					
-			data.dimension = _ChunkCalculator.get_dim_from(entity_instance)
+			
+			data.dimension = ChunkCalculator.get_dim_from(entity_instance)
 			if not data.dimension:
 				@warning_ignore("assert_always_true")
 				assert(true, 'Unsupported entity node type')
@@ -156,62 +147,54 @@ func _load_entity_resources() -> Array[EntityTypeData]:
 	return type_data
 
 
-func spawn(entity_type : String, data : Dictionary, where : Node = _EntityStorage) -> Node:
+func spawn(entity_type : String, data : Dictionary, where : Node = _MSSCore._RootEntityStorage) -> Node:
 	if not _entity_type_shortcuts.has(entity_type):
 		return
 	var shortcut := _entity_type_shortcuts[entity_type]
 	var tdata := _entity_type_data[shortcut]
 	var entity_instance := tdata.resource.instantiate()
-	if where == _EntityStorage:
-		where = _ChunkCalculator.dim_data[tdata.dimension].storage
 	for path in data:
 		Dispenser.set_resource(entity_instance, path, data[path], [shortcut, path])
-	where.add_child(entity_instance)
+	where.get_parent().add_child(entity_instance)
 	return entity_instance
 	
 
-func spawn_and_load(entity_type : String, data : Dictionary) -> Node:
+func spawn_and_load(entity_type : String, data : Dictionary, where : Node = _MSSCore._RootEntityStorage) -> Node:
 	var type_data := _entity_type_data[_entity_type_shortcuts[entity_type]]
 	var position
 	if data.has('position'):
 		position = data.position
-	var chunk_array : Array[PackedInt64Array]
-	var estorage := _ChunkCalculator.dim_data[type_data.dimension].storage
+	var chunk : PackedInt64Array
+	var estorage_logic := EntityStorageLogic.get_from(where)
 	if not position:
-		position = _ChunkCalculator.get_zero(type_data.dimension)
-	for scale_level_idx : int in range(type_data.scale_level_idx+1):
-		chunk_array.append(
-			_ChunkCalculator.position_to_chunk(
-				-1, 
-				_ChunkCalculator._scale_levels_by_size[scale_level_idx],
-				position,
-				type_data.dimension),
-				)
+		position = ChunkCalculator.get_zero(type_data.dimension)
+	var _ChunkCalculator := estorage_logic._ChunkCalculator
+	chunk = _ChunkCalculator.position_to_chunk(position, type_data.dimension)
+	print(chunk)
 	var preloader_scene_path := _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
-	for chunk : PackedInt64Array in chunk_array:
-		while true:
-			var wait_time := 5
-			if not has_node(str(chunk)):
-				var preloader_scene : PackedScene = load(preloader_scene_path)
-				var preloader_instance = preloader_scene.instantiate()
-				preloader_instance.name = str(chunk)
-				if position:
-					preloader_instance.position = position
-				var timer_killer := TimerKiller.new()
-				timer_killer.name = 'T'
-				timer_killer.wait_time = wait_time
-				preloader_instance.add_child(timer_killer)
-				add_child(preloader_instance)
-			else:
-				var timer_killer : TimerKiller = get_node_or_null(str(chunk)+'/T')
-				if is_instance_valid(timer_killer):
-					timer_killer.start()
-					break
-		if not _EntityStorage._chunk_idx_by_chunk.has(chunk):
-			var chunk_idx := _EntityStorage._allocate_chunk(chunk)
-			_load_chunk(chunk_idx)
-		await get_node(str(chunk)+'/T').timeout
-	return spawn(entity_type, data, estorage)
+	while true:
+		var wait_time := 5
+		if not has_node(str(chunk)):
+			var preloader_scene : PackedScene = load(preloader_scene_path)
+			var preloader_instance = preloader_scene.instantiate()
+			preloader_instance.name = str(chunk)
+			if position:
+				preloader_instance.position = position
+			var timer_killer := TimerKiller.new()
+			timer_killer.name = 'T'
+			timer_killer.wait_time = wait_time
+			preloader_instance.add_child(timer_killer)
+			add_child(preloader_instance)
+		else:
+			var timer_killer : TimerKiller = get_node_or_null(str(chunk)+'/T')
+			if is_instance_valid(timer_killer):
+				timer_killer.start()
+				break
+	if not estorage_logic._chunk_idx_by_chunk.has(chunk):
+		var chunk_idx := estorage_logic._allocate_chunk(chunk)
+		_load_chunk(chunk_idx)
+	await get_node(str(chunk)+'/T').timeout
+	return spawn(entity_type, data, estorage_logic)
 		
 	
 func _load_chunk(chunk_idx : int) -> void:

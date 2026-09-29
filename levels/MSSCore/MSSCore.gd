@@ -25,16 +25,8 @@ static func get_from(from : Node) -> MSSCore:
 @warning_ignore("unused_private_class_variable")
 @export var _EntityFactory : EntityFactory
 @warning_ignore("unused_private_class_variable")
-@export var _EntityStorage : EntityStorage
-@warning_ignore("unused_private_class_variable")
-@export var _EStorageGlobal : Node
-@warning_ignore("unused_private_class_variable")
-@export var _EntityInterest : EntityInterest
-@warning_ignore("unused_private_class_variable")
-@export var _ChunkCalculator : ChunkCalculator
+@export var _RootEntityStorage : Node
 @warning_ignore("unused_private_class_variable")
 @export var _MultiplayerInput : MultiplayerInput
 @warning_ignore("unused_private_class_variable")
 @export var _InterpolationState : InterpolationState
-@warning_ignore("unused_private_class_variable")
-@export var _VoxelEditor : VoxelEditor

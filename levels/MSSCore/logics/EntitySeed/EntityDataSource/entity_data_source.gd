@@ -3,7 +3,7 @@ extends Resource
 class_name EntityDataSource
 
 
-var _EntityStorage : EntityStorage
+var _EntityStorageLogic : EntityStorageLogic
 
 @warning_ignore("unused_private_class_variable")
 var _update_mask_size : int = 1

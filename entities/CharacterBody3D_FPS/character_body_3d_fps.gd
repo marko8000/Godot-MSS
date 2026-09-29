@@ -2,13 +2,12 @@ extends CharacterBody3D
 
 
 @onready var _ConnectionLogic := ConnectionLogic.get_from(self)
-@onready var _EntityStorage := EntityStorage.get_from(self)
 
 const WALKING_SPEED = 1.5
 const SLOW_SHIFT_SPEED = 3
 const FAST_SHIFT_SPEED = 7
 const JUMP_VELOCITY = 6
-const ROTATION_SPEED = 0.0006
+const ROTATION_SPEED = 0.00065
 var sensitivity := 0
 
 var direction : Vector3

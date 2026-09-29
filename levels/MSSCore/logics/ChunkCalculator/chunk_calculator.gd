@@ -2,40 +2,17 @@ extends MSSLogic
 class_name ChunkCalculator
 
 
-const MAX_SCALE_LEVEL := 254
-const UNUSED_SCALE_LEVEL := MAX_SCALE_LEVEL+1
-enum ScaleLevelLabel {
-	NORMAL
-	}
-var scale_levels : Dictionary[ScaleLevelLabel, ScaleLevel] = {
-	ScaleLevelLabel.NORMAL: ScaleLevel.new(16)
-	}
-var scale_level_order : Array[int] = [
-	ScaleLevelLabel.NORMAL
-	]
-@warning_ignore("unused_private_class_variable")
-@onready var _scale_levels_by_size := _sort_levels_by_size()
-
 enum Dimension {D0, D1, D2, D3}
 
 @export var dim_data : Dictionary[Dimension, DimData]
 
 
-func _sort_levels_by_size() -> Array[int]:
-	var sorted : Array[int]
-	for label : int in scale_level_order:
-		sorted.append(label)
-	return sorted
-	
-	
 func _ready() -> void:
-	for data : DimData in dim_data.values():
-		data.storage = get_node(data.storage_path)
 	assert(Dimension.size() == dim_data.size(), 'Invalid dim_data')
 	_setup_materials()
 
 
-func get_dim_from(node : Node) -> Dimension:
+static func get_dim_from(node : Node) -> Dimension:
 	if node is Node2D:
 		return Dimension.D2
 	elif node is Node3D:
@@ -43,7 +20,7 @@ func get_dim_from(node : Node) -> Dimension:
 	return Dimension.D0
 	
 	
-func get_zero(dimension : Dimension):
+static func get_zero(dimension : Dimension):
 	match dimension:
 		Dimension.D0:
 			return 0
@@ -54,57 +31,80 @@ func get_zero(dimension : Dimension):
 		Dimension.D3:
 			return Vector3.ZERO
 	
-	
-func position_to_chunk(root_parent_idx : int, scale_level_idx : int, root_position : Variant, dimension : int) -> PackedInt64Array:
-	var scale_level := scale_level_order[scale_level_idx]
-	var chunk_size := scale_levels[scale_level].chunk_size
-	var chunk : PackedInt64Array
-	chunk.resize(2+dimension)
-	chunk[0] = root_parent_idx
-	chunk[1] = scale_level_idx
-	for i : int in range(2, dimension+2):
-		chunk[i] = floori(root_position[i-2]/chunk_size)
-	return chunk
-		
 
-func rotation_to_direction(rotation):
-	if rotation is Vector3:
-		return (Basis.from_euler(rotation) * Vector3.FORWARD).normalized()
-	elif rotation is int:
-		pass
+func node_to_position(node : Node, dimension : Dimension) -> Variant:
+	match dimension:
+		Dimension.D1:
+			var n : Node2D = node
+			return n.position.x
+		Dimension.D2:
+			var n : Node2D = node
+			return n.position
+		Dimension.D3:
+			var n : Node3D = node
+			return n.position
+	return
+	
+
+func position_to_chunk(position : Variant, dimension : Dimension) -> PackedInt64Array:
+	var chunk_size := dim_data[dimension].chunk_size
+	match dimension:
+		Dimension.D1:
+			var pos : int = position
+			return [floori(pos / chunk_size)]
+		Dimension.D2:
+			var pos : Vector2i = position
+			return [floori(pos.x / chunk_size), floori(pos.y / chunk_size)]
+		Dimension.D3:
+			var pos : Vector3i = position
+			return [floori(pos.x / chunk_size), floori(pos.y / chunk_size), floori(pos.z / chunk_size)]
+	return PackedInt64Array()
 
 
 func get_chunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
-	var draw_distance := scale_levels[_scale_levels_by_size[chunk[0]]].chunk_size
-	var negative : PackedInt64Array
-	var positive : PackedInt64Array
-	for i : int in range(2, chunk.size()):
-		negative[i] = chunk[i] - draw_distance
-		positive[i] = chunk[i] + draw_distance+1
-		
-	return []
-	
-	
-func get_3dchunks_around(chunk : Vector4i) -> Array[Vector4i]:
-	var draw_distance := scale_levels[chunk.x].chunk_size
-	var negative_chunk = chunk - Vector4i(0, draw_distance, draw_distance, draw_distance)
-	var positive_chunk = chunk + Vector4i(0, draw_distance+1, draw_distance+1, draw_distance+1)
-	var chunks : Array[Vector4i]
-	for x : int in range(negative_chunk.y, positive_chunk.y):
-		for y : int in range(negative_chunk.z, positive_chunk.z):
-			for z : int in range(negative_chunk.w, positive_chunk.w):
-				chunks.append(Vector4i(chunk.x, x, y, z))
+	var chunks : Array[PackedInt64Array]
+	match chunk.size():
+		Dimension.D0:
+			pass
+		Dimension.D1:
+			chunk = get_1d_chunks_around(chunk)
+		Dimension.D2:
+			chunks = get_2dchunks_around(chunk)
+		Dimension.D3:
+			chunks = get_3dchunks_around(chunk)
 	return chunks
 	
 	
-func get_2dchunks_around(chunk : Vector3i) -> Array[Vector3i]:
-	var draw_distance := scale_levels[chunk.x].chunk_size
-	var negative_chunk = chunk - Vector3i(0, draw_distance, draw_distance)
-	var positive_chunk = chunk + Vector3i(0, draw_distance+1, draw_distance+1)
-	var chunks : Array[Vector3i]
-	for x : int in range(negative_chunk.y, positive_chunk.y):
-		for y : int in range(negative_chunk.z, positive_chunk.z):
-			chunks.append(Vector3i(chunk.x, x, y))
+func get_3dchunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
+	var draw_distance := dim_data[3].draw_distance
+	var negative_chunk := PackedInt64Array([chunk[0]-draw_distance, chunk[1]-draw_distance, chunk[2]-draw_distance])
+	var positive_chunk := PackedInt64Array([chunk[0]+draw_distance+1, chunk[1]+draw_distance+1, chunk[2]+draw_distance+1])
+	var chunks : Array[PackedInt64Array]
+	for x : int in range(negative_chunk[0], positive_chunk[0]):
+		for y : int in range(negative_chunk[1], positive_chunk[1]):
+			for z : int in range(negative_chunk[2], positive_chunk[2]):
+				chunks.append([x, y, z])
+	return chunks
+	
+	
+func get_2dchunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
+	var draw_distance := dim_data[2].draw_distance
+	var negative_chunk := PackedInt64Array([chunk[0]-draw_distance, chunk[1]-draw_distance])
+	var positive_chunk := PackedInt64Array([chunk[0]+draw_distance+1, chunk[1]+draw_distance+1])
+	var chunks : Array[PackedInt64Array]
+	for x : int in range(negative_chunk[0], positive_chunk[0]):
+		for y : int in range(negative_chunk[1], positive_chunk[1]):
+			chunks.append([x, y])
+	return chunks
+	
+	
+func get_1d_chunks_around(chunk : PackedInt64Array) -> Array[PackedInt64Array]:
+	var draw_distance := dim_data[2].draw_distance
+	var negative_chunk := PackedInt64Array([chunk[0]-draw_distance])
+	var positive_chunk := PackedInt64Array([chunk[0]+draw_distance+1])
+	var chunks : Array[PackedInt64Array]
+	for x : int in range(negative_chunk[0], positive_chunk[0]):
+		chunks.append([x])
 	return chunks
 	
 	
@@ -125,13 +125,13 @@ func _setup_materials():
 	chunk_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 
 # Function to visualize a chunk's borders
-func visualize3d(chunk: Vector4i, color : String = '#ffffff'):
+func visualize3d(chunk: Vector3i, color : String = '#ffffff'):
 	if has_node('3d'+str(chunk)): return
 	chunk_material.albedo_color = Color.html(color)
 	var mesh_instance := MeshInstance3D.new()
-	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * scale_levels[chunk.x].chunk_size)
+	mesh_instance.mesh = create_chunk_wireframe_mesh(Vector3i.ONE * dim_data[3].chunk_size)
 	mesh_instance.material_override = chunk_material
-	mesh_instance.position = Vector3i(chunk.y, chunk.z, chunk.w) * scale_levels[chunk.x].chunk_size
+	mesh_instance.position = Vector3i(chunk.x, chunk.y, chunk.z) * dim_data[3].chunk_size
 	mesh_instance.name = '3d'+str(chunk)
 	
 	add_child(mesh_instance)

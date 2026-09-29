@@ -5,7 +5,6 @@ class_name PlayerLifecycle
 @onready var _Exec := ExecManager.get_current_exec(self)
 @onready var _ConnectionLogic := _MSSCore._ConnectionLogic
 @onready var _EntityFactory := _MSSCore._EntityFactory
-@onready var _EntityInterest := _MSSCore._EntityInterest
 
 var players_data : Array[PlayerData]
 enum PlayerState {logging_in, logged_in, preparing, online, disconnected}
@@ -59,6 +58,7 @@ func _player_state_changed(peer_idx : int, state : PlayerState):
 			player_state_changed.emit(peer_idx, PlayerState.preparing)
 		PlayerState.preparing:
 			var player_entity := await _EntityFactory.spawn_and_load('CharacterBody3D_FPS', {'position': Vector3(0, 5, 0)})
+			var _EntityInterest := EntityStorageLogic.get_from(player_entity)._EntityInterest
 			_EntityInterest.register_player(int(player_entity.name), peer_idx)
 			player_state_changed.emit(peer_idx, PlayerState.online)
 		PlayerState.online:
