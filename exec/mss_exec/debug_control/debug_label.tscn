@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cn251jjd1xvpy"]
 
-[ext_resource type="Script" uid="uid://d4eh6a1wnijiu" path="res://exec/mssvin17_exec/debug_control/debug_label.gd" id="1_p7yi6"]
+[ext_resource type="Script" uid="uid://d4eh6a1wnijiu" path="res://exec/mss_exec/debug_control/debug_label.gd" id="1_p7yi6"]
 
 [node name="DebugLabel" type="VBoxContainer" unique_id=194224083]
 anchors_preset = 8

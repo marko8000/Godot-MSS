@@ -4,7 +4,7 @@ extends Control
 @onready var _MSSExec := ExecManager.get_current_exec(self)
 @onready var _current_level
 
-var debug_label_file = load('res://exec/mssvin17_exec/debug_control/debug_label.tscn')
+var debug_label_file = load('res://exec/mss_exec/debug_control/debug_label.tscn')
 
 var exec_debug_labels : Dictionary[String, Array]
 var static_exec_debug_labels : Array[String]

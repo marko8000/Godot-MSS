@@ -4,15 +4,11 @@ extends Node
 class_name EntityBehavior
 
 
-var _EntityStorage : EntityStorage
+var _EntityStorageLogic : EntityStorageLogic
 
 var entity_indices : PackedInt32Array
 
 
-func _ready() -> void:
-	_EntityStorage = MSSCore.get_from(self)._EntityStorage
-	
-	
 func _entity_ready(entity : Node) -> void:
 	pass
 	

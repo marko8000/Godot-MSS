@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://dk216gheeqnhw"]
 
 [ext_resource type="Script" uid="uid://154wgj123634" path="res://levels/MSSCore/MSSCore.gd" id="1_mrox5"]
-[ext_resource type="Script" uid="uid://b5o1ptm5sf8vb" path="res://levels/MSSCore/logics/EntityStorage/entity_storage.gd" id="2_mrox5"]
+[ext_resource type="Script" uid="uid://b5o1ptm5sf8vb" path="res://levels/MSSCore/logics/EntityStorageLogic/entity_storage_logic.gd" id="2_mrox5"]
 [ext_resource type="Script" uid="uid://cpnqru2mykw11" path="res://nodes/InterpolatedCamera3D/InterpolatedCamera3D.gd" id="3_iqr5g"]
 [ext_resource type="Script" uid="uid://bs6ign48kbldm" path="res://levels/MSSCore/logics/ConnectionLogic/connection_logic.gd" id="3_kwttr"]
 [ext_resource type="Script" uid="uid://cox4umbac26ux" path="res://levels/MSSCore/logics/ConnectionLogic/ConnectionModes/enetmultiplayer_connection_mode.gd" id="6_7gsgn"]
@@ -480,7 +480,6 @@ _InterpolationState = NodePath("MSSLogics/InterpolationState")
 script = ExtResource("2_mrox5")
 _EntityInterest = NodePath("EntityInterest")
 _ChunkCalculator = NodePath("ChunkCalculator")
-metadata/_custom_type_script = "uid://b5o1ptm5sf8vb"
 
 [node name="VoxelEditor" type="Node" parent="EntityStorage/EntityStorageLogic" unique_id=308852824]
 script = ExtResource("13_5d70p")

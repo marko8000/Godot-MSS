@@ -192,10 +192,14 @@ func spawn_and_load(entity_type : String, data : Dictionary, where : Node = _MSS
 				break
 	if not estorage_logic._chunk_idx_by_chunk.has(chunk):
 		var chunk_idx := estorage_logic._allocate_chunk(chunk)
-		_load_chunk(chunk_idx)
+		_load_chunk(chunk_idx, estorage_logic)
 	await get_node(str(chunk)+'/T').timeout
 	return spawn(entity_type, data, estorage_logic)
 		
 	
-func _load_chunk(chunk_idx : int) -> void:
+func _load_chunk(chunk_idx : int, storage : EntityStorageLogic) -> void:
+	pass
+	
+	
+func _save_chunk(chunk_idx : int, storage : EntityStorageLogic) -> void:
 	pass

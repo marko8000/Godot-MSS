@@ -6,8 +6,8 @@ class_name EntityInterest
 var _EntityStorageLogic : EntityStorageLogic
 var _ChunkCalculator : ChunkCalculator
 
-enum ChunkStatus {NOT_REQUESTED, REQUESTED, TO_LOAD}
-var _chunk_status : PackedByteArray # Array[ChunkStatus]
+var _chunk_requested : PackedByteArray
+var _chunks_to_load : PackedInt32Array
 var _player_data : Array[PlayerData]
 var _chunk_cache : Array[ChunkCache]
 class ChunkCache:
@@ -32,21 +32,17 @@ func _player_state_changed(peer_idx : int, player_state : PlayerLifecycle.Player
 					_player_data.append(p_data)
 	
 
-func add_chunk(chunk_idx : int):
-	pass
-	
-	
 func _request_chunks() -> void:
-	for chunk_idx : int in range(_chunk_status.size()):
-		_chunk_status[chunk_idx] = ChunkStatus.NOT_REQUESTED
-	var required_size := _chunk_status.size()
+	for chunk_idx : int in range(_chunk_requested.size()):
+		_chunk_requested[chunk_idx] = false
+	var required_size := _chunk_requested.size()
 	var old_size := _chunk_cache.size()
 
 	if old_size < required_size:
 		_chunk_cache.resize(required_size)
 		for i : int in range(old_size, required_size):
 			_chunk_cache[i] = ChunkCache.new()
-	_chunk_status.fill(ChunkStatus.NOT_REQUESTED)
+	_chunk_requested.fill(false)
 				
 	for peer_idx : int in range(_player_data.size()):
 		var p_data := _player_data[peer_idx]
@@ -66,20 +62,20 @@ func _request_chunks() -> void:
 						var chunk_idx : int
 						if not _EntityStorageLogic._chunk_idx_by_chunk.has(chunk):
 							chunk_idx = _EntityStorageLogic._allocate_chunk(chunk)
-							_chunk_status[chunk_idx] = ChunkStatus.TO_LOAD
+							_chunks_to_load.append(chunk_idx)
 						else:
 							chunk_idx = _EntityStorageLogic._chunk_idx_by_chunk[chunk]
-							_chunk_status[chunk_idx] = ChunkStatus.REQUESTED
+						_chunk_requested[chunk_idx] = true
 						cache.chunk_indices.append(chunk_idx)
-						p_data.required_chunk_indices.append(chunk_idx)
+						p_data.required_chunks.append(chunk_idx)
 				else:
 					for chunk_idx : int in cache.chunk_indices:
-						p_data.required_chunk_indices.append(chunk_idx)
-						_chunk_status[chunk_idx] = maxi(ChunkStatus.REQUESTED, _chunk_status[chunk_idx])
+						p_data.required_chunks.append(chunk_idx)
+						_chunk_requested[chunk_idx] = true
 				p_data.entity_chunk_indices[i] = entity_chunk_idx
 			else:
 				for chunk_idx in cache.chunk_indices:
-					_chunk_status[chunk_idx] = maxi(ChunkStatus.REQUESTED, _chunk_status[chunk_idx])
+					_chunk_requested[chunk_idx] = true
 		
 		
 func send_chunks():
@@ -94,7 +90,7 @@ class PlayerData:
 	var observer_entities : PackedInt32Array
 	var player_entities : PackedByteArray
 	var entity_chunk_indices : PackedInt32Array
-	var required_chunk_indices : PackedInt32Array
+	var required_chunks : PackedInt32Array
 	var loaded_chunk_indices : PackedInt32Array
 	
 

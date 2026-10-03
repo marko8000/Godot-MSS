@@ -10,7 +10,7 @@ class_name EntityStorageLogic
 
 var _entities_can_start_working : bool = false
 signal _entities_start_working
-var main_tickrate : int = 30
+var main_tickrate : int = 20
 
 # Allocate
 var _data_sources : Array[EntityDataSource]
@@ -101,14 +101,14 @@ func _allocate_chunk(chunk : PackedInt64Array) -> int:
 	if _entity_tree.size() < required_size:
 		var old_size: int = _entity_tree.size()
 		_entity_tree.resize(required_size)
-		_EntityInterest._chunk_status.resize(required_size)
+		_EntityInterest._chunk_requested.resize(required_size)
 		for i : int in range(old_size, required_size):
 			_entity_tree[i] = ChunkData.new()
-			_EntityInterest._chunk_status[i] = EntityInterest.ChunkStatus.NOT_REQUESTED
+			_EntityInterest._chunk_requested[i] = false
 	
 	return chunk_idx
 	
-	
+
 func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array:
 	var entity_indices : PackedInt32Array
 	var type_data := _EntityFactory._entity_type_data[entity_type]
@@ -174,9 +174,8 @@ func _allocate_batch(entity_type : int, nodes : Array[Node]) -> PackedInt32Array
 	
 var current_frame : int = 1
 var frames_per_tick : int
-var workers : Array[EntityWorker]
-var worker_entity_limit : int = 500
-var worker_budget : int
+var update_budget : int
+
 func _process(delta: float) -> void:
 	if _ConnectionLogic.peer_role == 'host':
 		frames_per_tick = _InterpolationState.server_FPS / main_tickrate
@@ -185,11 +184,8 @@ func _process(delta: float) -> void:
 			_process_activation_queue()
 			_process_move_queue()
 			_process_remove_queue()
-			var worker_count := ceili(float(_entity_ids.size()) / worker_entity_limit)
-			if worker_count > workers.size():
-				for _i : int in worker_count-workers.size():
-					workers.append(EntityWorker.new())
-			worker_budget = ceili(float(worker_entity_limit) / _InterpolationState.server_FPS)
+			update_budget = ceili(float(_entity_indices.size()) / _InterpolationState.server_FPS)
+		_process_chunk_loading()
 		_process_update()
 		if current_frame >= main_tickrate:
 			_EntityInterest.send_chunks()
@@ -197,7 +193,13 @@ func _process(delta: float) -> void:
 			current_frame = 1
 		else:
 			current_frame += 1
-	
+			
+			
+func _process_chunk_loading() -> void:
+	for chunk_idx in _EntityInterest._chunks_to_load:
+		_EntityFactory._load_chunk(chunk_idx, self)
+	_EntityInterest._chunks_to_load.clear()
+
 	
 func _process_activation_queue():
 	for s : int in range(_activation_queue.size()):
@@ -289,8 +291,11 @@ func _process_remove_queue():
 	pass
 
 
-
 func _process_update():
-	for chunk_idx : int in _EntityInterest._chunk_status:
-		pass
-	
+	for chunk_idx : int in _EntityInterest._chunk_requested:
+		if _EntityInterest._chunk_requested[chunk_idx]:
+			pass
+		else:
+			_chunk_free_slots.append(chunk_idx)
+			_EntityFactory._save_chunk(chunk_idx, self)
+			
