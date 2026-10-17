@@ -25,6 +25,8 @@ static func get_from(from : Node) -> MSSCore:
 @warning_ignore("unused_private_class_variable")
 @export var _EntityFactory : EntityFactory
 @warning_ignore("unused_private_class_variable")
+@export var _RootEntityStorageLogic : EntityStorageLogic
+@warning_ignore("unused_private_class_variable")
 @export var _RootEntityStorage : Node
 @warning_ignore("unused_private_class_variable")
 @export var _MultiplayerInput : MultiplayerInput

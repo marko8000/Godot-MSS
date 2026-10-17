@@ -76,7 +76,7 @@ func _connected_to_server():
 			
 
 func uid_to_peer_idx(uid):
-	for peer_idx : int in range(players_data.size()):
+	for peer_idx : int in range(_ConnectionLogic._peer_id_to_idx):
 		if players_data[peer_idx].uid == uid:
 			return peer_idx
 			

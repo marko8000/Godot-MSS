@@ -170,7 +170,6 @@ func spawn_and_load(entity_type : String, data : Dictionary, where : Node = _MSS
 		position = ChunkCalculator.get_zero(type_data.dimension)
 	var _ChunkCalculator := estorage_logic._ChunkCalculator
 	chunk = _ChunkCalculator.position_to_chunk(position, type_data.dimension)
-	print(chunk)
 	var preloader_scene_path := _ChunkCalculator.dim_data[type_data.dimension].chunk_loader_file
 	while true:
 		var wait_time := 5

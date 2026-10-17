@@ -9,14 +9,14 @@ var peer_role : String
 @export_category('Connection Settings')
 @export var connection_mode : ConnectionMode :
 	set(value):
-		_peer_indices = [0]
+		_peer_ids = [0]
 		_free_slots.clear()
 		connection_mode = value
 
 var current_peer_idx : int
-var _peer_indices : PackedInt32Array
+var _peer_ids : PackedInt32Array
 var _free_slots : PackedInt32Array
-var _peer_to_idx : Dictionary[int, int]
+var _peer_id_to_idx : Dictionary[int, int]
 
 signal connection_peer_changed(new_peer : MultiplayerPeer)
 signal peer_connected(peer_idx : int)
@@ -63,22 +63,27 @@ func _peer_connected(peer_id : int):
 	if not _free_slots.is_empty():
 		peer_idx = _free_slots[-1]
 		_free_slots.resize(_free_slots.size()-1)
-		_peer_indices[peer_idx] = peer_id
+		_peer_ids[peer_idx] = peer_id
 	else:
-		peer_idx = _peer_indices.size()
-		_peer_indices.append(peer_id)
-	_peer_to_idx[peer_id] = peer_idx
+		peer_idx = _peer_ids.size()
+		_peer_ids.append(peer_id)
+	_peer_id_to_idx[peer_id] = peer_idx
 	peer_connected.emit(peer_id)
 	rpc_id(peer_id, 'get_peer_idx', peer_idx)
 	Debug.dprint('Peer Connected ' + str(peer_id), peer_role)
 
 
 func _peer_disconnected(peer_id : int):
-	var peer_idx := _peer_indices[-1]
+	var peer_idx := _peer_id_to_idx[peer_id]
+	_peer_ids[peer_idx] = 0
 	_free_slots.append(peer_idx)
-	_peer_to_idx.erase(peer_id)
+	_peer_id_to_idx.erase(peer_id)
 	peer_disconnected.emit(peer_idx)
 	Debug.dprint('Peer Disconnected ' + str(peer_id), peer_role)
+	
+	
+func _is_connected(peer_idx : int) -> bool:
+	return not _peer_ids[peer_idx] == 0
 
 
 @rpc('authority', 'call_local')

@@ -82,7 +82,7 @@ func _input(event: InputEvent) -> void:
 @rpc("any_peer", "call_local")
 func _host_get_player_input(buffer : PackedByteArray, peer_idx : int):
 	var peer_id := multiplayer.get_remote_sender_id()
-	if _ConnectionLogic._peer_indices[peer_idx] != peer_id:
+	if _ConnectionLogic._peer_ids[peer_idx] != peer_id:
 		peer_idx = _ConnectionLogic._peer_to_idx[multiplayer.get_remote_sender_id()]
 	var input_buffer := StreamPeerBuffer.new()
 	input_buffer.data_array = buffer

@@ -4,7 +4,7 @@ class_name DeviceInputEventKey
 
 
 @export var key : Key
-@export var sensitivity : float = 100 :
+@export var sensitivity : float = 5000 :
 	set(v):
 		sensitivity = max(v, 0)
 
@@ -19,8 +19,13 @@ func _input(event : InputEvent):
 	elif is_released:
 		_is_active = false
 	
-	if action is ActionMagnitude:
+	if action is ActionStrength:
 		if is_pressed:
-			action.set_value(sensitivity)
+			action.set_value(1)
+		elif is_released:
+			action.set_value(0)
+	elif action is ActionMagnitude:
+		if is_pressed:
+			action.set_value(sensitivity*Engine.get_main_loop().root.get_process_delta_time())
 		elif is_released:
 			action.set_value(0)
